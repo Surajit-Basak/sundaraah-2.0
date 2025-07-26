@@ -25,7 +25,7 @@ export default function Header() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isSearchOpen && searchInputtRef.current) {
+    if (isSearchOpen && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [isSearchOpen]);
