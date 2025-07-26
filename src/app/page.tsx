@@ -188,8 +188,36 @@ export default function Home() {
         </div>
       </section>
 
+       {/* Gifting Banner Section */}
+       <section className="py-16 md:py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="relative bg-primary text-primary-foreground rounded-lg shadow-xl overflow-hidden">
+            <div className="absolute inset-0">
+                <Image 
+                    src="https://placehold.co/1200x400.png"
+                    alt="Elegant gift wrapping"
+                    data-ai-hint="elegant gift"
+                    fill
+                    className="object-cover opacity-20"
+                />
+            </div>
+            <div className="relative text-center p-12 md:p-20">
+              <h2 className="font-headline text-3xl md:text-4xl font-bold mb-4">The Art of Gifting</h2>
+              <p className="max-w-2xl mx-auto mb-8 text-lg text-primary-foreground/80">
+                Find the perfect expression of your affection. Our handcrafted pieces make for unforgettable gifts that will be treasured forever.
+              </p>
+              <Button asChild size="lg" variant="secondary" className="bg-accent text-accent-foreground hover:bg-accent/90">
+                <Link href="/shop">
+                  Explore Gift Ideas
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Blog Section */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             From Our Journal
