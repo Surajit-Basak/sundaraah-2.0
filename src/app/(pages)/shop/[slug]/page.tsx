@@ -1,9 +1,11 @@
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getProductBySlug, getProducts } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Check, ShoppingCart } from "lucide-react";
 import RecommendationSection from "@/components/recommendation-section";
+import { formatPrice } from "@/lib/utils";
 
 type ProductPageProps = {
   params: {
@@ -39,13 +41,6 @@ export default function ProductPage({ params }: ProductPageProps) {
   if (!product) {
     notFound();
   }
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
-  };
 
   return (
     <div className="bg-background">

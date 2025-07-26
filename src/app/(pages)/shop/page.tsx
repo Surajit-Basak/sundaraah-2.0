@@ -1,14 +1,23 @@
+
+"use client";
+
+import { useState } from "react";
 import ProductCard from "@/components/product-card";
 import { getProducts } from "@/lib/data";
-
-export const metadata = {
-  title: "Shop | Sundaraah Showcase",
-  description: "Explore our full collection of handcrafted jewelry.",
-};
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { formatPrice } from "@/lib/utils";
 
 export default function ShopPage() {
-  const products = getProducts();
-  const categories = [...new Set(products.map(p => p.category))];
+  const allProducts = getProducts();
+  const categories = [...new Set(allProducts.map(p => p.category))];
+  
+  const maxPrice = Math.ceil(Math.max(...allProducts.map(p => p.price)));
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
+
+  const filteredProducts = allProducts.filter(product => 
+    product.price >= priceRange[0] && product.price <= priceRange[1]
+  );
 
   return (
     <div className="bg-background">
@@ -30,15 +39,31 @@ export default function ShopPage() {
             <aside className="lg:col-span-1">
               <div className="sticky top-24 p-6 rounded-lg bg-secondary">
                 <h2 className="font-headline text-2xl font-bold text-primary mb-6">Filter by</h2>
-                <div>
-                  <h3 className="font-headline text-lg font-semibold text-primary mb-4">Category</h3>
-                  <ul className="space-y-2">
-                    {categories.map(category => (
-                        <li key={category}>
-                            <a href="#" className="text-muted-foreground hover:text-primary">{category}</a>
-                        </li>
-                    ))}
-                  </ul>
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="font-headline text-lg font-semibold text-primary mb-4">Category</h3>
+                    <ul className="space-y-2">
+                      {categories.map(category => (
+                          <li key={category}>
+                              <a href="#" className="text-muted-foreground hover:text-primary">{category}</a>
+                          </li>
+                      ))}
+                    </ul>
+                  </div>
+                   <div>
+                    <h3 className="font-headline text-lg font-semibold text-primary mb-4">Price</h3>
+                    <Slider
+                      min={0}
+                      max={maxPrice}
+                      step={5}
+                      value={[priceRange[1]]}
+                      onValueChange={(value) => setPriceRange([0, value[0]])}
+                    />
+                    <div className="flex justify-between text-muted-foreground text-sm mt-2">
+                      <span>{formatPrice(0)}</span>
+                      <span>{formatPrice(priceRange[1])}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </aside>
@@ -46,7 +71,7 @@ export default function ShopPage() {
             {/* Products Grid */}
             <main className="lg:col-span-3">
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>

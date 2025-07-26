@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -15,15 +16,20 @@ import {
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input";
 
-
 export default function Home() {
-  const featuredProducts = getProducts().slice(0, 3);
+  const allProducts = getProducts();
+  const featuredProducts = allProducts.slice(0, 6);
+  const trendingProducts = allProducts.slice(3, 9).sort(() => 0.5 - Math.random());
+  const bestSellers = allProducts.slice(1, 7).sort(() => 0.5 - Math.random());
   const recentPosts = getBlogPosts();
   const mainArtisan = getTeamMembers()[1]; // Rohan Verma, Master Artisan
   const categories = [
     { name: "Necklaces", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "necklace jewelry" },
     { name: "Earrings", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "earrings jewelry" },
     { name: "Bracelets", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "bracelet jewelry" },
+    { name: "Rings", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "ring jewelry" },
+    { name: "Anklets", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "anklet jewelry" },
+
   ];
   const testimonials = [
     {
@@ -47,7 +53,6 @@ export default function Home() {
       author: "Divya R.",
     },
   ];
-
 
   const features = [
     {
@@ -118,11 +123,17 @@ export default function Home() {
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             Featured Collection
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+           <Carousel opts={{ align: "start", loop: true }}>
+            <CarouselContent>
+              {featuredProducts.map((product) => (
+                <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/3 p-4">
+                  <ProductCard product={product} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
+          </Carousel>
           <div className="text-center mt-12">
             <Button asChild variant="outline" size="lg" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
               <Link href="/shop">
@@ -130,6 +141,58 @@ export default function Home() {
               </Link>
             </Button>
           </div>
+        </div>
+      </section>
+      
+      {/* Shop by Category Section */}
+      <section className="py-16 md:py-24 bg-secondary">
+        <div className="container mx-auto px-4">
+          <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
+            Shop by Category
+          </h2>
+          <Carousel opts={{ align: "start" }}>
+            <CarouselContent>
+              {categories.map((category) => (
+                 <CarouselItem key={category.name} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4 p-4">
+                    <Link href={category.href} className="group relative block overflow-hidden rounded-lg shadow-lg h-full">
+                      <Image 
+                        src={category.imageUrl} 
+                        alt={category.name} 
+                        data-ai-hint={category.hint}
+                        width={400} 
+                        height={500} 
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
+                      />
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition-colors duration-300 group-hover:bg-black/30">
+                        <h3 className="font-headline text-2xl font-bold text-white drop-shadow-md">{category.name}</h3>
+                      </div>
+                    </Link>
+                 </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
+          </Carousel>
+        </div>
+      </section>
+
+      {/* Trending Products Section */}
+      <section className="py-16 md:py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
+            Trending Now
+          </h2>
+           <Carousel opts={{ align: "start", loop: true }}>
+            <CarouselContent>
+              {trendingProducts.map((product) => (
+                <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/3 p-4">
+                  <ProductCard product={product} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
+          </Carousel>
         </div>
       </section>
 
@@ -165,29 +228,23 @@ export default function Home() {
         </div>
       </section>
       
-      {/* Shop by Category Section */}
-      <section className="py-16 md:py-24 bg-background">
+      {/* Best Sellers Section */}
+       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
-            Shop by Category
+            Our Best Sellers
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            {categories.map((category) => (
-              <Link href={category.href} key={category.name} className="group relative overflow-hidden rounded-lg shadow-lg">
-                <Image 
-                  src={category.imageUrl} 
-                  alt={category.name} 
-                  data-ai-hint={category.hint}
-                  width={400} 
-                  height={500} 
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
-                />
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition-colors duration-300 group-hover:bg-black/30">
-                  <h3 className="font-headline text-2xl font-bold text-white drop-shadow-md">{category.name}</h3>
-                </div>
-              </Link>
-            ))}
-          </div>
+           <Carousel opts={{ align: "start", loop: true }}>
+            <CarouselContent>
+              {bestSellers.map((product) => (
+                <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/3 p-4">
+                  <ProductCard product={product} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
+          </Carousel>
         </div>
       </section>
       

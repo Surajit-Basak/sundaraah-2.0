@@ -1,21 +1,16 @@
+
 import type { Product } from "@/types";
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "./ui/button";
+import { formatPrice } from "@/lib/utils";
 
 type ProductCardProps = {
   product: Product;
 };
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
-  };
-
   return (
     <Card className="overflow-hidden flex flex-col h-full group transform transition-transform duration-300 hover:scale-105 hover:shadow-xl">
       <Link href={`/shop/${product.slug}`} className="block overflow-hidden">

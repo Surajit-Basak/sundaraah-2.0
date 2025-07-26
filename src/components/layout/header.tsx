@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -40,7 +41,7 @@ export default function Header() {
           Sundaraah
         </Link>
         
-        <div className={cn("absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md px-4 transition-all duration-300 md:relative md:left-auto md:top-auto md:translate-x-0 md:translate-y-0 md:w-auto md:max-w-none md:p-0", isSearchOpen ? 'opacity-100 visible' : 'opacity-0 invisible md:opacity-100 md:visible')}>
+        <div className={cn("absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg px-4 transition-all duration-300 md:relative md:left-auto md:top-auto md:translate-x-0 md:translate-y-0 md:w-auto md:max-w-none md:p-0", isSearchOpen ? 'opacity-100 visible' : 'opacity-0 invisible md:opacity-100 md:visible')}>
             <nav className={cn("hidden md:flex gap-6", isSearchOpen && "md:hidden")}>
                 {navLinks.map((link) => (
                     <Link
@@ -67,7 +68,11 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={handleSearchToggle}>
+          <Button variant="ghost" size="icon" onClick={handleSearchToggle} className="md:hidden">
+            {isSearchOpen ? <X className="h-5 w-5 text-primary" /> : <Search className="h-5 w-5 text-primary" />}
+            <span className="sr-only">Search</span>
+          </Button>
+           <Button variant="ghost" size="icon" onClick={handleSearchToggle} className="hidden md:inline-flex">
             {isSearchOpen ? <X className="h-5 w-5 text-primary" /> : <Search className="h-5 w-5 text-primary" />}
             <span className="sr-only">Search</span>
           </Button>
