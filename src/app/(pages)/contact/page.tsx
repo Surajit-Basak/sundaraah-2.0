@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin } from "lucide-react";
+import Image from "next/image";
 
 export const metadata = {
   title: "Contact Us | Sundaraah Showcase",
@@ -12,15 +13,26 @@ export const metadata = {
 export default function ContactPage() {
   return (
     <div className="bg-background">
-      {/* Header Section */}
-      <section className="bg-secondary py-16 md:py-20 text-center">
-        <div className="container mx-auto px-4">
-          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">Get In Touch</h1>
-          <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-            We'd love to hear from you. Whether you have a question about our products, a custom design idea, or anything else, our team is ready to answer all your questions.
+      {/* Hero Section */}
+      <section className="relative h-[50vh] flex items-center justify-center text-center text-primary-foreground">
+        <div className="absolute inset-0 bg-primary/80 z-10" />
+        <Image
+          src="https://placehold.co/1800x600.png"
+          alt="Contact Sundaraah"
+          data-ai-hint="customer service"
+          fill
+          className="object-cover"
+        />
+        <div className="relative z-20 container mx-auto px-4">
+          <h1 className="font-headline text-4xl md:text-6xl font-bold drop-shadow-md">
+            Get In Touch
+          </h1>
+          <p className="text-lg md:text-xl max-w-3xl mx-auto mt-4">
+            We'd love to hear from you.
           </p>
         </div>
       </section>
+
 
       {/* Content Section */}
       <section className="py-16 md:py-24">
@@ -28,8 +40,11 @@ export default function ContactPage() {
           <div className="grid md:grid-cols-2 gap-12">
             {/* Contact Info */}
             <div className="space-y-8">
-              <div>
-                <h2 className="font-headline text-2xl md:text-3xl font-bold text-primary mb-6">Contact Information</h2>
+               <div>
+                 <h2 className="font-headline text-2xl md:text-3xl font-bold text-primary mb-6">Contact Information</h2>
+                 <p className="text-lg text-muted-foreground mb-6">
+                    Whether you have a question about our products, a custom design idea, or anything else, our team is ready to answer all your questions.
+                 </p>
                 <div className="space-y-4 text-lg">
                   <div className="flex items-center gap-4">
                     <Mail className="h-6 w-6 text-accent" />
