@@ -6,10 +6,19 @@ import ProductCard from "@/components/product-card";
 import BlogPostCard from "@/components/blog-post-card";
 import { getProducts, getBlogPosts, getTeamMembers } from "@/lib/data";
 import TestimonialCard from "@/components/testimonial-card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+import { Input } from "@/components/ui/input";
+
 
 export default function Home() {
   const featuredProducts = getProducts().slice(0, 3);
-  const recentPosts = getBlogPosts().slice(0, 3);
+  const recentPosts = getBlogPosts();
   const mainArtisan = getTeamMembers()[1]; // Rohan Verma, Master Artisan
   const categories = [
     { name: "Necklaces", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "necklace jewelry" },
@@ -28,6 +37,14 @@ export default function Home() {
     {
       quote: "I'm in love with my new earrings. They are elegant, unique, and beautifully made. I'll definitely be coming back for more.",
       author: "Anjali M.",
+    },
+     {
+      quote: "The quality is exceptional. You can feel the love and dedication that goes into each piece. A truly special brand.",
+      author: "Sameer T.",
+    },
+    {
+      quote: "My bracelet is my new favorite accessory. It's so versatile and beautifully crafted. I'll be a returning customer for sure.",
+      author: "Divya R.",
     },
   ];
 
@@ -180,11 +197,23 @@ export default function Home() {
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             Words from Our Customers
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <TestimonialCard key={index} {...testimonial} />
-            ))}
-          </div>
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {testimonials.map((testimonial, index) => (
+                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3 p-4">
+                   <TestimonialCard {...testimonial} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
+          </Carousel>
         </div>
       </section>
 
@@ -222,17 +251,46 @@ export default function Home() {
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             From Our Journal
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {recentPosts.map((post) => (
-              <BlogPostCard key={post.id} post={post} />
-            ))}
-          </div>
+           <Carousel
+            opts={{
+              align: "start",
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {recentPosts.map((post) => (
+                <CarouselItem key={post.id} className="md:basis-1/2 lg:basis-1/3 p-4">
+                  <BlogPostCard post={post} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
+          </Carousel>
           <div className="text-center mt-12">
              <Button asChild variant="outline" size="lg" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
               <Link href="/blog">
                 Read More Stories
               </Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+       {/* Newsletter Section */}
+       <section className="py-16 md:py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="bg-secondary p-10 rounded-lg shadow-lg text-center">
+            <h2 className="font-headline text-3xl md:text-4xl font-bold text-primary mb-4">Join Our World</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
+              Subscribe to our newsletter for exclusive updates, new arrivals, and special offers delivered right to your inbox.
+            </p>
+            <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <Input type="email" placeholder="Your email address" className="text-base" />
+              <Button type="submit" size="lg" className="bg-primary hover:bg-primary/90">
+                Subscribe
+              </Button>
+            </form>
           </div>
         </div>
       </section>
