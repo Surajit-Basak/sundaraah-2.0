@@ -1,4 +1,7 @@
 
+"use client";
+
+import { useEffect, useState, useTransition } from "react";
 import { getProducts } from "@/lib/data";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
@@ -16,9 +19,31 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import type { Product } from "@/types";
+import { DeleteProductButton } from "./delete-product-button";
 
-export default async function AdminProductsPage() {
-  const products = await getProducts();
+export default function AdminProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
+
+  const fetchProducts = () => {
+    setIsLoading(true);
+    getProducts().then((data) => {
+      setProducts(data);
+      setIsLoading(false);
+    });
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleProductUpdate = () => {
+    startTransition(() => {
+      fetchProducts();
+    });
+  };
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -47,7 +72,13 @@ export default async function AdminProductsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.map((product) => (
+              {(isLoading || isPending) ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : products.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>
                     <Image
@@ -76,7 +107,9 @@ export default async function AdminProductsPage() {
                             <DropdownMenuItem asChild>
                                 <Link href={`/admin/products/${product.slug}/edit`}>Edit</Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                               <DeleteProductButton productId={product.id} onSuccess={handleProductUpdate} />
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

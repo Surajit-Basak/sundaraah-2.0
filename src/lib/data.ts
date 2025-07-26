@@ -119,6 +119,19 @@ export async function updateProduct(id: string, productData: Partial<ProductInpu
     return data;
 }
 
+export async function deleteProduct(id: string) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('products').delete().eq('id', id);
+
+    if (error) {
+        console.error('Error deleting product:', error);
+        throw new Error('Failed to delete product.');
+    }
+
+    revalidatePath('/admin/products');
+    revalidatePath('/shop');
+}
+
 export async function getBlogPosts(): Promise<BlogPost[]> {
   return blogPosts;
 }
