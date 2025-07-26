@@ -1,11 +1,17 @@
 
+"use client";
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getProductBySlug, getProducts } from "@/lib/data";
 import { Button } from "@/components/ui/button";
-import { Check, ShoppingCart } from "lucide-react";
+import { Check, ShoppingCart, Loader2 } from "lucide-react";
 import RecommendationSection from "@/components/recommendation-section";
 import { formatPrice } from "@/lib/utils";
+import type { Product } from "@/types";
+import { useCart } from "@/context/cart-context";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
 
 type ProductPageProps = {
   params: {
@@ -13,33 +19,44 @@ type ProductPageProps = {
   };
 };
 
-// Generate metadata for the page
-export async function generateMetadata({ params }: ProductPageProps) {
-  const product = await getProductBySlug(params.slug);
-  if (!product) {
-    return {
-      title: "Product Not Found",
+export default function ProductPage({ params }: ProductPageProps) {
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const { addItem, isAdding } = useCart();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setIsLoading(true);
+      const fetchedProduct = await getProductBySlug(params.slug);
+      if (!fetchedProduct) {
+        notFound();
+      }
+      setProduct(fetchedProduct);
+      setIsLoading(false);
     };
-  }
-  return {
-    title: `${product.name} | Sundaraah Showcase`,
-    description: product.description,
+    fetchProduct();
+  }, [params.slug]);
+
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    addItem(product, 1);
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart.`,
+    });
   };
-}
 
-// Statically generate routes for each product
-export async function generateStaticParams() {
-    const products = await getProducts();
-    return products.map((product) => ({
-        slug: product.slug,
-    }));
-}
-
-export default async function ProductPage({ params }: ProductPageProps) {
-  const product = await getProductBySlug(params.slug);
-
-  if (!product) {
-    notFound();
+  if (isLoading || !product) {
+    return (
+        <div className="container mx-auto px-4 py-16 md:py-24">
+            <div className="flex justify-center items-center h-96">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        </div>
+    )
   }
 
   return (
@@ -85,8 +102,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </ul>
             </div>
 
-            <Button size="lg" className="w-full md:w-auto bg-primary hover:bg-primary/90">
-              <ShoppingCart className="mr-2 h-5 w-5" />
+            <Button size="lg" className="w-full md:w-auto bg-primary hover:bg-primary/90" onClick={handleAddToCart} disabled={isAdding}>
+              {isAdding ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                  <ShoppingCart className="mr-2 h-5 w-5" />
+              )}
               Add to Cart
             </Button>
           </div>
@@ -96,4 +117,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
     </div>
   );
+}
+
+// Statically generate routes for each product
+export async function generateStaticParams() {
+    const products = await getProducts();
+    return products.map((product) => ({
+        slug: product.slug,
+    }));
+}
+
+// Generate metadata for the page
+export async function generateMetadata({ params }: ProductPageProps) {
+  const product = await getProductBySlug(params.slug);
+  if (!product) {
+    return {
+      title: "Product Not Found",
+    };
+  }
+  return {
+    title: `${product.name} | Sundaraah Showcase`,
+    description: product.description,
+  };
 }

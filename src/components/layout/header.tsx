@@ -6,9 +6,10 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, ShoppingCart, User, X, Search } from "lucide-react";
+import { Menu, User, X, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "../ui/input";
+import { CartSheet } from "../cart/cart-sheet";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -92,9 +93,7 @@ export default function Header() {
             {isSearchOpen ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
           </HeaderIcon>
           
-          <HeaderIcon ariaLabel="Shopping Cart">
-            <ShoppingCart className="h-6 w-6" />
-          </HeaderIcon>
+          <CartSheet />
 
            <HeaderIcon ariaLabel="User Profile">
             <User className="h-6 w-6" />
