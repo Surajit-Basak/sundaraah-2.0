@@ -1,8 +1,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getProducts } from "@/lib/data";
 import { DollarSign, Package, Users, Activity } from "lucide-react";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const products = await getProducts();
+  const totalProducts = products.length;
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
@@ -39,7 +43,7 @@ export default function DashboardPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{totalProducts}</div>
             <p className="text-xs text-muted-foreground">
               Number of products in store
             </p>

@@ -14,26 +14,28 @@ import {
 } from "@/components/ui/sidebar";
 import { Home, Package, Settings, ShoppingCart, BarChart3, Gem } from "lucide-react";
 import Link from "next/link";
-
+import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Sundaraah Admin",
   description: "Admin dashboard for Sundaraah Showcase",
 };
 
-const adminNavItems = [
-    { href: "/admin/dashboard", label: "Dashboard", icon: <Home /> },
-    { href: "#", label: "Orders", icon: <ShoppingCart /> },
-    { href: "#", label: "Products", icon: <Package /> },
-    { href: "#", label: "Analytics", icon: <BarChart3 /> },
-    { href: "#", label: "Settings", icon: <Settings /> },
-]
-
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = headers().get('next-url') || '';
+
+  const adminNavItems = [
+      { href: "/admin/dashboard", label: "Dashboard", icon: <Home /> },
+      { href: "/admin/orders", label: "Orders", icon: <ShoppingCart /> },
+      { href: "/admin/products", label: "Products", icon: <Package /> },
+      { href: "#", label: "Analytics", icon: <BarChart3 /> },
+      { href: "#", label: "Settings", icon: <Settings /> },
+  ]
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -49,7 +51,7 @@ export default function AdminLayout({
             <SidebarMenu>
                 {adminNavItems.map((item) => (
                     <SidebarMenuItem key={item.label}>
-                        <SidebarMenuButton asChild tooltip={item.label} isActive={item.href === '/admin/dashboard'}>
+                        <SidebarMenuButton asChild tooltip={item.label} isActive={pathname.startsWith(item.href) && item.href !== '#'}>
                             <Link href={item.href}>
                                 {item.icon}
                                 <span>{item.label}</span>
