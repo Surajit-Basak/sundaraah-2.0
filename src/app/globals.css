@@ -10,19 +10,19 @@
     --card-foreground: 0 50% 10%;
     --popover: 30 50% 100%;
     --popover-foreground: 0 50% 10%;
-    --primary: 0 90% 15%; /* #4A0404 */
+    --primary: 347 65% 25%; /* Wine */
     --primary-foreground: 45 10% 95%;
     --secondary: 30 30% 94%;
-    --secondary-foreground: 0 90% 15%;
+    --secondary-foreground: 347 65% 25%;
     --muted: 30 30% 94%;
     --muted-foreground: 0 30% 35%;
-    --accent: 45 65% 52%; /* #D4AF37 */
+    --accent: 45 85% 55%; /* Golden */
     --accent-foreground: 0 50% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 30 20% 85%;
     --input: 30 20% 85%;
-    --ring: 45 65% 52%;
+    --ring: 45 85% 55%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -45,19 +45,19 @@
     --card-foreground: 30 10% 80%;
     --popover: 0 15% 8%;
     --popover-foreground: 30 10% 80%;
-    --primary: 45 65% 52%;
+    --primary: 45 85% 55%;
     --primary-foreground: 0 50% 10%;
     --secondary: 0 10% 12%;
     --secondary-foreground: 30 10% 80%;
     --muted: 0 10% 12%;
     --muted-foreground: 30 15% 65%;
-    --accent: 0 90% 30%;
+    --accent: 347 65% 45%;
     --accent-foreground: 45 10% 95%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 10% 17%;
     --input: 0 10% 17%;
-    --ring: 45 65% 52%;
+    --ring: 45 85% 55%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
