@@ -5,7 +5,6 @@ import { ArrowRight, Gem, HandHeart, Sparkles } from "lucide-react";
 import ProductCard from "@/components/product-card";
 import BlogPostCard from "@/components/blog-post-card";
 import { getProducts, getBlogPosts } from "@/lib/data";
-import { Card, CardContent } from "@/components/ui/card";
 import TestimonialCard from "@/components/testimonial-card";
 
 export default function Home() {
@@ -78,6 +77,23 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Why Choose Us Section */}
+      <section className="py-16 md:py-24 bg-secondary">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+            {features.map((feature, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <div className="flex items-center justify-center h-20 w-20 rounded-full bg-background mb-6 shadow-md">
+                  {feature.icon}
+                </div>
+                <h3 className="font-headline text-2xl font-semibold text-primary mb-2">{feature.title}</h3>
+                <p className="text-muted-foreground max-w-xs">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Featured Products Section */}
       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
@@ -107,7 +123,7 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             {categories.map((category) => (
-              <Link href={category.href} key={category.name} className="group relative overflow-hidden rounded-lg">
+              <Link href={category.href} key={category.name} className="group relative overflow-hidden rounded-lg shadow-lg">
                 <Image 
                   src={category.imageUrl} 
                   alt={category.name} 
@@ -116,37 +132,17 @@ export default function Home() {
                   height={500} 
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
                 />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <h3 className="font-headline text-2xl font-bold text-white">{category.name}</h3>
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition-colors duration-300 group-hover:bg-black/30">
+                  <h3 className="font-headline text-2xl font-bold text-white drop-shadow-md">{category.name}</h3>
                 </div>
               </Link>
             ))}
           </div>
         </div>
       </section>
-
-      {/* Why Choose Us Section */}
-      <section className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
-            Why Choose Sundaraah
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-            {features.map((feature, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <div className="flex items-center justify-center h-20 w-20 rounded-full bg-secondary mb-4 shadow-md">
-                  {feature.icon}
-                </div>
-                <h3 className="font-headline text-2xl font-semibold text-primary mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground max-w-xs">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
       
       {/* Testimonials Section */}
-      <section className="py-16 md:py-24 bg-secondary">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             Words from Our Customers
@@ -160,7 +156,7 @@ export default function Home() {
       </section>
 
       {/* Blog Section */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             From Our Journal
@@ -177,23 +173,6 @@ export default function Home() {
               </Link>
             </Button>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 py-16 text-center">
-          <h2 className="font-headline text-3xl font-bold mb-4">
-            Create Your Own Masterpiece
-          </h2>
-          <p className="max-w-xl mx-auto mb-6">
-            Looking for something unique? We offer custom design services to bring your vision to life.
-          </p>
-          <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
-            <Link href="/contact">
-              Get in Touch
-            </Link>
-          </Button>
         </div>
       </section>
     </div>
