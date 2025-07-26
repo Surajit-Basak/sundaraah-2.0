@@ -18,27 +18,35 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input";
-import type { Product } from "@/types";
+import type { Product, BlogPost, TeamMember } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
+  const [mainArtisan, setMainArtisan] = useState<TeamMember | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
-      const products = await getProducts();
+      const [products, posts, team] = await Promise.all([
+        getProducts(),
+        getBlogPosts(),
+        getTeamMembers(),
+      ]);
       setAllProducts(products);
+      setRecentPosts(posts);
+      setMainArtisan(team[1] ?? null); // Rohan Verma, Master Artisan
       setIsLoading(false);
     };
-    fetchProducts();
+    fetchData();
   }, []);
   
   const featuredProducts = allProducts.slice(0, 6);
   const trendingProducts = allProducts.slice(3, 9).sort(() => 0.5 - Math.random());
   const bestSellers = allProducts.slice(1, 7).sort(() => 0.5 - Math.random());
-  const recentPosts = getBlogPosts();
-  const mainArtisan = getTeamMembers()[1]; // Rohan Verma, Master Artisan
+
   const categories = [
     { name: "Necklaces", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "necklace jewelry" },
     { name: "Earrings", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "earrings jewelry" },
@@ -87,6 +95,32 @@ export default function Home() {
       description: "Our jewelry is created to be cherished for generations, blending classic and modern styles.",
     },
   ];
+
+  const ProductCarousel = ({products}: {products: Product[]}) => (
+     <Carousel opts={{ align: "start", loop: true }}>
+      <CarouselContent>
+        {products.map((product) => (
+          <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/3 p-4">
+            <ProductCard product={product} />
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious className="hidden md:flex" />
+      <CarouselNext className="hidden md:flex" />
+    </Carousel>
+  );
+
+  const ProductCarouselSkeleton = () => (
+     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {[...Array(3)].map((_, i) => (
+            <div key={i} className="space-y-4">
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            </div>
+        ))}
+    </div>
+  )
 
   return (
     <div className="flex flex-col">
@@ -139,17 +173,7 @@ export default function Home() {
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             Featured Collection
           </h2>
-           <Carousel opts={{ align: "start", loop: true }}>
-            <CarouselContent>
-              {featuredProducts.map((product) => (
-                <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/3 p-4">
-                  <ProductCard product={product} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
-          </Carousel>
+          {isLoading ? <ProductCarouselSkeleton/> : <ProductCarousel products={featuredProducts} />}
           <div className="text-center mt-12">
             <Button asChild variant="outline" size="lg" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
               <Link href="/shop">
@@ -198,17 +222,7 @@ export default function Home() {
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             Trending Now
           </h2>
-           <Carousel opts={{ align: "start", loop: true }}>
-            <CarouselContent>
-              {trendingProducts.map((product) => (
-                <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/3 p-4">
-                  <ProductCard product={product} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
-          </Carousel>
+          {isLoading ? <ProductCarouselSkeleton/> : <ProductCarousel products={trendingProducts} />}
         </div>
       </section>
 
@@ -218,12 +232,22 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="prose prose-lg max-w-none text-foreground">
               <h2 className="font-headline text-3xl md:text-4xl text-primary mb-4">The Soul of Sundaraah</h2>
-              <p>
-                Behind every piece of Sundaraah jewelry lies a story of tradition, skill, and dedication. Our master artisans, like {mainArtisan.name}, pour their hearts into crafting each item, ensuring it's not just an accessory, but a work of art.
-              </p>
-              <p>
-                We believe in the beauty of the human touch. From the initial sketch to the final polish, every step is a testament to our commitment to exceptional craftsmanship and timeless design.
-              </p>
+              {isLoading || !mainArtisan ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                </div>
+              ) : (
+                <>
+                <p>
+                  Behind every piece of Sundaraah jewelry lies a story of tradition, skill, and dedication. Our master artisans, like {mainArtisan.name}, pour their hearts into crafting each item, ensuring it's not just an accessory, but a work of art.
+                </p>
+                <p>
+                  We believe in the beauty of the human touch. From the initial sketch to the final polish, every step is a testament to our commitment to exceptional craftsmanship and timeless design.
+                </p>
+                </>
+              )}
               <Button asChild variant="link" className="text-accent p-0 mt-4 text-lg">
                 <Link href="/about">
                   Meet Our Artisans <ArrowRight className="ml-2 h-4 w-4" />
@@ -250,17 +274,7 @@ export default function Home() {
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             Our Best Sellers
           </h2>
-           <Carousel opts={{ align: "start", loop: true }}>
-            <CarouselContent>
-              {bestSellers.map((product) => (
-                <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/3 p-4">
-                  <ProductCard product={product} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
-          </Carousel>
+          {isLoading ? <ProductCarouselSkeleton/> : <ProductCarousel products={bestSellers} />}
         </div>
       </section>
       

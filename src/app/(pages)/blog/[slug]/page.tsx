@@ -13,7 +13,7 @@ type BlogPostPageProps = {
 
 // Generate metadata for the page
 export async function generateMetadata({ params }: BlogPostPageProps) {
-  const post = getBlogPostBySlug(params.slug);
+  const post = await getBlogPostBySlug(params.slug);
   if (!post) {
     return {
       title: "Post Not Found",
@@ -27,14 +27,14 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
 
 // Statically generate routes for each blog post
 export async function generateStaticParams() {
-    const posts = getBlogPosts();
+    const posts = await getBlogPosts();
     return posts.map((post) => ({
         slug: post.slug,
     }));
 }
 
-export default function BlogPostPage({ params }: BlogPostPageProps) {
-  const post = getBlogPostBySlug(params.slug);
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const post = await getBlogPostBySlug(params.slug);
 
   if (!post) {
     notFound();

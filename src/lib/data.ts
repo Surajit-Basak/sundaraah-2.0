@@ -1,3 +1,6 @@
+
+'use server';
+
 import type { Product, BlogPost, TeamMember } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 
@@ -154,33 +157,33 @@ export async function getProducts(): Promise<Product[]> {
 
     if (error) {
         console.error('Error fetching products:', error);
-        return staticProducts;
+        return [];
     }
     
     // The data from supabase will have image_url, which needs to be mapped to imageUrl
-    return data.map(p => ({ ...p, imageUrl: p.image_url || 'https://placehold.co/600x600.png' })) || staticProducts;
+    return data.map(p => ({ ...p, imageUrl: p.image_url || 'https://placehold.co/600x600.png' })) || [];
 }
 
-export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+export async function getProductBySlug(slug: string): Promise<Product | null> {
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase.from('products').select('*').eq('slug', slug).single();
 
   if (error || !data) {
     console.error('Error fetching product by slug:', error);
-    return staticProducts.find((p) => p.slug === slug);
+    return null;
   }
 
   return { ...data, imageUrl: data.image_url || 'https://placehold.co/600x600.png' };
 }
 
-export function getBlogPosts() {
+export async function getBlogPosts(): Promise<BlogPost[]> {
   return blogPosts;
 }
 
-export function getBlogPostBySlug(slug: string) {
+export async function getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
   return blogPosts.find((p) => p.slug === slug);
 }
 
-export function getTeamMembers() {
+export async function getTeamMembers(): Promise<TeamMember[]> {
     return teamMembers;
 }

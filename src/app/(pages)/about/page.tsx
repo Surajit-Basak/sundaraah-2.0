@@ -1,14 +1,15 @@
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTeamMembers } from "@/lib/data";
+import type { TeamMember } from "@/types";
 
 export const metadata = {
   title: "About Us | Sundaraah Showcase",
   description: "Learn about the story, passion, and people behind Sundaraah Showcase.",
 };
 
-export default function AboutPage() {
-  const team = getTeamMembers();
+export default async function AboutPage() {
+  const team: TeamMember[] = await getTeamMembers();
 
   return (
     <div className="bg-background">

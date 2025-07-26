@@ -1,13 +1,14 @@
 import BlogPostCard from "@/components/blog-post-card";
 import { getBlogPosts } from "@/lib/data";
+import type { BlogPost } from "@/types";
 
 export const metadata = {
   title: "Blog | Sundaraah Showcase",
   description: "Read our stories, tips, and insights on handcrafted jewelry and art.",
 };
 
-export default function BlogPage() {
-  const posts = getBlogPosts();
+export default async function BlogPage() {
+  const posts: BlogPost[] = await getBlogPosts();
 
   return (
     <div className="bg-background">

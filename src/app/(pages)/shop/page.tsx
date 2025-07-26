@@ -4,7 +4,6 @@
 import { useState, useEffect } from "react";
 import ProductCard from "@/components/product-card";
 import { getProducts } from "@/lib/data";
-import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
@@ -25,8 +24,8 @@ export default function ShopPage() {
       const productCategories = [...new Set(products.map(p => p.category))];
       setCategories(productCategories);
       const maxProductPrice = Math.ceil(Math.max(...products.map(p => p.price), 0));
-      setMaxPrice(maxProductPrice);
-      setPriceRange([0, maxProductPrice]);
+      setMaxPrice(maxProductPrice > 0 ? maxProductPrice : 1000);
+      setPriceRange([0, maxProductPrice > 0 ? maxProductPrice : 1000]);
       setIsLoading(false);
     };
     fetchProducts();
@@ -100,9 +99,9 @@ export default function ShopPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                  {filteredProducts.map((product) => (
+                  {filteredProducts.length > 0 ? filteredProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
-                  ))}
+                  )) : <p>No products match your criteria.</p>}
                 </div>
               )}
             </main>
