@@ -5,10 +5,32 @@ import { ArrowRight, Gem, HandHeart, Sparkles } from "lucide-react";
 import ProductCard from "@/components/product-card";
 import BlogPostCard from "@/components/blog-post-card";
 import { getProducts, getBlogPosts } from "@/lib/data";
+import { Card, CardContent } from "@/components/ui/card";
+import TestimonialCard from "@/components/testimonial-card";
 
 export default function Home() {
   const featuredProducts = getProducts().slice(0, 3);
   const recentPosts = getBlogPosts().slice(0, 3);
+  const categories = [
+    { name: "Necklaces", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "necklace jewelry" },
+    { name: "Earrings", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "earrings jewelry" },
+    { name: "Bracelets", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "bracelet jewelry" },
+  ];
+  const testimonials = [
+    {
+      quote: "The necklace I bought is absolutely stunning. The craftsmanship is top-notch, and I get compliments every time I wear it!",
+      author: "Priya K.",
+    },
+    {
+      quote: "Sundaraah's customer service is as wonderful as their jewelry. They helped me pick the perfect gift, and it was a huge hit.",
+      author: "Rahul S.",
+    },
+    {
+      quote: "I'm in love with my new earrings. They are elegant, unique, and beautifully made. I'll definitely be coming back for more.",
+      author: "Anjali M.",
+    },
+  ];
+
 
   const features = [
     {
@@ -76,9 +98,35 @@ export default function Home() {
           </div>
         </div>
       </section>
+      
+      {/* Shop by Category Section */}
+      <section className="py-16 md:py-24 bg-secondary">
+        <div className="container mx-auto px-4">
+          <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
+            Shop by Category
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            {categories.map((category) => (
+              <Link href={category.href} key={category.name} className="group relative overflow-hidden rounded-lg">
+                <Image 
+                  src={category.imageUrl} 
+                  alt={category.name} 
+                  data-ai-hint={category.hint}
+                  width={400} 
+                  height={500} 
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
+                />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <h3 className="font-headline text-2xl font-bold text-white">{category.name}</h3>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-16 md:py-24 bg-secondary">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             Why Choose Sundaraah
@@ -86,12 +134,26 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
             {features.map((feature, index) => (
               <div key={index} className="flex flex-col items-center">
-                <div className="flex items-center justify-center h-20 w-20 rounded-full bg-background mb-4 shadow-md">
+                <div className="flex items-center justify-center h-20 w-20 rounded-full bg-secondary mb-4 shadow-md">
                   {feature.icon}
                 </div>
                 <h3 className="font-headline text-2xl font-semibold text-primary mb-2">{feature.title}</h3>
                 <p className="text-muted-foreground max-w-xs">{feature.description}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      
+      {/* Testimonials Section */}
+      <section className="py-16 md:py-24 bg-secondary">
+        <div className="container mx-auto px-4">
+          <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
+            Words from Our Customers
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <TestimonialCard key={index} {...testimonial} />
             ))}
           </div>
         </div>
