@@ -75,7 +75,7 @@ export default function Header() {
                     <NavLink key={link.href} href={link.href} label={link.label} />
                 ))}
             </nav>
-            <div className={cn("relative w-full", !isSearchOpen && "hidden")}>
+            <div className={cn("relative w-full max-w-2xl", !isSearchOpen && "hidden")}>
               <Input
                 ref={searchInputRef}
                 type="search"
