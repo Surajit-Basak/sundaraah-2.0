@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Gem, HandHeart, Sparkles } from "lucide-react";
 import ProductCard from "@/components/product-card";
 import BlogPostCard from "@/components/blog-post-card";
 import { getProducts, getBlogPosts } from "@/lib/data";
@@ -9,6 +9,24 @@ import { getProducts, getBlogPosts } from "@/lib/data";
 export default function Home() {
   const featuredProducts = getProducts().slice(0, 3);
   const recentPosts = getBlogPosts().slice(0, 3);
+
+  const features = [
+    {
+      icon: <HandHeart className="w-10 h-10 text-accent" />,
+      title: "Handcrafted with Love",
+      description: "Each piece is uniquely designed and meticulously crafted by our skilled artisans.",
+    },
+    {
+      icon: <Gem className="w-10 h-10 text-accent" />,
+      title: "Ethically Sourced",
+      description: "We use only the finest, ethically sourced materials for our jewelry.",
+    },
+    {
+      icon: <Sparkles className="w-10 h-10 text-accent" />,
+      title: "Timeless Designs",
+      description: "Our jewelry is created to be cherished for generations, blending classic and modern styles.",
+    },
+  ];
 
   return (
     <div className="flex flex-col">
@@ -59,8 +77,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Blog Section */}
+      {/* Why Choose Us Section */}
       <section className="py-16 md:py-24 bg-secondary">
+        <div className="container mx-auto px-4">
+          <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
+            Why Choose Sundaraah
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+            {features.map((feature, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <div className="flex items-center justify-center h-20 w-20 rounded-full bg-background mb-4 shadow-md">
+                  {feature.icon}
+                </div>
+                <h3 className="font-headline text-2xl font-semibold text-primary mb-2">{feature.title}</h3>
+                <p className="text-muted-foreground max-w-xs">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Blog Section */}
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             From Our Journal
