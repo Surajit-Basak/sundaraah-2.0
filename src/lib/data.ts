@@ -1,6 +1,7 @@
 import type { Product, BlogPost, TeamMember } from "@/types";
+import { createSupabaseServerClient } from "./supabase/server";
 
-const products: Product[] = [
+const staticProducts: Product[] = [
   {
     id: "1",
     name: "Golden Sunstone Necklace",
@@ -147,12 +148,29 @@ const teamMembers: TeamMember[] = [
     }
 ]
 
-export function getProducts() {
-  return products;
+export async function getProducts(): Promise<Product[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('products').select('*');
+
+    if (error) {
+        console.error('Error fetching products:', error);
+        return staticProducts;
+    }
+    
+    // The data from supabase will have image_url, which needs to be mapped to imageUrl
+    return data.map(p => ({ ...p, imageUrl: p.image_url || 'https://placehold.co/600x600.png' })) || staticProducts;
 }
 
-export function getProductBySlug(slug: string) {
-  return products.find((p) => p.slug === slug);
+export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  const supabase = createSupabaseServerClient();
+  const { data, error } = await supabase.from('products').select('*').eq('slug', slug).single();
+
+  if (error || !data) {
+    console.error('Error fetching product by slug:', error);
+    return staticProducts.find((p) => p.slug === slug);
+  }
+
+  return { ...data, imageUrl: data.image_url || 'https://placehold.co/600x600.png' };
 }
 
 export function getBlogPosts() {

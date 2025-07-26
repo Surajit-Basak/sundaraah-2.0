@@ -1,19 +1,36 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductCard from "@/components/product-card";
 import { getProducts } from "@/lib/data";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { formatPrice } from "@/lib/utils";
+import type { Product } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ShopPage() {
-  const allProducts = getProducts();
-  const categories = [...new Set(allProducts.map(p => p.category))];
-  
-  const maxPrice = Math.ceil(Math.max(...allProducts.map(p => p.price)));
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [maxPrice, setMaxPrice] = useState(1000);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      const products = await getProducts();
+      setAllProducts(products);
+      const productCategories = [...new Set(products.map(p => p.category))];
+      setCategories(productCategories);
+      const maxProductPrice = Math.ceil(Math.max(...products.map(p => p.price), 0));
+      setMaxPrice(maxProductPrice);
+      setPriceRange([0, maxProductPrice]);
+      setIsLoading(false);
+    };
+    fetchProducts();
+  }, []);
 
   const filteredProducts = allProducts.filter(product => 
     product.price >= priceRange[0] && product.price <= priceRange[1]
@@ -58,6 +75,7 @@ export default function ShopPage() {
                       step={5}
                       value={[priceRange[1]]}
                       onValueChange={(value) => setPriceRange([0, value[0]])}
+                      disabled={isLoading}
                     />
                     <div className="flex justify-between text-muted-foreground text-sm mt-2">
                       <span>{formatPrice(0)}</span>
@@ -70,11 +88,23 @@ export default function ShopPage() {
 
             {/* Products Grid */}
             <main className="lg:col-span-3">
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="space-y-4">
+                      <Skeleton className="h-64 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {filteredProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              )}
             </main>
           </div>
         </div>

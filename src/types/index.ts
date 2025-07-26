@@ -5,6 +5,7 @@ export type Product = {
   category: string;
   price: number;
   imageUrl: string;
+  image_url?: string; // from supabase
   description: string;
   details: string[];
 };

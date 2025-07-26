@@ -1,4 +1,7 @@
 
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -15,9 +18,22 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input";
+import type { Product } from "@/types";
 
 export default function Home() {
-  const allProducts = getProducts();
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      const products = await getProducts();
+      setAllProducts(products);
+      setIsLoading(false);
+    };
+    fetchProducts();
+  }, []);
+  
   const featuredProducts = allProducts.slice(0, 6);
   const trendingProducts = allProducts.slice(3, 9).sort(() => 0.5 - Math.random());
   const bestSellers = allProducts.slice(1, 7).sort(() => 0.5 - Math.random());

@@ -1,4 +1,5 @@
 
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getProductBySlug, getProducts } from "@/lib/data";
@@ -15,7 +16,7 @@ type ProductPageProps = {
 
 // Generate metadata for the page
 export async function generateMetadata({ params }: ProductPageProps) {
-  const product = getProductBySlug(params.slug);
+  const product = await getProductBySlug(params.slug);
   if (!product) {
     return {
       title: "Product Not Found",
@@ -29,14 +30,14 @@ export async function generateMetadata({ params }: ProductPageProps) {
 
 // Statically generate routes for each product
 export async function generateStaticParams() {
-    const products = getProducts();
+    const products = await getProducts();
     return products.map((product) => ({
         slug: product.slug,
     }));
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
-  const product = getProductBySlug(params.slug);
+export default async function ProductPage({ params }: ProductPageProps) {
+  const product = await getProductBySlug(params.slug);
 
   if (!product) {
     notFound();
