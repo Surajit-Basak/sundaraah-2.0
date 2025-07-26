@@ -8,11 +8,14 @@ import { Slider } from "@/components/ui/slider";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function ShopPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [maxPrice, setMaxPrice] = useState(1000);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
 
@@ -21,7 +24,7 @@ export default function ShopPage() {
       setIsLoading(true);
       const products = await getProducts();
       setAllProducts(products);
-      const productCategories = [...new Set(products.map(p => p.category))];
+      const productCategories = ["All", ...new Set(products.map(p => p.category))];
       setCategories(productCategories);
       const maxProductPrice = Math.ceil(Math.max(...products.map(p => p.price), 0));
       setMaxPrice(maxProductPrice > 0 ? maxProductPrice : 1000);
@@ -32,6 +35,7 @@ export default function ShopPage() {
   }, []);
 
   const filteredProducts = allProducts.filter(product => 
+    (selectedCategory === "All" || product.category === selectedCategory) &&
     product.price >= priceRange[0] && product.price <= priceRange[1]
   );
 
@@ -61,7 +65,15 @@ export default function ShopPage() {
                     <ul className="space-y-2">
                       {categories.map(category => (
                           <li key={category}>
-                              <a href="#" className="text-muted-foreground hover:text-primary">{category}</a>
+                              <button 
+                                onClick={() => setSelectedCategory(category)}
+                                className={cn(
+                                  "text-muted-foreground hover:text-primary w-full text-left",
+                                  selectedCategory === category && "text-primary font-bold"
+                                )}
+                              >
+                                {category}
+                              </button>
                           </li>
                       ))}
                     </ul>
@@ -98,11 +110,16 @@ export default function ShopPage() {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                  {filteredProducts.length > 0 ? filteredProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  )) : <p>No products match your criteria.</p>}
-                </div>
+                <>
+                  <div className="mb-4">
+                    <p className="text-sm text-muted-foreground">Showing {filteredProducts.length} of {allProducts.length} products</p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                    {filteredProducts.length > 0 ? filteredProducts.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    )) : <p>No products match your criteria.</p>}
+                  </div>
+                </>
               )}
             </main>
           </div>
