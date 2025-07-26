@@ -29,6 +29,14 @@ export default function Header() {
       searchInputRef.current.focus();
     }
   }, [isSearchOpen]);
+  
+  // Close search when navigating
+  useEffect(() => {
+    if (isSearchOpen) {
+      setIsSearchOpen(false);
+    }
+  }, [pathname]);
+
 
   const handleSearchToggle = () => {
     setIsSearchOpen(!isSearchOpen);
@@ -47,7 +55,7 @@ export default function Header() {
   );
   
   const HeaderIcon = ({ children, ariaLabel, onClick }: { children: React.ReactNode; ariaLabel: string, onClick?: () => void }) => (
-     <Button variant="ghost" size="icon" aria-label={ariaLabel} onClick={onClick} className="hover:bg-primary/10 rounded-full">
+     <Button variant="ghost" size="icon" aria-label={ariaLabel} onClick={onClick} className="text-primary transition-colors hover:bg-primary/10 rounded-full">
         {children}
      </Button>
   )
@@ -59,7 +67,7 @@ export default function Header() {
           Sundaraah
         </Link>
         
-        <div className={cn("absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md px-4 transition-all duration-300 md:relative md:left-auto md:top-auto md:translate-x-0 md:translate-y-0 md:w-auto md:max-w-none md:p-0", isSearchOpen ? 'opacity-100 visible' : 'opacity-0 invisible md:opacity-100 md:visible')}>
+        <div className={cn("absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl px-4 transition-all duration-300 md:relative md:left-auto md:top-auto md:translate-x-0 md:translate-y-0 md:w-auto md:max-w-none md:p-0", isSearchOpen ? 'opacity-100 visible' : 'opacity-0 invisible md:opacity-100 md:visible')}>
             <nav className={cn("hidden md:flex items-center gap-8", isSearchOpen && "md:hidden")}>
                 {navLinks.map((link) => (
                     <NavLink key={link.href} href={link.href} label={link.label} />
@@ -78,21 +86,21 @@ export default function Header() {
 
         <div className="flex items-center gap-2">
            <HeaderIcon ariaLabel="Toggle Search" onClick={handleSearchToggle}>
-            {isSearchOpen ? <X className="h-6 w-6 text-primary" /> : <Search className="h-6 w-6 text-primary" />}
+            {isSearchOpen ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
           </HeaderIcon>
           
           <HeaderIcon ariaLabel="Shopping Cart">
-            <ShoppingCart className="h-6 w-6 text-primary" />
+            <ShoppingCart className="h-6 w-6" />
           </HeaderIcon>
 
            <HeaderIcon ariaLabel="User Profile">
-            <User className="h-6 w-6 text-primary" />
+            <User className="h-6 w-6" />
           </HeaderIcon>
 
           <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="hover:bg-primary/10 rounded-full">
-                <Menu className="h-6 w-6 text-primary" />
+              <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10 rounded-full">
+                <Menu className="h-6 w-6" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
