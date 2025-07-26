@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Gem, HandHeart, Sparkles } from "lucide-react";
 import ProductCard from "@/components/product-card";
 import BlogPostCard from "@/components/blog-post-card";
-import { getProducts, getBlogPosts } from "@/lib/data";
+import { getProducts, getBlogPosts, getTeamMembers } from "@/lib/data";
 import TestimonialCard from "@/components/testimonial-card";
 
 export default function Home() {
   const featuredProducts = getProducts().slice(0, 3);
   const recentPosts = getBlogPosts().slice(0, 3);
+  const mainArtisan = getTeamMembers()[1]; // Rohan Verma, Master Artisan
   const categories = [
     { name: "Necklaces", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "necklace jewelry" },
     { name: "Earrings", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "earrings jewelry" },
@@ -114,9 +115,41 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Our Craftsmanship Section */}
+      <section className="py-16 md:py-24 bg-secondary">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="prose prose-lg max-w-none text-foreground">
+              <h2 className="font-headline text-3xl md:text-4xl text-primary mb-4">The Soul of Sundaraah</h2>
+              <p>
+                Behind every piece of Sundaraah jewelry lies a story of tradition, skill, and dedication. Our master artisans, like {mainArtisan.name}, pour their hearts into crafting each item, ensuring it's not just an accessory, but a work of art.
+              </p>
+              <p>
+                We believe in the beauty of the human touch. From the initial sketch to the final polish, every step is a testament to our commitment to exceptional craftsmanship and timeless design.
+              </p>
+              <Button asChild variant="link" className="text-accent p-0 mt-4 text-lg">
+                <Link href="/about">
+                  Meet Our Artisans <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+            <div className="aspect-square relative">
+              <Image
+                src="https://placehold.co/600x600.png"
+                alt="Artisan at work"
+                data-ai-hint="artisan jewelry"
+                width={600}
+                height={600}
+                className="rounded-lg shadow-xl object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
       
       {/* Shop by Category Section */}
-      <section className="py-16 md:py-24 bg-secondary">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             Shop by Category
@@ -142,7 +175,7 @@ export default function Home() {
       </section>
       
       {/* Testimonials Section */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             Words from Our Customers
@@ -156,7 +189,7 @@ export default function Home() {
       </section>
 
       {/* Blog Section */}
-      <section className="py-16 md:py-24 bg-secondary">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             From Our Journal
