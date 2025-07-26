@@ -34,26 +34,35 @@ export default function Header() {
     setIsSearchOpen(!isSearchOpen);
   };
 
+  const NavLink = ({ href, label }: { href: string; label: string }) => (
+    <Link
+      href={href}
+      className={cn(
+        "text-base font-medium transition-colors hover:text-primary",
+        pathname === href ? "text-primary" : "text-muted-foreground"
+      )}
+    >
+      {label}
+    </Link>
+  );
+  
+  const HeaderIcon = ({ children, ariaLabel }: { children: React.ReactNode; ariaLabel: string }) => (
+     <Button variant="ghost" size="icon" aria-label={ariaLabel} className="hover:bg-accent/80 rounded-full">
+        {children}
+     </Button>
+  )
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4">
-        <Link href="/" className="font-headline text-2xl font-bold text-primary">
+      <div className="container mx-auto flex h-20 max-w-screen-2xl items-center justify-between px-4">
+        <Link href="/" className="font-headline text-3xl font-bold text-primary">
           Sundaraah
         </Link>
         
-        <div className={cn("absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg px-4 transition-all duration-300 md:relative md:left-auto md:top-auto md:translate-x-0 md:translate-y-0 md:w-auto md:max-w-none md:p-0", isSearchOpen ? 'opacity-100 visible' : 'opacity-0 invisible md:opacity-100 md:visible')}>
-            <nav className={cn("hidden md:flex gap-6", isSearchOpen && "md:hidden")}>
+        <div className={cn("absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl px-4 transition-all duration-300 md:relative md:left-auto md:top-auto md:translate-x-0 md:translate-y-0 md:w-auto md:max-w-none md:p-0", isSearchOpen ? 'opacity-100 visible' : 'opacity-0 invisible md:opacity-100 md:visible')}>
+            <nav className={cn("hidden md:flex items-center gap-8", isSearchOpen && "md:hidden")}>
                 {navLinks.map((link) => (
-                    <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                        "text-sm font-medium transition-colors hover:text-primary",
-                        pathname === link.href ? "text-primary" : "text-muted-foreground"
-                    )}
-                    >
-                    {link.label}
-                    </Link>
+                    <NavLink key={link.href} href={link.href} label={link.label} />
                 ))}
             </nav>
             <div className={cn("relative", !isSearchOpen && "hidden", isSearchOpen && "w-full")}>
@@ -61,32 +70,31 @@ export default function Header() {
                 ref={searchInputRef}
                 type="search"
                 placeholder="Search products..."
-                className="w-full pl-10"
+                className="w-full pl-12 h-12 text-base rounded-full bg-secondary border-transparent focus:border-primary focus:ring-primary"
               />
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
             </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={handleSearchToggle} className="md:hidden">
-            {isSearchOpen ? <X className="h-5 w-5 text-primary" /> : <Search className="h-5 w-5 text-primary" />}
-            <span className="sr-only">Search</span>
+           <Button variant="ghost" size="icon" onClick={handleSearchToggle} className="md:hidden hover:bg-accent/80 rounded-full">
+            {isSearchOpen ? <X className="h-6 w-6 text-primary" /> : <Search className="h-6 w-6 text-primary" />}
+            <span className="sr-only">Toggle Search</span>
           </Button>
-           <Button variant="ghost" size="icon" onClick={handleSearchToggle} className="hidden md:inline-flex">
-            {isSearchOpen ? <X className="h-5 w-5 text-primary" /> : <Search className="h-5 w-5 text-primary" />}
-            <span className="sr-only">Search</span>
+           <Button variant="ghost" size="icon" onClick={handleSearchToggle} className="hidden md:inline-flex hover:bg-accent/80 rounded-full">
+            {isSearchOpen ? <X className="h-6 w-6 text-primary" /> : <Search className="h-6 w-6 text-primary" />}
+            <span className="sr-only">Toggle Search</span>
           </Button>
-          <Button variant="ghost" size="icon">
-            <ShoppingCart className="h-5 w-5 text-primary" />
-            <span className="sr-only">Shopping Cart</span>
-          </Button>
-          <Button variant="ghost" size="icon">
-            <User className="h-5 w-5 text-primary" />
-            <span className="sr-only">User Profile</span>
-          </Button>
+          <HeaderIcon ariaLabel="Shopping Cart">
+            <ShoppingCart className="h-6 w-6 text-primary" />
+          </HeaderIcon>
+           <HeaderIcon ariaLabel="User Profile">
+            <User className="h-6 w-6 text-primary" />
+          </HeaderIcon>
+
           <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="hover:bg-accent/80 rounded-full">
                 <Menu className="h-6 w-6 text-primary" />
                 <span className="sr-only">Open menu</span>
               </Button>
