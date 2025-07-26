@@ -85,7 +85,9 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   return { ...data, imageUrl: data.image_url || 'https://placehold.co/600x600.png' };
 }
 
-export async function createProduct(productData: Omit<Product, 'id' | 'imageUrl'>) {
+type ProductInput = Omit<Product, 'id' | 'imageUrl'> & { image_url?: string };
+
+export async function createProduct(productData: ProductInput) {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('products').insert([productData]).select().single();
 
@@ -96,6 +98,23 @@ export async function createProduct(productData: Omit<Product, 'id' | 'imageUrl'
 
     revalidatePath('/admin/products');
     revalidatePath('/shop');
+
+    return data;
+}
+
+export async function updateProduct(id: string, productData: Partial<ProductInput>) {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('products').update(productData).eq('id', id).select().single();
+
+    if (error) {
+        console.error('Error updating product:', error);
+        throw new Error('Failed to update product.');
+    }
+
+    revalidatePath('/admin/products');
+    revalidatePath(`/admin/products/${data.slug}/edit`);
+    revalidatePath('/shop');
+    revalidatePath(`/shop/${data.slug}`);
 
     return data;
 }

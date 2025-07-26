@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, PlusCircle } from "lucide-react";
+import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default async function AdminProductsPage() {
   const products = await getProducts();
@@ -63,10 +64,21 @@ export default async function AdminProductsPage() {
                   </TableCell>
                   <TableCell>{formatPrice(product.price)}</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="h-4 w-4" />
-                      <span className="sr-only">Actions</span>
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem asChild>
+                                <Link href={`/admin/products/${product.slug}/edit`}>Edit</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}

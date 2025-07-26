@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Product } from "@/types";
-import { createProduct } from "@/lib/data";
+import { createProduct, updateProduct } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
@@ -59,17 +59,29 @@ export function ProductForm({ initialData }: ProductFormProps) {
         const productData = {
             ...data,
             details: data.details.split(",").map((s) => s.trim()),
-            // Temporarily set slug and imageUrl
             slug: data.name.toLowerCase().replace(/\s+/g, '-'),
-            image_url: 'https://placehold.co/600x600.png',
         };
-      await createProduct(productData);
-      toast({
-        title: "Success!",
-        description: "Product has been created.",
-      });
+
+      if (initialData) {
+        await updateProduct(initialData.id, productData);
+        toast({
+          title: "Success!",
+          description: "Product has been updated.",
+        });
+      } else {
+        await createProduct({
+            ...productData,
+            image_url: 'https://placehold.co/600x600.png',
+        });
+        toast({
+            title: "Success!",
+            description: "Product has been created.",
+        });
+      }
+      
       router.push("/admin/products");
       router.refresh();
+
     } catch (error) {
       toast({
         variant: "destructive",
