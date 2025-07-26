@@ -18,6 +18,7 @@ export type BlogPost = {
   slug: string;
   date: string;
   imageUrl: string;
+  image_url?: string; // from supabase
   excerpt: string;
   content: string;
 };
@@ -27,5 +28,6 @@ export type TeamMember = {
   name: string;
   role: string;
   imageUrl: string;
+  image_url?: string; // from supabase
   bio: string;
 };
