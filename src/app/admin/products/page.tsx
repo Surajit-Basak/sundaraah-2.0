@@ -68,13 +68,14 @@ export default function AdminProductsPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
+                <TableHead>Inventory</TableHead>
                 <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {(isLoading || isPending) ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     Loading...
                   </TableCell>
                 </TableRow>
@@ -94,6 +95,7 @@ export default function AdminProductsPage() {
                     <Badge variant="outline">{product.category}</Badge>
                   </TableCell>
                   <TableCell>{formatPrice(product.price)}</TableCell>
+                  <TableCell>{product.inventory}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>

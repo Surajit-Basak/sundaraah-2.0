@@ -9,6 +9,7 @@ export type Product = {
   image_url?: string; // from supabase
   description: string;
   details: string[];
+  inventory: number;
 };
 
 export type BlogPost = {

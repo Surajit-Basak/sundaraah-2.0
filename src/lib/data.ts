@@ -69,7 +69,6 @@ export async function getProducts(): Promise<Product[]> {
         return [];
     }
     
-    // The data from supabase will have image_url, which needs to be mapped to imageUrl
     return data.map(p => ({ ...p, imageUrl: p.image_url || 'https://placehold.co/600x600.png' })) || [];
 }
 

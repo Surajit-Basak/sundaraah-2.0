@@ -26,6 +26,7 @@ const productSchema = z.object({
   price: z.coerce.number().min(0, "Price must be a positive number."),
   category: z.string().min(1, "Category is required."),
   details: z.string().min(1, "Please provide at least one detail."),
+  inventory: z.coerce.number().min(0, "Inventory must be a positive number."),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -51,6 +52,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
           price: 0,
           category: "",
           details: "",
+          inventory: 0,
         },
   });
 
@@ -110,31 +112,46 @@ export function ProductForm({ initialData }: ProductFormProps) {
           />
           <FormField
             control={form.control}
-            name="price"
+            name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price</FormLabel>
+                <FormLabel>Category</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="185.00" {...field} />
+                  <Input placeholder="Necklaces" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <FormControl>
-                <Input placeholder="Necklaces" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Price</FormLabel>
+                    <FormControl>
+                    <Input type="number" step="0.01" placeholder="185.00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="inventory"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Inventory Count</FormLabel>
+                    <FormControl>
+                    <Input type="number" placeholder="10" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
         <FormField
           control={form.control}
           name="description"
@@ -156,7 +173,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
           name="details"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Product Details</FormLabel>
+              <FormLabel>Product Details (comma-separated)</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="18k Gold Plated, Genuine Sunstone, 18-inch chain..."
