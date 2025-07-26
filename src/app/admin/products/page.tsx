@@ -2,6 +2,7 @@
 import { getProducts } from "@/lib/data";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default async function AdminProductsPage() {
@@ -22,7 +23,12 @@ export default async function AdminProductsPage() {
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Products</h2>
-        <Button>Add Product</Button>
+        <Button asChild>
+          <Link href="/admin/products/new">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Product
+          </Link>
+        </Button>
       </div>
       <Card>
         <CardHeader>

@@ -3,100 +3,9 @@
 
 import type { Product, BlogPost, TeamMember } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
+import { revalidatePath } from "next/cache";
 
-const staticProducts: Product[] = [
-  {
-    id: "1",
-    name: "Golden Sunstone Necklace",
-    slug: "golden-sunstone-necklace",
-    category: "Necklaces",
-    price: 185.0,
-    imageUrl: "https://placehold.co/600x600.png",
-    description: "A radiant gold-plated necklace featuring a mesmerizing sunstone pendant. Perfect for adding a touch of warmth and elegance to any outfit.",
-    details: [
-      "18k Gold Plated Sterling Silver",
-      "Genuine Sunstone Crystal",
-      "18-inch chain with 2-inch extender",
-      "Lobster clasp closure",
-    ],
-  },
-  {
-    id: "2",
-    name: "Silver Moonstone Earrings",
-    slug: "silver-moonstone-earrings",
-    category: "Earrings",
-    price: 95.0,
-    imageUrl: "https://placehold.co/600x600.png",
-    description: "Delicate sterling silver earrings with luminous moonstone drops. These earrings capture the magic of moonlight.",
-    details: [
-      "Solid 925 Sterling Silver",
-      "Natural Rainbow Moonstone",
-      "Lightweight and comfortable for all-day wear",
-      "Hypoallergenic fish hook backs",
-    ],
-  },
-  {
-    id: "3",
-    name: "Rose Quartz Beaded Bracelet",
-    slug: "rose-quartz-beaded-bracelet",
-    category: "Bracelets",
-    price: 75.0,
-    imageUrl: "https://placehold.co/600x600.png",
-    description: "A beautiful bracelet made with genuine rose quartz beads, known as the stone of universal love. Finished with a golden accent bead.",
-    details: [
-      "8mm Genuine Rose Quartz beads",
-      "Durable elastic cord",
-      "Fits most wrist sizes (6.5 - 7.5 inches)",
-      "Gold-plated spacer bead",
-    ],
-  },
-  {
-    id: "4",
-    name: "Emerald Isle Ring",
-    slug: "emerald-isle-ring",
-    category: "Rings",
-    price: 250.0,
-    imageUrl: "https://placehold.co/600x600.png",
-    description: "A stunning statement ring featuring a lab-grown emerald set in a vintage-inspired golden band.",
-    details: [
-      "14k Gold Vermeil",
-      "High-quality Lab-Grown Emerald",
-      "Intricate band detailing",
-      "Available in sizes 5-9",
-    ],
-  },
-  {
-    id: "5",
-    name: "Bohemian Tassel Lariat",
-    slug: "bohemian-tassel-lariat",
-    category: "Necklaces",
-    price: 120.0,
-    imageUrl: "https://placehold.co/600x600.png",
-    description: "A long, versatile lariat necklace with delicate chain tassels. Perfect for layering or wearing as a standalone piece.",
-    details: [
-      "18k Gold Plated",
-      "Adjustable length",
-      "Minimalist and chic design",
-      "Can be styled multiple ways",
-    ],
-  },
-  {
-    id: "6",
-    name: "Pearl Drop Hoops",
-    slug: "pearl-drop-hoops",
-    category: "Earrings",
-    price: 110.0,
-    imageUrl: "https://placehold.co/600x600.png",
-    description: "Classic golden hoops get a modern update with detachable freshwater pearl charms.",
-    details: [
-      "14k Gold Filled Hoops",
-      "Genuine Freshwater Pearls",
-      "Two-in-one style: wear with or without pearls",
-      "Secure latch-back closure",
-    ],
-  },
-];
-
+// Temporary static data for blog and team
 const blogPosts: BlogPost[] = [
   {
     id: "1",
@@ -174,6 +83,21 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   }
 
   return { ...data, imageUrl: data.image_url || 'https://placehold.co/600x600.png' };
+}
+
+export async function createProduct(productData: Omit<Product, 'id' | 'imageUrl'>) {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('products').insert([productData]).select().single();
+
+    if (error) {
+        console.error('Error creating product:', error);
+        throw new Error('Failed to create product.');
+    }
+
+    revalidatePath('/admin/products');
+    revalidatePath('/shop');
+
+    return data;
 }
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
