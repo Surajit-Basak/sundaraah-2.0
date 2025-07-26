@@ -25,7 +25,7 @@ export default function Header() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isSearchOpen && searchInputRef.current) {
+    if (isSearchOpen && searchInputtRef.current) {
       searchInputRef.current.focus();
     }
   }, [isSearchOpen]);
@@ -35,6 +35,7 @@ export default function Header() {
     if (isSearchOpen) {
       setIsSearchOpen(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
 
@@ -62,18 +63,19 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-20 max-w-screen-2xl items-center justify-between px-4">
-        <Link href="/" className="font-headline text-3xl font-bold text-primary">
+      <div className="container mx-auto flex h-20 max-w-screen-2xl items-center justify-between px-4 gap-8">
+        <Link href="/" className="font-headline text-3xl font-bold text-primary hidden sm:block">
           Sundaraah
         </Link>
         
-        <div className={cn("absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl px-4 transition-all duration-300 md:relative md:left-auto md:top-auto md:translate-x-0 md:translate-y-0 md:w-auto md:max-w-none md:p-0", isSearchOpen ? 'opacity-100 visible' : 'opacity-0 invisible md:opacity-100 md:visible')}>
-            <nav className={cn("hidden md:flex items-center gap-8", isSearchOpen && "md:hidden")}>
+        {/* Main Navigation & Search Container */}
+        <div className={cn("flex-1 flex justify-center items-center transition-all duration-300")}>
+            <nav className={cn("hidden md:flex items-center gap-8", isSearchOpen && "hidden")}>
                 {navLinks.map((link) => (
                     <NavLink key={link.href} href={link.href} label={link.label} />
                 ))}
             </nav>
-            <div className={cn("relative", !isSearchOpen && "hidden", isSearchOpen && "w-full")}>
+            <div className={cn("relative w-full", !isSearchOpen && "hidden")}>
               <Input
                 ref={searchInputRef}
                 type="search"
@@ -84,6 +86,7 @@ export default function Header() {
             </div>
         </div>
 
+        {/* Right side icons & mobile menu */}
         <div className="flex items-center gap-2">
            <HeaderIcon ariaLabel="Toggle Search" onClick={handleSearchToggle}>
             {isSearchOpen ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
