@@ -107,7 +107,7 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
 }
 
 
-type ProductInput = Omit<Product, 'id' | 'imageUrl' | 'imageUrls' | 'reviews' | 'category'> & { image_url?: string };
+type ProductInput = Omit<Product, 'id' | 'imageUrl' | 'imageUrls' | 'reviews' | 'category' | 'created_at'> & { image_url?: string };
 
 export async function createProduct(productData: ProductInput) {
     const supabase = createSupabaseServerClient();

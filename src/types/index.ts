@@ -13,6 +13,7 @@ export type Product = {
   details: string[];
   inventory: number;
   reviews: ProductReview[];
+  created_at: string;
 };
 
 export type ProductReview = {

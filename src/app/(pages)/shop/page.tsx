@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from 'next/navigation';
 import ProductCard from "@/components/product-card";
 import { getProducts, getCategories } from "@/lib/data";
@@ -9,8 +9,14 @@ import { Slider } from "@/components/ui/slider";
 import { formatPrice } from "@/lib/utils";
 import type { Product, Category } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function ShopPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -19,6 +25,7 @@ export default function ShopPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [maxPrice, setMaxPrice] = useState(1000);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [sortBy, setSortBy] = useState<string>("newest");
   
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
@@ -31,7 +38,9 @@ export default function ShopPage() {
         getCategories()
       ]);
       
-      setAllProducts(products);
+      const publishedProducts = products.sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setAllProducts(publishedProducts);
       setCategories([{ id: 'all', name: 'All' }, ...fetchedCategories]);
 
       const maxProductPrice = Math.ceil(Math.max(...products.map(p => p.price), 0));
@@ -43,15 +52,33 @@ export default function ShopPage() {
     fetchData();
   }, []);
 
-  const filteredProducts = allProducts.filter(product => {
-    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
-    const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
-    const matchesSearch = searchQuery 
-      ? product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        product.description.toLowerCase().includes(searchQuery.toLowerCase())
-      : true;
-    return matchesCategory && matchesPrice && matchesSearch;
-  });
+  const filteredAndSortedProducts = useMemo(() => {
+    let products = allProducts.filter(product => {
+      const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
+      const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
+      const matchesSearch = searchQuery 
+        ? product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          product.description.toLowerCase().includes(searchQuery.toLowerCase())
+        : true;
+      return matchesCategory && matchesPrice && matchesSearch;
+    });
+
+    switch(sortBy) {
+        case 'price-asc':
+            products.sort((a, b) => a.price - b.price);
+            break;
+        case 'price-desc':
+            products.sort((a, b) => b.price - a.price);
+            break;
+        case 'newest':
+        default:
+             // Already sorted by newest by default on fetch
+            break;
+    }
+
+    return products;
+
+  }, [allProducts, selectedCategory, priceRange, searchQuery, sortBy]);
 
   return (
     <div className="bg-background">
@@ -72,7 +99,7 @@ export default function ShopPage() {
             {/* Filters Sidebar */}
             <aside className="lg:col-span-1">
               <div className="sticky top-24 p-6 rounded-lg bg-secondary">
-                <h2 className="font-headline text-2xl font-bold text-primary mb-6">Filter by</h2>
+                <h2 className="font-headline text-2xl font-bold text-primary mb-6">Filter & Sort</h2>
                 <div className="space-y-8">
                   <div>
                     <h3 className="font-headline text-lg font-semibold text-primary mb-4">Category</h3>
@@ -93,19 +120,32 @@ export default function ShopPage() {
                     </ul>
                   </div>
                    <div>
-                    <h3 className="font-headline text-lg font-semibold text-primary mb-4">Price</h3>
+                    <h3 className="font-headline text-lg font-semibold text-primary mb-4">Price Range</h3>
                     <Slider
                       min={0}
                       max={maxPrice}
                       step={5}
-                      value={[priceRange[1]]}
-                      onValueChange={(value) => setPriceRange([0, value[0]])}
+                      value={priceRange}
+                      onValueChange={(value) => setPriceRange(value as [number, number])}
                       disabled={isLoading}
                     />
                     <div className="flex justify-between text-muted-foreground text-sm mt-2">
-                      <span>{formatPrice(0)}</span>
+                      <span>{formatPrice(priceRange[0])}</span>
                       <span>{formatPrice(priceRange[1])}</span>
                     </div>
+                  </div>
+                   <div>
+                    <h3 className="font-headline text-lg font-semibold text-primary mb-4">Sort By</h3>
+                     <Select value={sortBy} onValueChange={setSortBy}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Sort by" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="newest">Newest</SelectItem>
+                            <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                            <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                        </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
@@ -131,10 +171,10 @@ export default function ShopPage() {
                         Search results for: <span className="font-bold text-primary">"{searchQuery}"</span>
                       </h2>
                     )}
-                    <p className="text-sm text-muted-foreground">Showing {filteredProducts.length} of {allProducts.length} products</p>
+                    <p className="text-sm text-muted-foreground">Showing {filteredAndSortedProducts.length} of {allProducts.length} products</p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {filteredProducts.length > 0 ? filteredProducts.map((product) => (
+                    {filteredAndSortedProducts.length > 0 ? filteredAndSortedProducts.map((product) => (
                       <ProductCard key={product.id} product={product} />
                     )) : (
                         <p className="md:col-span-3 text-center text-muted-foreground">
