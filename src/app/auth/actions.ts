@@ -31,6 +31,7 @@ export async function signup(formData: FormData) {
   const email = data.email as string;
   const password = data.password as string;
   
+  // The new database trigger will automatically create a profile row from the metadata.
   const { error: signUpError } = await supabase.auth.signUp({
     email: email,
     password: password,
