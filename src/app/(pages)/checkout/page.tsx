@@ -6,13 +6,13 @@ import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Image from "next/image";
 import { createOrder } from "@/lib/data";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -88,15 +88,67 @@ export default function CheckoutPage() {
       <h1 className="font-headline text-4xl md:text-5xl font-bold text-center mb-12 text-primary">
         Checkout
       </h1>
-      <div className="grid md:grid-cols-2 gap-12">
-        {/* Order Summary */}
-        <div>
+      <div className="grid lg:grid-cols-2 gap-12 items-start">
+        {/* Left Side: Forms */}
+        <div className="space-y-8">
+            <form action={handlePlaceOrder} id="checkout-form" className="space-y-8">
+              {/* Customer Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Your Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Full Name</Label>
+                      <Input id="name" name="name" type="text" placeholder="Your full name" defaultValue={user?.user_metadata?.full_name || ''} required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email Address</Label>
+                      <Input id="email" name="email" type="email" placeholder="you@example.com" defaultValue={user?.email || ''} required />
+                    </div>
+                </CardContent>
+              </Card>
+
+              {/* Payment Details (Simulated) */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payment Details</CardTitle>
+                  <CardDescription>
+                    This is a demo. Do not enter real card details.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="card-number">Card Number</Label>
+                      <Input id="card-number" placeholder="1234 5678 9101 1121" disabled />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="expiry">Expiry</Label>
+                            <Input id="expiry" placeholder="MM/YY" disabled />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="cvc">CVC</Label>
+                            <Input id="cvc" placeholder="123" disabled />
+                        </div>
+                    </div>
+                     <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2">
+                        <Lock className="w-3 h-3"/>
+                        <span>Payment is secure and encrypted. For a real app, this would use a provider like Stripe.</span>
+                    </div>
+                </CardContent>
+              </Card>
+            </form>
+        </div>
+        
+        {/* Right Side: Order Summary */}
+        <div className="sticky top-24">
           <Card>
             <CardHeader>
               <CardTitle>Order Summary</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
                 {cartItems.map(item => (
                   <div key={item.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -111,35 +163,14 @@ export default function CheckoutPage() {
                 ))}
               </div>
               <hr className="my-6" />
-              <div className="flex justify-between font-bold text-lg">
+              <div className="flex justify-between font-bold text-lg mb-6">
                 <p>Total</p>
                 <p>{formatPrice(cartTotal)}</p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Customer Information */}
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form action={handlePlaceOrder} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" name="name" type="text" placeholder="Your full name" defaultValue={user?.user_metadata?.full_name || ''} required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" name="email" type="email" placeholder="you@example.com" defaultValue={user?.email || ''} required />
-                </div>
-                <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                    Place Order
+              <Button form="checkout-form" type="submit" size="lg" className="w-full" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Lock className="mr-2 h-5 w-5" />}
+                    {isLoading ? "Processing..." : "Confirm and Pay"}
                 </Button>
-              </form>
             </CardContent>
           </Card>
         </div>
