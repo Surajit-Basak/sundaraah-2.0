@@ -23,7 +23,8 @@ export default function RootLayout({
 }>) {
   const pathname = headers().get('next-url') || '';
   const isAdminRoute = pathname.startsWith('/admin');
-  const isLoginRoute = pathname === '/login';
+  const isLoginRoute = pathname === '/login' || pathname === '/signup' || pathname === '/auth/confirm';
+
 
   return (
     <html lang="en" className="scroll-smooth">
