@@ -6,19 +6,21 @@ import Link from 'next/link';
 import { ArrowUp } from 'lucide-react';
 import { WhatsappIcon } from '@/components/icons/WhatsappIcon';
 import { cn } from '@/lib/utils';
+import { getSettings } from '@/lib/data';
+import type { Settings } from '@/types';
 
 const FloatingButtons = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const [whatsappEnabled, setWhatsappEnabled] = useState(true); // Default to true
-  const [whatsappNumber, setWhatsappNumber] = useState('1234567890'); // Placeholder
+  const [settings, setSettings] = useState<Settings | null>(null);
 
   useEffect(() => {
-    setIsMounted(true);
+    const fetchSettings = async () => {
+      const fetchedSettings = await getSettings();
+      setSettings(fetchedSettings);
+    };
     
-    // In a real app, you would fetch these settings from a CMS or API
-    // For now, we'll just use the default state values.
-
+    fetchSettings();
+    
     const toggleVisibility = () => {
       if (window.pageYOffset > 300) {
         setIsVisible(true);
@@ -40,15 +42,16 @@ const FloatingButtons = () => {
     });
   };
 
-  if (!isMounted) {
+  if (!settings) {
+    // You can return a skeleton or null while settings are loading
     return null;
   }
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-4">
-      {whatsappEnabled && whatsappNumber && (
+      {settings.whatsapp_enabled && settings.whatsapp_number && (
          <Link 
-            href={`https://wa.me/${whatsappNumber}`} 
+            href={`https://wa.me/${settings.whatsapp_number}`} 
             target="_blank" 
             rel="noopener noreferrer"
             aria-label="Chat on WhatsApp"

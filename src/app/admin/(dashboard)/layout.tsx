@@ -44,7 +44,7 @@ export default async function AdminDashboardLayout({
       { href: "/admin/team", label: "Team", icon: <Users /> },
       { href: "/admin/banners", label: "Banners", icon: <ImageIcon /> },
       { href: "/admin/analytics", label: "Analytics", icon: <BarChart3 /> },
-      { href: "#", a: true, label: "Settings", icon: <Settings /> },
+      { href: "/admin/settings", label: "Settings", icon: <Settings /> },
   ]
 
   const handleLogout = async () => {

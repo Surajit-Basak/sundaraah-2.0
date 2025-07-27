@@ -91,3 +91,8 @@ export type UserProfile = {
   full_name: string | null;
   user_role: 'admin' | 'user';
 };
+
+export type Settings = {
+  whatsapp_number: string | null;
+  whatsapp_enabled: boolean;
+};

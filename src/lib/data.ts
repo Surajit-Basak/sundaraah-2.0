@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -521,4 +521,28 @@ export async function updateUserRole(userId: string, role: 'admin' | 'user') {
     }
 
     revalidatePath('/admin/users');
+}
+
+
+// Settings
+export async function getSettings(): Promise<Settings | null> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single();
+    if (error) {
+        console.error('Error fetching settings:', error);
+        // Return default settings if the table is empty or there's an error
+        return { whatsapp_number: '', whatsapp_enabled: false };
+    }
+    return data;
+}
+
+export async function updateSettings(settingsData: Partial<Settings>) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('settings').update(settingsData).eq('id', 1);
+    if (error) {
+        console.error('Error updating settings:', error);
+        throw new Error('Failed to update settings.');
+    }
+    revalidatePath('/admin/settings');
+    revalidatePath('/'); // Revalidate home to update floating button
 }
