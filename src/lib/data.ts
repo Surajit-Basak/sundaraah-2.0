@@ -358,9 +358,7 @@ type NewOrder = {
 }
 export async function createOrder(orderData: NewOrder): Promise<string> {
     const supabase = createSupabaseServerClient();
-    const settings = await getSettings();
-    const resendApiKey = process.env.RESEND_API_KEY;
-
+    
     const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -395,10 +393,11 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
         throw new Error('Failed to create order items.');
     }
     
-    // Send confirmation email only if API key exists
+    const resendApiKey = process.env.RESEND_API_KEY;
     if (resendApiKey) {
         try {
             const resend = new Resend(resendApiKey);
+            const settings = await getSettings();
             await resend.emails.send({
                 from: `"${settings?.site_name || 'Sundaraah'}" <noreply@sundaraah.com>`,
                 to: [orderData.customer_email],
@@ -410,7 +409,6 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
             });
         } catch (emailError) {
             console.error('Email sending failed:', emailError);
-            // Do not throw an error here, the order was still placed successfully.
         }
     } else {
         console.warn("RESEND_API_KEY is not set. Skipping order confirmation email.");
