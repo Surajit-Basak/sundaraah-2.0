@@ -48,6 +48,23 @@ export default function AdminLayout({
     redirect('/admin/login');
   }
 
+  // This check ensures that if a non-admin somehow gets to this layout,
+  // they are redirected. This is a secondary check to the middleware.
+  const checkAdmin = async () => {
+    const supabase = createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.user_metadata?.user_role !== 'admin') {
+      redirect('/admin/login');
+    }
+  };
+  checkAdmin();
+
+  const isLoginPage = pathname === '/admin/login';
+  
+  if (isLoginPage) {
+    return <div className="bg-secondary">{children}</div>
+  }
+
   return (
     <SidebarProvider>
       <Sidebar>

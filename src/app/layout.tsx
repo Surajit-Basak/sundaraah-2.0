@@ -23,8 +23,23 @@ export default function RootLayout({
 }>) {
   const pathname = headers().get('next-url') || '';
   const isAdminRoute = pathname.startsWith('/admin');
-  const isLoginRoute = pathname === '/login' || pathname === '/signup' || pathname === '/auth/confirm';
+  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/auth/confirm' || pathname === '/admin/login';
 
+  if (isAdminRoute) {
+    return (
+       <html lang="en" className="scroll-smooth">
+        <head>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
+        </head>
+        <body className={cn("font-body antialiased bg-secondary")}>
+          {children}
+          <Toaster />
+        </body>
+      </html>
+    )
+  }
 
   return (
     <html lang="en" className="scroll-smooth">
@@ -34,16 +49,16 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
         <meta name="theme-color" content="#5d1d39" />
       </head>
-      <body className={cn("font-body antialiased", (isAdminRoute || isLoginRoute) && "bg-secondary")}>
+      <body className={cn("font-body antialiased", isAuthPage && "bg-secondary")}>
         <PwaProvider>
           <CartProvider>
             <div className="flex min-h-screen flex-col">
-              {!isAdminRoute && !isLoginRoute && <Header />}
+              {!isAuthPage && <Header />}
               <main className="flex-1">{children}</main>
-              {!isAdminRoute && !isLoginRoute && <Footer />}
+              {!isAuthPage && <Footer />}
             </div>
             <Toaster />
-            {!isAdminRoute && !isLoginRoute && <FloatingButtons />}
+            {!isAuthPage && <FloatingButtons />}
           </CartProvider>
         </PwaProvider>
       </body>

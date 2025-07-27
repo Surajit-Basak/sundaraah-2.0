@@ -75,13 +75,22 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // If user is logged in, handle redirects away from auth pages.
+  // If user is logged in, handle redirects away from auth pages and enforce admin role.
   if (session) {
     if (isAuthRoute) {
        return NextResponse.redirect(new URL('/', request.url));
     }
     if (isAdminLogin) {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+       // Check if the user has admin role
+      if (session.user.user_metadata?.user_role === 'admin') {
+         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      }
+    }
+    if (isAdminRoute && !isAdminLogin) {
+        // If user is not an admin, redirect them away from admin routes
+        if (session.user.user_metadata?.user_role !== 'admin') {
+            return NextResponse.redirect(new URL('/', request.url));
+        }
     }
   }
 
