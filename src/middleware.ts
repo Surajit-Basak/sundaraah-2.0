@@ -33,41 +33,28 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { session } } = await supabase.auth.getSession();
-  const { pathname } = request.nextUrl;
+  const { data: userProfile } = await supabase.from('users').select('user_role').single();
 
+  const { pathname } = request.nextUrl;
+  
   const isAdminRoute = pathname.startsWith('/admin');
   const isAccountRoute = pathname.startsWith('/account');
   const isAuthRoute = pathname === '/login' || pathname === '/signup';
-  const isAdminLoginPage = pathname === '/admin/login';
 
-  // If the user is logged in
+  if (!session && (isAdminRoute || isAccountRoute)) {
+    const redirectUrl = isAdminRoute ? '/admin/login' : '/login';
+    return NextResponse.redirect(new URL(redirectUrl, request.url));
+  }
+  
   if (session) {
-    const isAdminUser = session.user.user_metadata?.user_role === 'admin';
-
-    // If a logged-in user tries to access a public auth page (/login, /signup)
     if (isAuthRoute) {
       return NextResponse.redirect(new URL('/', request.url));
     }
-    
-    // If an admin is logged in and visits the admin login page, redirect to dashboard
-    if (isAdminUser && isAdminLoginPage) {
-        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-    }
 
-    // If a non-admin user tries to access any admin page, redirect them to the home page
-    if (!isAdminUser && isAdminRoute) {
-        return NextResponse.redirect(new URL('/', request.url));
-    }
-  } 
-  // If the user is not logged in
-  else {
-    // Protect the account page
-    if (isAccountRoute) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-    // Protect all admin pages except the login page itself
-    if (isAdminRoute && !isAdminLoginPage) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
+    const isAdminUser = userProfile?.user_role === 'admin';
+    
+    if (isAdminRoute && !isAdminUser) {
+      return NextResponse.redirect(new URL('/', request.url));
     }
   }
 

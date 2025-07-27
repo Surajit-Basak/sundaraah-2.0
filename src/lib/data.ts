@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -494,4 +494,30 @@ export async function deleteBanner(id: string) {
     }
     revalidatePath('/admin/banners');
     revalidatePath('/');
+}
+
+export async function getUsers(): Promise<UserProfile[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('users').select('*').order('email');
+
+    if (error) {
+        console.error('Error fetching users:', error);
+        return [];
+    }
+    return data || [];
+}
+
+export async function updateUserRole(userId: string, role: 'admin' | 'user') {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+        .from('users')
+        .update({ user_role: role })
+        .eq('id', userId);
+
+    if (error) {
+        console.error('Error updating user role:', error);
+        throw new Error('Failed to update user role.');
+    }
+
+    revalidatePath('/admin/users');
 }

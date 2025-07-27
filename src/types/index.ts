@@ -84,3 +84,10 @@ export type Banner = {
   is_active: boolean;
   sort_order: number;
 };
+
+export type UserProfile = {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+  user_role: 'admin' | 'user';
+};

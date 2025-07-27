@@ -46,6 +46,9 @@ export async function signup(formData: FormData) {
     return redirect(`/signup?error=${encodeURIComponent(signUpError.message)}`)
   }
   
+  // Revalidate the users path to show the new user in the admin panel
+  revalidatePath('/admin/users');
+
   // Redirect to a page that tells the user to confirm their email
   return redirect('/auth/confirm');
 }

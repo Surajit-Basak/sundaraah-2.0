@@ -32,13 +32,8 @@ export default async function AdminLayout({
   const { data: { user } } = await supabase.auth.getUser();
   const pathname = headers().get('next-url') || '';
 
-  // If on login page, render children directly without the sidebar layout
-  if (pathname === '/admin/login') {
-    return <div className="bg-secondary">{children}</div>;
-  }
-  
   // This is a failsafe, middleware should handle redirection primarily.
-  if (!user || user.user_metadata.user_role !== 'admin') {
+  if (!user) {
     redirect('/admin/login');
   }
 
@@ -46,6 +41,7 @@ export default async function AdminLayout({
       { href: "/admin/dashboard", label: "Dashboard", icon: <Home /> },
       { href: "/admin/orders", label: "Orders", icon: <ShoppingCart /> },
       { href: "/admin/products", label: "Products", icon: <Package /> },
+      { href: "/admin/users", label: "Users", icon: <Users /> },
       { href: "/admin/blog", label: "Blog", icon: <BookOpen /> },
       { href: "/admin/team", label: "Team", icon: <Users /> },
       { href: "/admin/banners", label: "Banners", icon: <ImageIcon /> },
