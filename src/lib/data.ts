@@ -1,11 +1,12 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo, Testimonial } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo, Testimonial, EmailTemplate } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import OrderConfirmationEmail from "@/components/emails/order-confirmation-email";
+import GenericNotificationEmail from "@/components/emails/generic-notification-email";
 
 
 // Product Functions
@@ -464,15 +465,34 @@ export async function getOrdersByUserId(userId: string): Promise<Order[]> {
 
 export async function updateOrderStatus(orderId: string, status: Order['status']) {
     const supabase = createSupabaseServerClient();
-    const { error } = await supabase
+    
+    const { data: updatedOrder, error } = await supabase
         .from('orders')
         .update({ status })
-        .eq('id', orderId);
+        .eq('id', orderId)
+        .select()
+        .single();
 
-    if (error) {
+    if (error || !updatedOrder) {
         console.error('Error updating order status:', error);
         throw new Error('Failed to update order status.');
     }
+
+    // If the order is fulfilled, trigger the notification email
+    if (status === 'Fulfilled') {
+        const eventTrigger = 'order_status_fulfilled';
+        const { data: template } = await supabase
+            .from('email_templates')
+            .select('*')
+            .eq('event_trigger', eventTrigger)
+            .eq('is_active', true)
+            .single();
+        
+        if (template) {
+            await sendTemplatedEmail(template, updatedOrder);
+        }
+    }
+
 
     revalidatePath('/admin/orders');
     revalidatePath(`/admin/orders/${orderId}`);
@@ -915,4 +935,41 @@ export async function deleteTestimonial(id: string) {
     }
     revalidatePath('/admin/testimonials');
     revalidatePath('/');
+}
+
+// Email Functions
+async function sendTemplatedEmail(template: EmailTemplate, order: Order) {
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+        console.warn("RESEND_API_KEY is not set. Skipping templated email.");
+        return;
+    }
+
+    try {
+        const resend = new Resend(resendApiKey);
+        const settings = await getSettings();
+        const siteName = settings?.site_name || 'Sundaraah Showcase';
+        const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+
+        // Replace placeholders
+        let subject = template.subject.replace(/{{site_name}}/g, siteName);
+        let body = template.body
+            .replace(/{{customer_name}}/g, order.customer_name)
+            .replace(/{{order_id}}/g, order.id.substring(0, 8).toUpperCase())
+            .replace(/{{order_url}}/g, `${baseUrl}/account/orders/${order.id}`)
+            .replace(/{{site_name}}/g, siteName);
+
+        await resend.emails.send({
+            from: `"${siteName}" <noreply@sundaraah.com>`,
+            to: [order.customer_email],
+            subject: subject,
+            react: GenericNotificationEmail({
+                siteName,
+                subject,
+                bodyContent: body,
+            }),
+        });
+    } catch (emailError) {
+        console.error(`Email sending failed for event ${template.event_trigger}:`, emailError);
+    }
 }

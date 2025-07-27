@@ -161,3 +161,13 @@ export type Testimonial = {
   is_active: boolean;
   created_at: string;
 };
+
+export type EmailTemplate = {
+  id: number;
+  name: string;
+  event_trigger: string;
+  subject: string;
+  body: string;
+  is_active: boolean;
+  created_at: string;
+};
