@@ -1,8 +1,11 @@
 
+"use client";
+
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOrders } from "@/lib/data";
 import { formatPrice } from "@/lib/utils";
-import { DollarSign, CreditCard, Activity } from "lucide-react";
+import { DollarSign, CreditCard, Activity, Package } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -13,13 +16,22 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import type { Order } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export const metadata = {
-    title: "Analytics | Sundaraah Admin",
-};
+export default function AnalyticsPage() {
+  const [allOrders, setAllOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-export default async function AnalyticsPage() {
-  const allOrders = await getOrders();
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      const orders = await getOrders();
+      setAllOrders(orders);
+      setIsLoading(false);
+    };
+    fetchData();
+  }, []);
 
   const fulfilledOrders = allOrders.filter(order => order.status === 'Fulfilled');
   const totalRevenue = fulfilledOrders.reduce((sum, order) => sum + order.total, 0);
@@ -48,6 +60,23 @@ export default async function AnalyticsPage() {
         case "Cancelled": return "destructive";
         default: return "outline";
     }
+  }
+  
+  if (isLoading) {
+    return (
+        <div className="flex-1 space-y-4 p-8 pt-6">
+            <Skeleton className="h-8 w-48" />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <Card><CardHeader><Skeleton className="h-5 w-32" /></CardHeader><CardContent><Skeleton className="h-8 w-24" /></CardContent></Card>
+                <Card><CardHeader><Skeleton className="h-5 w-32" /></CardHeader><CardContent><Skeleton className="h-8 w-24" /></CardContent></Card>
+                <Card><CardHeader><Skeleton className="h-5 w-32" /></CardHeader><CardContent><Skeleton className="h-8 w-24" /></CardContent></Card>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                <Card className="col-span-4"><CardHeader><Skeleton className="h-6 w-32" /></CardHeader><CardContent><Skeleton className="h-[350px] w-full" /></CardContent></Card>
+                <Card className="col-span-3"><CardHeader><Skeleton className="h-6 w-32" /></CardHeader><CardContent><Skeleton className="h-[350px] w-full" /></CardContent></Card>
+            </div>
+        </div>
+    );
   }
 
   return (
@@ -117,31 +146,38 @@ export default async function AnalyticsPage() {
                 <CardTitle>Recent Orders</CardTitle>
             </CardHeader>
             <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Customer</TableHead>
-                            <TableHead className="text-center">Status</TableHead>
-                            <TableHead className="text-right">Total</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {allOrders.slice(0, 10).map(order => (
-                                <TableRow key={order.id}>
-                                <TableCell>
-                                    <div className="font-medium">{order.customer_name}</div>
-                                    <div className="hidden text-sm text-muted-foreground md:inline">
-                                        {order.customer_email}
-                                    </div>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                    <Badge variant={getStatusVariant(order.status) as any}>{order.status}</Badge>
-                                </TableCell>
-                                <TableCell className="text-right">{formatPrice(order.total)}</TableCell>
+                {allOrders.length > 0 ? (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Customer</TableHead>
+                                <TableHead className="text-center">Status</TableHead>
+                                <TableHead className="text-right">Total</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {allOrders.slice(0, 10).map(order => (
+                                    <TableRow key={order.id}>
+                                    <TableCell>
+                                        <div className="font-medium">{order.customer_name}</div>
+                                        <div className="hidden text-sm text-muted-foreground md:inline">
+                                            {order.customer_email}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <Badge variant={getStatusVariant(order.status) as any}>{order.status}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">{formatPrice(order.total)}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                ) : (
+                    <div className="flex flex-col items-center justify-center text-center h-[200px] text-muted-foreground">
+                        <Package className="h-12 w-12 mb-4" />
+                        <p>No orders found yet.</p>
+                    </div>
+                )}
             </CardContent>
         </Card>
       </div>
