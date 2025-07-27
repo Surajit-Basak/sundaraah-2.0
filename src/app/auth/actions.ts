@@ -64,31 +64,54 @@ export async function logout() {
 
 export async function adminLogin(formData: FormData) {
   const supabase = createSupabaseServerClient()
-
   const data = Object.fromEntries(formData)
 
-  const { data: { user }, error } = await supabase.auth.signInWithPassword({
+  // 1. Authenticate the user
+  const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
     email: data.email as string,
     password: data.password as string,
   })
 
-  if (error || !user) {
-    console.error('Admin Login error:', error?.message)
+  if (signInError || !user) {
+    console.error('Admin Login error:', signInError?.message)
     return redirect('/admin/login?error=Invalid credentials')
   }
 
-  const { data: userProfile } = await supabase
+  // 2. Check for a profile in public.users table
+  let { data: userProfile } = await supabase
     .from('users')
     .select('user_role')
     .eq('id', user.id)
     .single();
 
+  // 3. (Self-Healing) If no profile, create one. This handles users created before the trigger existed.
+  if (!userProfile) {
+      const { data: newUserProfile, error: insertError } = await supabase
+        .from('users')
+        .insert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata.full_name,
+            user_role: 'user' // Default to 'user'
+        })
+        .select('user_role')
+        .single();
+      
+      if (insertError) {
+          console.error('Error creating user profile on-the-fly:', insertError);
+          await supabase.auth.signOut();
+          return redirect('/admin/login?error=Could not verify user profile.');
+      }
+      userProfile = newUserProfile;
+  }
+
+  // 4. Check if the user is an admin
   if (userProfile?.user_role !== 'admin') {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut(); // Sign out non-admins
     return redirect('/admin/login?error=Access Denied');
   }
 
-
-  revalidatePath('/admin/dashboard')
+  // 5. Success: Revalidate and redirect to dashboard
+  revalidatePath('/admin', 'layout')
   redirect('/admin/dashboard')
 }
