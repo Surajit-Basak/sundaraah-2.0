@@ -12,9 +12,11 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Home, Package, Settings, ShoppingCart, BarChart3, Gem } from "lucide-react";
+import { Home, Package, Settings, ShoppingCart, BarChart3, Gem, LogOut } from "lucide-react";
 import Link from "next/link";
 import { headers } from "next/headers";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Sundaraah Admin",
@@ -35,6 +37,13 @@ export default function AdminLayout({
       { href: "#", label: "Analytics", icon: <BarChart3 /> },
       { href: "#", label: "Settings", icon: <Settings /> },
   ]
+
+  const handleLogout = async () => {
+    'use server';
+    const supabase = createSupabaseServerClient();
+    await supabase.auth.signOut();
+    redirect('/admin/login');
+  }
 
   return (
     <SidebarProvider>
@@ -64,12 +73,12 @@ export default function AdminLayout({
         <SidebarFooter>
            <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip="Go to Frontend">
-                        <Link href="/" target="_blank">
-                            <Home />
-                            <span>Visit Store</span>
-                        </Link>
-                    </SidebarMenuButton>
+                    <form action={handleLogout} className="w-full">
+                        <SidebarMenuButton tooltip="Logout" type="submit" className="w-full">
+                            <LogOut />
+                            <span>Logout</span>
+                        </SidebarMenuButton>
+                    </form>
                 </SidebarMenuItem>
            </SidebarMenu>
         </SidebarFooter>

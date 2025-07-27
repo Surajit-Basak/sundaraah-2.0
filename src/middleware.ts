@@ -60,12 +60,20 @@ export async function middleware(request: NextRequest) {
   
   const { pathname } = request.nextUrl;
 
-  // if user is not logged in, redirect to /login
+  // if user is not logged in and is trying to access admin routes, redirect to admin login
   if (!session && pathname.startsWith('/admin')) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    url.pathname = '/admin/login'
     return NextResponse.redirect(url)
   }
+
+  // if user is logged in and tries to access admin login, redirect to dashboard
+  if (session && pathname === '/admin/login') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/admin/dashboard'
+    return NextResponse.redirect(url)
+  }
+
 
   return response
 }
@@ -77,8 +85,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - auth routes
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|auth/.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, X, Search } from "lucide-react";
+import { Menu, User, X, Search, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "../ui/input";
 import { CartSheet } from "../cart/cart-sheet";
@@ -56,11 +56,15 @@ export default function Header() {
     </Link>
   );
   
-  const HeaderIcon = ({ children, ariaLabel, onClick }: { children: React.ReactNode; ariaLabel: string, onClick?: () => void }) => (
-     <Button variant="ghost" size="icon" aria-label={ariaLabel} onClick={onClick} className="text-primary transition-colors hover:bg-primary/10 rounded-full">
+  const HeaderIcon = ({ children, ariaLabel, onClick, asChild, href }: { children: React.ReactNode; ariaLabel: string, onClick?: () => void, asChild?: boolean, href?: string }) => {
+    const Component = asChild ? Link : Button;
+    const props = asChild ? { href } : { onClick };
+    return (
+     <Component {...props} asChild={asChild} variant="ghost" size="icon" aria-label={ariaLabel} className="text-primary transition-colors hover:bg-primary/10 rounded-full">
         {children}
-     </Button>
-  )
+     </Component>
+    )
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -95,9 +99,9 @@ export default function Header() {
           
           <CartSheet />
 
-           <HeaderIcon ariaLabel="User Profile">
-            <User className="h-6 w-6" />
-          </HeaderIcon>
+           <HeaderIcon asChild href="/login" ariaLabel="Login">
+              <LogIn className="h-6 w-6" />
+           </HeaderIcon>
 
           <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">

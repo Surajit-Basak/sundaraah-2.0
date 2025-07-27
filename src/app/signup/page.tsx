@@ -1,4 +1,5 @@
 
+import { signup } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,20 +12,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { login } from "@/app/auth/actions";
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
     <div className="flex items-center justify-center py-12">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Sign Up</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account.
+            Create an account to get started.
           </CardDescription>
         </CardHeader>
         <form>
           <CardContent className="grid gap-4">
+            <div className="grid gap-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input id="fullName" name="fullName" placeholder="Your Name" required />
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -41,14 +45,14 @@ export default function LoginPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button formAction={login} className="w-full">
-              Sign in
+            <Button formAction={signup} className="w-full">
+              Create Account
             </Button>
             <div className="text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="underline">
-                Sign up
-              </Link>
+                Already have an account?{" "}
+                <Link href="/login" className="underline">
+                    Login
+                </Link>
             </div>
           </CardFooter>
         </form>
