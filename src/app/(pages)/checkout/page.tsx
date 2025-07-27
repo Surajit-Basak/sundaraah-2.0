@@ -52,7 +52,7 @@ export default function CheckoutPage() {
         customer_name: customerName,
         customer_email: customerEmail,
         total: cartTotal,
-        items: cartItems.map(item => ({ product_id: item.id, quantity: item.quantity, price: item.price })),
+        items: cartItems, // Pass the full cart item
         user_id: user?.id,
       });
       

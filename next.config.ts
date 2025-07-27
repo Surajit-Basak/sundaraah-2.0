@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
   },
    env: {
     CURRENCY: process.env.CURRENCY,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
   }
 };
 

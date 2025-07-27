@@ -1,9 +1,14 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
+import { Resend } from "resend";
+import OrderConfirmationEmail from "@/components/emails/order-confirmation-email";
+import { getSettings } from "./data";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Product Functions
 export async function getProducts(): Promise<Product[]> {
@@ -350,11 +355,12 @@ type NewOrder = {
     customer_name: string;
     customer_email: string;
     total: number;
-    items: { product_id: string; quantity: number; price: number }[];
+    items: CartItem[];
     user_id?: string | null;
 }
 export async function createOrder(orderData: NewOrder): Promise<string> {
     const supabase = createSupabaseServerClient();
+    const settings = await getSettings();
 
     const { data: order, error: orderError } = await supabase
         .from('orders')
@@ -365,7 +371,7 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
             status: 'Processing',
             user_id: orderData.user_id
         })
-        .select('id')
+        .select('id, created_at')
         .single();
 
     if (orderError || !order) {
@@ -377,7 +383,7 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
 
     const orderItems = orderData.items.map(item => ({
         order_id: orderId,
-        product_id: item.product_id,
+        product_id: item.id,
         quantity: item.quantity,
         price: item.price,
     }));
@@ -388,6 +394,22 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
         console.error('Error creating order items:', itemsError);
         await supabase.from('orders').delete().eq('id', orderId);
         throw new Error('Failed to create order items.');
+    }
+    
+    // Send confirmation email
+    try {
+        await resend.emails.send({
+            from: `"${settings?.site_name || 'Sundaraah'}" <noreply@sundaraah.com>`,
+            to: [orderData.customer_email],
+            subject: 'Your Sundaraah Order Confirmation',
+            react: OrderConfirmationEmail({
+                order: { ...order, ...orderData, order_items: orderData.items },
+                siteName: settings?.site_name || 'Sundaraah Showcase',
+            }),
+        });
+    } catch (emailError) {
+        console.error('Email sending failed:', emailError);
+        // Do not throw an error here, the order was still placed successfully.
     }
 
     revalidatePath('/admin/orders');

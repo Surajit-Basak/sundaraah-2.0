@@ -1,3 +1,4 @@
 
 export const SUPABASE_URL = "https://yuvglciamvkfwhlkphop.supabase.co";
 export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1dmdsY2lhbXZrZndobGtwaG9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1NTU5ODMsImV4cCI6MjA2OTEzMTk4M30.i5rH2XYpm2964yWD8l5RsJwAN80WrMjvavqV--dO6UE";
+export const RESEND_API_KEY = process.env.RESEND_API_KEY;

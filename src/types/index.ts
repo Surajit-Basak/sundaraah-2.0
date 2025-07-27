@@ -15,6 +15,10 @@ export type Product = {
   created_at: string;
 };
 
+export interface CartItem extends Product {
+  quantity: number;
+}
+
 export type ProductReview = {
   id: string;
   product_id: string;
@@ -72,6 +76,10 @@ export type OrderItem = {
 
 export type OrderWithItems = Order & {
     order_items: OrderItem[];
+}
+
+export type FullOrderForEmail = Order & {
+  order_items: CartItem[];
 }
 
 export type Banner = {
