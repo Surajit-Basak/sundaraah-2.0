@@ -27,6 +27,15 @@ const hslToVar = (hslStr: string) => {
   return hslStr.replace('hsl(', '').replace(')', '').replace(/%/g, '');
 };
 
+// Helper to create the Google Fonts URL
+const createFontUrl = (fonts: { body: string; headline: string; }) => {
+    const familyParams = [
+        `family=${fonts.headline.replace(/ /g, '+')}:wght@400;700`,
+        `family=${fonts.body.replace(/ /g, '+')}:wght@400;700`
+    ].join('&');
+    return `https://fonts.googleapis.com/css2?${familyParams}&display=swap`;
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -34,20 +43,24 @@ export default async function RootLayout({
 }>) {
   const settings = await getSettings();
   
-  const themeStyle = settings?.theme_colors ? `
+  const themeStyle = settings ? `
     :root {
       --background: ${hslToVar(settings.theme_colors.background)};
       --primary: ${hslToVar(settings.theme_colors.primary)};
       --accent: ${hslToVar(settings.theme_colors.accent)};
+      --font-body: "${settings.theme_fonts.body}", sans-serif;
+      --font-headline: "${settings.theme_fonts.headline}", serif;
     }
   ` : '';
+
+  const fontUrl = settings ? createFontUrl(settings.theme_fonts) : '';
 
   return (
     <html lang="en" className="scroll-smooth">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
+        {fontUrl && <link href={fontUrl} rel="stylesheet" />}
         <meta name="theme-color" content="#5d1d39" />
         {themeStyle && <style dangerouslySetInnerHTML={{ __html: themeStyle }} />}
       </head>

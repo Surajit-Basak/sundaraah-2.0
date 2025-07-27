@@ -111,6 +111,10 @@ export type Settings = {
     background: string;
     accent: string;
   };
+  theme_fonts: {
+    body: string;
+    headline: string;
+  };
   whatsapp_number: string | null;
   whatsapp_enabled: boolean;
 };

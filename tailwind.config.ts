@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -17,8 +18,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['"PT Sans"', 'sans-serif'],
-        headline: ['"Playfair Display"', 'serif'],
+        body: ['var(--font-body)', 'sans-serif'],
+        headline: ['var(--font-headline)', 'serif'],
         code: ['monospace'],
       },
       colors: {
@@ -110,16 +111,16 @@ export default {
             '--tw-prose-th-borders': theme('colors.border'),
             '--tw-prose-td-borders': theme('colors.border'),
             h1: {
-              fontFamily: theme('fontFamily.headline').join(', '),
+              fontFamily: 'var(--font-headline), serif',
             },
             h2: {
-              fontFamily: theme('fontFamily.headline').join(', '),
+              fontFamily: 'var(--font-headline), serif',
             },
             h3: {
-              fontFamily: theme('fontFamily.headline').join(', '),
+              fontFamily: 'var(--font-headline), serif',
             },
             h4: {
-              fontFamily: theme('fontFamily.headline').join(', '),
+              fontFamily: 'var(--font-headline), serif',
             },
           },
         },

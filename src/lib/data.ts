@@ -599,6 +599,10 @@ export async function getSettings(): Promise<Settings | null> {
               background: "hsl(30 50% 98%)",
               accent: "hsl(45 85% 55%)",
             },
+            theme_fonts: {
+              body: 'PT Sans',
+              headline: 'Playfair Display'
+            },
             whatsapp_number: '', 
             whatsapp_enabled: false 
         };

@@ -21,14 +21,14 @@ import { updateSettings } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { MediaPicker } from "@/components/ui/media-picker";
 import { hexToHsl, isHexColor } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const colorSchema = z.string().refine(value => {
     const isHsl = /^hsl\(\d{1,3} \d{1,3}% \d{1,3}%\)$/.test(value);
     return isHsl || isHexColor(value);
-}, { message: "Must be a valid HSL or Hex color string (e.g., hsl(30 50% 98%) or #fdfa_f7)" });
+}, { message: "Must be a valid HSL or Hex color string (e.g., hsl(30 50% 98%) or #fdfaf7)" });
 
 const settingsSchema = z.object({
   site_name: z.string().min(2, "Site name must be at least 2 characters."),
@@ -37,6 +37,10 @@ const settingsSchema = z.object({
     primary: colorSchema,
     background: colorSchema,
     accent: colorSchema,
+  }),
+  theme_fonts: z.object({
+      body: z.string(),
+      headline: z.string(),
   }),
   whatsapp_number: z.string().optional(),
   whatsapp_enabled: z.boolean().default(true),
@@ -47,6 +51,20 @@ type SettingsFormValues = z.infer<typeof settingsSchema>;
 interface SettingsFormProps {
   initialData?: Settings | null;
 }
+
+const availableFonts = [
+    { name: "Inter", value: "Inter" },
+    { name: "Lato", value: "Lato" },
+    { name: "Merriweather", value: "Merriweather" },
+    { name: "Montserrat", value: "Montserrat" },
+    { name: "Open Sans", value: "Open Sans" },
+    { name: "Playfair Display", value: "Playfair Display" },
+    { name: "Poppins", value: "Poppins" },
+    { name: "PT Sans", value: "PT Sans" },
+    { name: "Roboto", value: "Roboto" },
+    { name: "Source Sans Pro", value: "Source Sans Pro" },
+];
+
 
 export function SettingsForm({ initialData }: SettingsFormProps) {
   const { toast } = useToast();
@@ -61,6 +79,10 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
         primary: "hsl(347 65% 25%)",
         background: "hsl(30 50% 98%)",
         accent: "hsl(45 85% 55%)",
+      },
+      theme_fonts: {
+          body: "PT Sans",
+          headline: "Playfair Display",
       },
       whatsapp_number: "",
       whatsapp_enabled: true,
@@ -85,7 +107,10 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
         title: "Success!",
         description: "Settings have been updated.",
       });
-      router.refresh(); // Refresh the page to reflect changes
+      
+      // Full page reload to apply new theme and fonts
+      window.location.reload();
+
     } catch (error) {
       toast({
         variant: "destructive",
@@ -140,51 +165,103 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
 
         <Card>
             <CardHeader>
-                <CardTitle>Theme Colors</CardTitle>
+                <CardTitle>Theme Colors & Fonts</CardTitle>
                 <FormDescription>
-                    Define the main colors for your website. Use HSL (e.g., `hsl(347 65% 25%)`) or Hex (e.g., `#5d1d39`).
+                    Define the main colors and typography for your website.
                 </FormDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                 <FormField
-                  control={form.control}
-                  name="theme_colors.primary"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Primary Color (Wine)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="hsl(347 65% 25%)" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="theme_colors.background"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Background Color</FormLabel>
-                      <FormControl>
-                        <Input placeholder="hsl(30 50% 98%)" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="theme_colors.accent"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Accent Color (Golden)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="hsl(45 85% 55%)" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="theme_colors.primary"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Primary Color</FormLabel>
+                          <FormControl>
+                            <Input placeholder="hsl(347 65% 25%)" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="theme_colors.background"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Background Color</FormLabel>
+                          <FormControl>
+                            <Input placeholder="hsl(30 50% 98%)" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="theme_colors.accent"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Accent Color</FormLabel>
+                          <FormControl>
+                            <Input placeholder="hsl(45 85% 55%)" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                    <FormField
+                      control={form.control}
+                      name="theme_fonts.headline"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Headline Font</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a font for headlines" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {availableFonts.map((font) => (
+                                <SelectItem key={font.value} value={font.value}>
+                                  {font.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="theme_fonts.body"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Body Font</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a font for body text" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {availableFonts.map((font) => (
+                                <SelectItem key={font.value} value={font.value}>
+                                  {font.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                </div>
             </CardContent>
         </Card>
 
