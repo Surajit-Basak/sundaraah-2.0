@@ -738,7 +738,7 @@ export async function uploadMedia(formData: FormData): Promise<Media> {
     const { data: { user } } = await supabase.auth.getUser();
 
     // Create a unique file path
-    const file_path = `${user?.id || 'public'}/${Date.now()}-${file.name}`;
+    const file_path = `public/${Date.now()}-${file.name}`;
 
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
@@ -804,3 +804,5 @@ export async function deleteMedia(id: string, filePath: string) {
 
     revalidatePath('/admin/media');
 }
+
+    
