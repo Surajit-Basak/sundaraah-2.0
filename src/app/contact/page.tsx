@@ -34,7 +34,7 @@ export default async function ContactPage() {
         <div className="absolute inset-0 bg-primary/80 z-10" />
         <Image
           src={heroContent.image_url || "https://placehold.co/1800x600.png"}
-          alt="Contact Sundaraah"
+          alt={heroContent.title || "Contact Sundaraah"}
           data-ai-hint="customer service"
           fill
           className="object-cover"
