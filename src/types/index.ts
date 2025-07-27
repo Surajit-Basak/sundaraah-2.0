@@ -1,4 +1,5 @@
 
+
 export type Product = {
   id: string;
   name: string;
@@ -31,3 +32,25 @@ export type TeamMember = {
   image_url?: string; // from supabase
   bio: string;
 };
+
+export type Order = {
+  id: string;
+  created_at: string;
+  customer_name: string;
+  customer_email: string;
+  total: number;
+  status: 'Processing' | 'Fulfilled' | 'Cancelled';
+};
+
+export type OrderItem = {
+    id: string;
+    order_id: string;
+    product_id: string;
+    quantity: number;
+    price: number;
+    product: Product | null;
+}
+
+export type OrderWithItems = Order & {
+    order_items: OrderItem[];
+}

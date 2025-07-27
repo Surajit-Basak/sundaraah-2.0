@@ -1,7 +1,8 @@
 
+
 'use server';
 
-import type { Product, BlogPost, TeamMember } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -110,4 +111,49 @@ export async function getTeamMembers(): Promise<TeamMember[]> {
     }
 
     return data.map(m => ({ ...m, imageUrl: m.image_url || 'https://placehold.co/400x400.png' })) || [];
+}
+
+export async function getOrders(): Promise<Order[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching orders:', error);
+        return [];
+    }
+
+    return data;
+}
+
+export async function getOrderById(id: string): Promise<OrderWithItems | null> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+        .from('orders')
+        .select(`
+            *,
+            order_items (
+                *,
+                products (
+                    *
+                )
+            )
+        `)
+        .eq('id', id)
+        .single();
+
+    if (error || !data) {
+        console.error('Error fetching order by id:', error);
+        return null;
+    }
+    
+    // Transform the order items to include the full product object.
+    const transformedItems = data.order_items.map((item: any) => ({
+        ...item,
+        product: item.products ? {
+            ...item.products,
+            imageUrl: item.products.image_url || 'https://placehold.co/100x100.png'
+        } : null
+    }));
+
+    return { ...data, order_items: transformedItems };
 }
