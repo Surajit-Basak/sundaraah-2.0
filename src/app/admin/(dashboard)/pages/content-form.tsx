@@ -21,6 +21,8 @@ import { useRouter } from "next/navigation";
 import type { PageContent } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { MediaPicker } from "@/components/ui/media-picker";
+
 
 interface ContentFormProps {
   pageName: string;
@@ -77,8 +79,11 @@ export function ContentForm({ pageName, sections }: ContentFormProps) {
   };
   
   const renderField = (fieldName: string, field: any) => {
-    if (fieldName.includes('paragraph') || fieldName === 'content' || fieldName === 'text') {
-        return <Textarea placeholder={`Enter content for ${fieldName}...`} {...field} rows={fieldName === 'content' ? 15 : 5} />;
+    if (fieldName.endsWith('_url') || fieldName.endsWith('_image')) {
+      return <MediaPicker {...field} />;
+    }
+    if (fieldName.includes('paragraph') || fieldName === 'content' || fieldName === 'text' || fieldName === 'html') {
+        return <Textarea placeholder={`Enter content for ${fieldName}...`} {...field} rows={fieldName === 'content' || fieldName === 'html' ? 15 : 5} />;
     }
     return <Input placeholder={`Enter content for ${fieldName}...`} {...field} />;
   }

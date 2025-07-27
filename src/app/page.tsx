@@ -235,8 +235,8 @@ export default function Home() {
             </div>
             <div className="aspect-square relative">
               <Image
-                src="https://placehold.co/600x600.png"
-                alt="Artisan at work"
+                src={craftsmanshipContent.image_url || "https://placehold.co/600x600.png"}
+                alt={craftsmanshipContent.title || "Artisan at work"}
                 data-ai-hint="artisan jewelry"
                 width={600}
                 height={600}
