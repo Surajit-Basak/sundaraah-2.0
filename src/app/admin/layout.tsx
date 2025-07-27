@@ -28,7 +28,22 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   const pathname = headers().get('next-url') || '';
+  const isLoginPage = pathname === '/admin/login';
+
+  // If on login page, render children directly without the sidebar layout
+  if (isLoginPage) {
+    return <div className="bg-secondary">{children}</div>
+  }
+  
+  // If no user, or user is not admin, middleware should have redirected.
+  // This is a failsafe.
+  if (!user || user.user_metadata.user_role !== 'admin') {
+    redirect('/admin/login');
+  }
 
   const adminNavItems = [
       { href: "/admin/dashboard", label: "Dashboard", icon: <Home /> },
@@ -46,23 +61,6 @@ export default async function AdminLayout({
     const supabase = createSupabaseServerClient();
     await supabase.auth.signOut();
     redirect('/admin/login');
-  }
-
-  // This check ensures that if a non-admin somehow gets to this layout,
-  // they are redirected. This is a secondary check to the middleware.
-  const checkAdmin = async () => {
-    const supabase = createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user?.user_metadata?.user_role !== 'admin') {
-      redirect('/admin/login');
-    }
-  };
-  await checkAdmin();
-
-  const isLoginPage = pathname === '/admin/login';
-  
-  if (isLoginPage) {
-    return <div className="bg-secondary">{children}</div>
   }
 
   return (

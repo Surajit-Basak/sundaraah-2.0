@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
           })
           response.cookies.set({
             name,
-            value,
+            value: '',
             ...options,
           })
         },
@@ -65,33 +65,35 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = pathname.startsWith('/admin');
   const isAccountRoute = pathname.startsWith('/account');
 
-  // If user is not logged in, redirect them to the appropriate login page.
+  // If user is not logged in, handle redirects
   if (!session) {
     if (isAccountRoute) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
+    // If trying to access any admin page except the login page, redirect to admin login
     if (isAdminRoute && !isAdminLogin) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
+    // Allow access to /admin/login if not logged in
+    return response;
   }
 
-  // If user is logged in, handle redirects away from auth pages and enforce admin role.
-  if (session) {
-    if (isAuthRoute) {
-       return NextResponse.redirect(new URL('/', request.url));
+  // If user is logged in, handle role-based access and redirects
+  const isAdminUser = session.user.user_metadata?.user_role === 'admin';
+
+  if (isAuthRoute) {
+      // If a logged-in user tries to access login/signup, redirect to home
+      return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  if (isAdminRoute) {
+    // If a non-admin tries to access any admin route, redirect to home
+    if (!isAdminUser) {
+        return NextResponse.redirect(new URL('/', request.url));
     }
-
-    const isAdminUser = session.user.user_metadata?.user_role === 'admin';
-
+    // If an admin is already logged in and visits the admin login page, redirect to dashboard
     if (isAdminLogin) {
-      if (isAdminUser) {
-         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-      }
-    }
-    if (isAdminRoute && !isAdminLogin) {
-        if (!isAdminUser) {
-            return NextResponse.redirect(new URL('/', request.url));
-        }
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
   }
 
