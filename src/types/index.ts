@@ -4,13 +4,19 @@ export type Product = {
   id: string;
   name: string;
   slug: string;
-  category: string;
+  category: string; // This will come from the joined categories table
+  category_id: string;
   price: number;
   imageUrl: string;
   image_url?: string; // from supabase
   description: string;
   details: string[];
   inventory: number;
+};
+
+export type Category = {
+  id: string;
+  name: string;
 };
 
 export type BlogPost = {

@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -15,8 +16,15 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type { Product } from "@/types";
-import { createProduct, updateProduct } from "@/lib/data";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Product, Category } from "@/types";
+import { createProduct, updateProduct, getCategories } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
@@ -24,7 +32,7 @@ const productSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   description: z.string().min(10, "Description must be at least 10 characters."),
   price: z.coerce.number().min(0, "Price must be a positive number."),
-  category: z.string().min(1, "Category is required."),
+  category_id: z.string().min(1, "Category is required."),
   details: z.string().min(1, "Please provide at least one detail."),
   inventory: z.coerce.number().min(0, "Inventory must be a positive number."),
 });
@@ -38,6 +46,15 @@ interface ProductFormProps {
 export function ProductForm({ initialData }: ProductFormProps) {
   const { toast } = useToast();
   const router = useRouter();
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      const fetchedCategories = await getCategories();
+      setCategories(fetchedCategories);
+    }
+    fetchCategories();
+  }, []);
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -50,7 +67,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
           name: "",
           description: "",
           price: 0,
-          category: "",
+          category_id: "",
           details: "",
           inventory: 0,
         },
@@ -112,13 +129,24 @@ export function ProductForm({ initialData }: ProductFormProps) {
           />
           <FormField
             control={form.control}
-            name="category"
+            name="category_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Category</FormLabel>
-                <FormControl>
-                  <Input placeholder="Necklaces" {...field} />
-                </FormControl>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}

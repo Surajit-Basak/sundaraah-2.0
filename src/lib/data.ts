@@ -1,36 +1,53 @@
 
-
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function getProducts(): Promise<Product[]> {
     const supabase = createSupabaseServerClient();
-    const { data, error } = await supabase.from('products').select('*');
+    const { data, error } = await supabase.from('products').select(`
+        *,
+        categories (
+            name
+        )
+    `);
 
     if (error) {
         console.error('Error fetching products:', error);
         return [];
     }
     
-    return data.map(p => ({ ...p, imageUrl: p.image_url || 'https://placehold.co/600x600.png' })) || [];
+    return data.map(p => ({ 
+        ...p, 
+        category: p.categories.name, 
+        imageUrl: p.image_url || 'https://placehold.co/600x600.png' 
+    })) || [];
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const supabase = createSupabaseServerClient();
-  const { data, error } = await supabase.from('products').select('*').eq('slug', slug).single();
+  const { data, error } = await supabase.from('products').select(`
+        *,
+        categories (
+            name
+        )
+    `).eq('slug', slug).single();
 
   if (error || !data) {
     console.error('Error fetching product by slug:', error);
     return null;
   }
 
-  return { ...data, imageUrl: data.image_url || 'https://placehold.co/600x600.png' };
+  return { 
+    ...data, 
+    category: data.categories.name, 
+    imageUrl: data.image_url || 'https://placehold.co/600x600.png' 
+  };
 }
 
-type ProductInput = Omit<Product, 'id' | 'imageUrl'> & { image_url?: string };
+type ProductInput = Omit<Product, 'id' | 'imageUrl' | 'category'> & { image_url?: string };
 
 export async function createProduct(productData: ProductInput) {
     const supabase = createSupabaseServerClient();
@@ -75,6 +92,16 @@ export async function deleteProduct(id: string) {
 
     revalidatePath('/admin/products');
     revalidatePath('/shop');
+}
+
+export async function getCategories(): Promise<Category[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('categories').select('*');
+    if (error) {
+        console.error('Error fetching categories:', error);
+        return [];
+    }
+    return data || [];
 }
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
@@ -134,7 +161,8 @@ export async function getOrderById(id: string): Promise<OrderWithItems | null> {
             order_items (
                 *,
                 products (
-                    *
+                    *,
+                    categories (name)
                 )
             )
         `)
@@ -151,6 +179,7 @@ export async function getOrderById(id: string): Promise<OrderWithItems | null> {
         ...item,
         product: item.products ? {
             ...item.products,
+            category: item.products.categories.name,
             imageUrl: item.products.image_url || 'https://placehold.co/100x100.png'
         } : null
     }));

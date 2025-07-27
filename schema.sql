@@ -1,25 +1,22 @@
+
 -- Create products table
 CREATE TABLE products (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   slug text NOT NULL UNIQUE,
-  category text NOT NULL,
+  description text,
   price numeric(10, 2) NOT NULL,
   image_url text,
-  description text,
   details text[],
-  inventory integer DEFAULT 0,
-  created_at timestamp with time zone DEFAULT now()
+  inventory integer NOT NULL DEFAULT 0,
+  category_id uuid REFERENCES categories(id)
 );
 
--- Enable RLS
-ALTER TABLE products ENABLE ROW LEVEL SECURITY;
-
--- Allow public read access to products
-CREATE POLICY "Allow public read access to products"
-ON products
-FOR SELECT
-USING (true);
+-- Create categories table
+CREATE TABLE categories (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL UNIQUE
+);
 
 -- Create blog_posts table
 CREATE TABLE blog_posts (
@@ -29,18 +26,8 @@ CREATE TABLE blog_posts (
   date text,
   image_url text,
   excerpt text,
-  content text,
-  created_at timestamp with time zone DEFAULT now()
+  content text
 );
-
--- Enable RLS
-ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
-
--- Allow public read access to blog posts
-CREATE POLICY "Allow public read access to blog posts"
-ON blog_posts
-FOR SELECT
-USING (true);
 
 -- Create team_members table
 CREATE TABLE team_members (
@@ -48,105 +35,88 @@ CREATE TABLE team_members (
   name text NOT NULL,
   role text,
   image_url text,
-  bio text,
-  created_at timestamp with time zone DEFAULT now()
+  bio text
 );
-
--- Enable RLS
-ALTER TABLE team_members ENABLE ROW LEVEL SECURITY;
-
--- Allow public read access to team members
-CREATE POLICY "Allow public read access to team members"
-ON team_members
-FOR SELECT
-USING (true);
 
 -- Create orders table
 CREATE TABLE orders (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  customer_name text NOT NULL,
-  customer_email text NOT NULL,
-  total numeric(10, 2) NOT NULL,
-  status text NOT NULL DEFAULT 'Processing',
-  created_at timestamp with time zone DEFAULT now()
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    customer_name text NOT NULL,
+    customer_email text NOT NULL,
+    total numeric(10, 2) NOT NULL,
+    status text NOT NULL DEFAULT 'Processing'
 );
 
 -- Create order_items table
 CREATE TABLE order_items (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id uuid NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-  product_id uuid NOT NULL REFERENCES products(id),
-  quantity integer NOT NULL,
-  price numeric(10, 2) NOT NULL,
-  created_at timestamp with time zone DEFAULT now()
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id uuid NOT NULL REFERENCES orders(id),
+    product_id uuid NOT NULL REFERENCES products(id),
+    quantity integer NOT NULL,
+    price numeric(10, 2) NOT NULL
 );
 
--- Enable RLS for orders and order_items
+
+-- Enable RLS for all tables
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE team_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 
--- For now, let's assume admins can do anything. We would lock this down further.
-CREATE POLICY "Allow all access to admins"
-ON orders
-FOR ALL
-USING (true);
+-- Create policies to allow public read access
+CREATE POLICY "Allow public read access to products" ON products FOR SELECT USING (true);
+CREATE POLICY "Allow public read access to categories" ON categories FOR SELECT USING (true);
+CREATE POLICY "Allow public read access to blog_posts" ON blog_posts FOR SELECT USING (true);
+CREATE POLICY "Allow public read access to team_members" ON team_members FOR SELECT USING (true);
 
-CREATE POLICY "Allow all access to admins"
-ON order_items
-FOR ALL
-USING (true);
+-- For now, allow admin full access (assuming an admin role, which we'll set up)
+-- This is a placeholder; real auth policies will be more secure.
+CREATE POLICY "Allow full access for admins on orders" ON orders FOR ALL USING (true);
+CREATE POLICY "Allow full access for admins on order_items" ON order_items FOR ALL USING (true);
 
--- MOCK DATA
--- Insert some mock products if the table is empty
-INSERT INTO products (name, slug, category, price, description, details, inventory) VALUES
-('Golden Sunstone Necklace', 'golden-sunstone-necklace', 'Necklaces', 185.00, 'A radiant gold-plated necklace featuring a stunning sunstone pendant. Perfect for adding a touch of warmth and elegance to any outfit.', '{"18k Gold Plated", "Genuine Sunstone", "18-inch chain"}', 10),
-('Azure Drop Earrings', 'azure-drop-earrings', 'Earrings', 75.00, 'Elegant silver earrings with beautiful azure blue gemstones that dangle gracefully.', '{"Sterling Silver", "Azure Gemstones", "Lightweight"}', 15),
-('Crimson Heart Ring', 'crimson-heart-ring', 'Rings', 95.00, 'A beautiful ring with a crimson heart-shaped stone, set in a delicate rose gold band.', '{"Rose Gold Band", "Crimson Stone", "Available in all sizes"}', 20),
-('Midnight Bloom Bracelet', 'midnight-bloom-bracelet', 'Bracelets', 120.00, 'An intricate bracelet with dark, floral-themed charms and obsidian beads.', '{"Oxidized Silver", "Obsidian Beads", "Adjustable Length"}', 12),
-('Forest Whisper Anklet', 'forest-whisper-anklet', 'Anklets', 55.00, 'A delicate anklet with tiny leaf charms and green aventurine stones.', '{"Bronze Chain", "Green Aventurine", "Hand-finished"}', 25),
-('Celestial Halo Studs', 'celestial-halo-studs', 'Earrings', 65.00, 'Simple yet stunning stud earrings with a celestial halo design, perfect for everyday wear.', '{"14k White Gold", "Cubic Zirconia", "Hypoallergenic"}', 30);
 
--- Insert some mock blog posts if the table is empty
+-- Insert some initial data
+INSERT INTO categories (id, name) VALUES
+('a8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', 'Necklaces'),
+('b8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', 'Earrings'),
+('c8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', 'Bracelets'),
+('d8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', 'Rings'),
+('e8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', 'Anklets');
+
+
+INSERT INTO products (name, slug, description, price, details, inventory, category_id) VALUES
+('Golden Sunstone Necklace', 'golden-sunstone-necklace', 'A radiant gold-plated necklace featuring a mesmerizing sunstone pendant. Perfect for adding a touch of sunshine to any outfit.', 185.00, '{"18k Gold Plated", "Genuine Sunstone", "18-inch chain"}', 10, 'a8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f'),
+('Silver Moonstone Earrings', 'silver-moonstone-earrings', 'Elegant sterling silver earrings with luminous moonstone gems that shimmer with every movement.', 120.00, '{"925 Sterling Silver", "Rainbow Moonstone", "Secure lever-back"}', 15, 'b8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f'),
+('Rose Gold Charm Bracelet', 'rose-gold-charm-bracelet', 'A delicate rose gold bracelet, perfect for personalizing with your favorite charms.', 95.00, '{"14k Rose Gold Plated", "Adjustable length", "Lobster clasp"}', 20, 'c8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f'),
+('Minimalist Gold Band', 'minimalist-gold-band', 'A simple yet stunning 14k gold band, perfect for stacking or wearing alone for a classic look.', 250.00, '{"Solid 14k Gold", "2mm width", "Polished finish"}', 12, 'd8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f'),
+('Azure Beaded Anklet', 'azure-beaded-anklet', 'A vibrant anklet made with azure beads and sterling silver accents, evoking the colors of the sea.', 75.00, '{"925 Sterling Silver", "Czech glass beads", "Durable cord"}', 30, 'e8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f'),
+('Emerald Drop Pendant', 'emerald-drop-pendant', 'A breathtaking necklace featuring a lab-created emerald in a classic teardrop shape, set in sterling silver.', 210.00, '{"925 Sterling Silver", "Lab-created Emerald", "20-inch chain"}', 8, 'a8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f'),
+('Geometric Hoop Earrings', 'geometric-hoop-earrings', 'Modern and chic, these gold-plated hoop earrings feature a unique hexagonal design.', 85.00, '{"18k Gold Plated", "Lightweight design", "2-inch diameter"}', 25, 'b8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f'),
+('Leather and Steel Bracelet', 'leather-and-steel-bracelet', 'A rugged yet stylish bracelet combining braided genuine leather with a sleek stainless steel magnetic clasp.', 65.00, '{"Genuine Leather", "Stainless Steel", "Magnetic Clasp"}', 18, 'c8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f'),
+('Opal Statement Ring', 'opal-statement-ring', 'A mesmerizing ring featuring a large, iridescent lab-grown opal set in a decorative silver band.', 195.00, '{"925 Sterling Silver", "Lab-grown Opal", "Intricate band detailing"}', 9, 'd8e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f');
+
+
+INSERT INTO team_members (name, role, image_url, bio) VALUES
+('Aisha Khan', 'Founder & CEO', 'https://placehold.co/400x400.png', 'With a lifelong passion for design and artistry, Aisha founded Sundaraah to bring unique, handcrafted jewelry to the world.'),
+('Rohan Verma', 'Master Artisan', 'https://placehold.co/400x400.png', 'Rohan is the heart of our workshop, with over 20 years of experience in traditional jewelry making techniques.'),
+('Priya Sharma', 'Customer Happiness Lead', 'https://placehold.co/400x400.png', 'Priya ensures every customer has a wonderful experience, from browsing our collections to unboxing their new treasure.');
+
 INSERT INTO blog_posts (title, slug, date, excerpt, content) VALUES
-('The Art of Layering Necklaces', 'art-of-layering', 'October 15, 2023', 'Discover the secrets to perfectly layering your necklaces for a chic, personalized look.', 'Content for layering...'),
-('Choosing the Right Metal for You', 'choosing-your-metal', 'October 08, 2023', 'Gold, silver, or rose gold? We break down which metal tones best suit your skin.', 'Content for metals...'),
-('A Guide to Gemstone Meanings', 'gemstone-meanings', 'October 01, 2023', 'Explore the symbolism and history behind your favorite gemstones.', 'Content for gemstones...');
+('The Art of Layering Necklaces', 'art-of-layering-necklaces', 'June 15, 2024', 'Discover our top tips for creating the perfect layered necklace look, from choosing lengths to mixing metals.', '<h1>The Art of Layering Necklaces</h1><p>Layering necklaces is a trend that''s here to stay. It allows you to express your personal style and create a look that''s uniquely yours. Here are our top tips...</p>'),
+('Caring for Your Handcrafted Jewelry', 'caring-for-jewelry', 'May 28, 2024', 'Keep your Sundaraah pieces sparkling for years to come with our simple and effective care guide.', '<h1>Caring for Your Handcrafted Jewelry</h1><p>Your jewelry is an investment. To keep it looking its best, follow these simple steps...</p>'),
+('Meet the Maker: Rohan Verma', 'meet-the-maker-rohan', 'May 10, 2024', 'Go behind the scenes and learn about the inspiration and process of our Master Artisan, Rohan Verma.', '<h1>Meet the Maker: Rohan Verma</h1><p>We sat down with Rohan to discuss his journey, his passion, and what makes Sundaraah jewelry so special...</p>');
 
--- Insert some mock team members if the table is empty
-INSERT INTO team_members (name, role, bio) VALUES
-('Aisha Khan', 'Founder & Lead Designer', 'Aisha started Sundaraah from her small studio, with a dream to share her passion for handcrafted jewelry.'),
-('Rohan Verma', 'Master Artisan', 'With over 20 years of experience, Rohan is the heart of our workshop, turning designs into reality.'),
-('Priya Sharma', 'Customer Experience Lead', 'Priya ensures that every customer has a delightful experience with Sundaraah, from browsing to unboxing.');
+INSERT INTO orders (id, customer_name, customer_email, total, status) VALUES 
+('f4e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', 'Priya Kumar', 'priya.kumar@example.com', 305.00, 'Fulfilled'),
+('g4e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', 'Amit Singh', 'amit.singh@example.com', 95.00, 'Processing'),
+('h4e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', 'Sunita Sharma', 'sunita.sharma@example.com', 445.00, 'Cancelled');
 
--- Insert mock orders
-INSERT INTO orders (id, customer_name, customer_email, total, status, created_at) VALUES
-('a1b2c3d4-e5f6-7890-1234-567890abcdef', 'Priya Sharma', 'priya.sharma@example.com', 260.00, 'Fulfilled', '2023-10-26 10:00:00+00');
-INSERT INTO orders (id, customer_name, customer_email, total, status, created_at) VALUES
-('b2c3d4e5-f6a7-8901-2345-67890abcdef1', 'Rahul Kapoor', 'rahul.kapoor@example.com', 95.00, 'Processing', '2023-10-25 14:30:00+00');
-
--- Insert mock order items
--- Order 1: Priya Sharma
-INSERT INTO order_items (order_id, product_id, quantity, price)
-SELECT 
-    'a1b2c3d4-e5f6-7890-1234-567890abcdef', 
-    p.id, 
-    1, 
-    185.00 
-FROM products p WHERE p.slug = 'golden-sunstone-necklace';
-
-INSERT INTO order_items (order_id, product_id, quantity, price)
-SELECT 
-    'a1b2c3d4-e5f6-7890-1234-567890abcdef', 
-    p.id, 
-    1, 
-    75.00 
-FROM products p WHERE p.slug = 'azure-drop-earrings';
-
--- Order 2: Rahul Kapoor
-INSERT INTO order_items (order_id, product_id, quantity, price)
-SELECT 
-    'b2c3d4e5-f6a7-8901-2345-67890abcdef1', 
-    p.id, 
-    1, 
-    95.00 
-FROM products p WHERE p.slug = 'crimson-heart-ring';
+INSERT INTO order_items (order_id, product_id, quantity, price) VALUES
+('f4e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', (SELECT id from products WHERE slug = 'golden-sunstone-necklace'), 1, 185.00),
+('f4e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', (SELECT id from products WHERE slug = 'silver-moonstone-earrings'), 1, 120.00),
+('g4e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', (SELECT id from products WHERE slug = 'rose-gold-charm-bracelet'), 1, 95.00),
+('h4e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', (SELECT id from products WHERE slug = 'minimalist-gold-band'), 1, 250.00),
+('h4e8f8f8-8f8f-8f8f-8f8f-8f8f8f8f8f8f', (SELECT id from products WHERE slug = 'opal-statement-ring'), 1, 195.00);

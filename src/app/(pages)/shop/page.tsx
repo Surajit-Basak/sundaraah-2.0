@@ -3,10 +3,10 @@
 
 import { useState, useEffect } from "react";
 import ProductCard from "@/components/product-card";
-import { getProducts } from "@/lib/data";
+import { getProducts, getCategories } from "@/lib/data";
 import { Slider } from "@/components/ui/slider";
 import { formatPrice } from "@/lib/utils";
-import type { Product } from "@/types";
+import type { Product, Category } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,24 +14,29 @@ import { cn } from "@/lib/utils";
 export default function ShopPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [maxPrice, setMaxPrice] = useState(1000);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
-      const products = await getProducts();
+      const [products, fetchedCategories] = await Promise.all([
+        getProducts(),
+        getCategories()
+      ]);
+      
       setAllProducts(products);
-      const productCategories = ["All", ...new Set(products.map(p => p.category))];
-      setCategories(productCategories);
+      setCategories([{ id: 'all', name: 'All' }, ...fetchedCategories]);
+
       const maxProductPrice = Math.ceil(Math.max(...products.map(p => p.price), 0));
       setMaxPrice(maxProductPrice > 0 ? maxProductPrice : 1000);
       setPriceRange([0, maxProductPrice > 0 ? maxProductPrice : 1000]);
+      
       setIsLoading(false);
     };
-    fetchProducts();
+    fetchData();
   }, []);
 
   const filteredProducts = allProducts.filter(product => 
@@ -64,15 +69,15 @@ export default function ShopPage() {
                     <h3 className="font-headline text-lg font-semibold text-primary mb-4">Category</h3>
                     <ul className="space-y-2">
                       {categories.map(category => (
-                          <li key={category}>
+                          <li key={category.id}>
                               <button 
-                                onClick={() => setSelectedCategory(category)}
+                                onClick={() => setSelectedCategory(category.name)}
                                 className={cn(
                                   "text-muted-foreground hover:text-primary w-full text-left",
-                                  selectedCategory === category && "text-primary font-bold"
+                                  selectedCategory === category.name && "text-primary font-bold"
                                 )}
                               >
-                                {category}
+                                {category.name}
                               </button>
                           </li>
                       ))}
