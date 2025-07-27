@@ -80,7 +80,6 @@ export default async function AdminDashboardLayout({
             </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
-           <SidebarTrigger className="mx-auto" />
            <SidebarMenu>
                 <SidebarMenuItem>
                     <form action={handleLogout} className="w-full">
@@ -89,6 +88,9 @@ export default async function AdminDashboardLayout({
                             <span>Logout</span>
                         </SidebarMenuButton>
                     </form>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarTrigger className="w-full" />
                 </SidebarMenuItem>
            </SidebarMenu>
         </SidebarFooter>
