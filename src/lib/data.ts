@@ -728,7 +728,6 @@ export async function getMedia(): Promise<Media[]> {
 }
 
 export async function uploadMedia(formData: FormData) {
-  'use server';
   const supabase = createSupabaseServerClient();
   const file = formData.get('file') as File;
 
@@ -769,6 +768,7 @@ export async function uploadMedia(formData: FormData) {
   
   if (dbError) {
     console.error('Database insert error:', dbError);
+    // Attempt to clean up the orphaned file in storage
     await supabase.storage.from('media').remove([filePath]);
     throw new Error('Failed to save media information to database.');
   }
