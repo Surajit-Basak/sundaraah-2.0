@@ -112,4 +112,5 @@ export type Collection = {
     description: string | null;
     image_url: string | null;
     created_at: string;
+    products?: Product[]; // For holding related products
 }

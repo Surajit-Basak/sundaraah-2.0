@@ -584,15 +584,27 @@ export async function getCollections(): Promise<Collection[]> {
 
 export async function getCollectionById(id: string): Promise<Collection | null> {
     const supabase = createSupabaseServerClient();
-    const { data, error } = await supabase.from('collections').select('*').eq('id', id).single();
+    // This query now also fetches the associated products
+    const { data, error } = await supabase
+      .from('collections')
+      .select(`
+        *,
+        products (
+            id
+        )
+      `)
+      .eq('id', id)
+      .single();
+
     if (error || !data) {
         console.error('Error fetching collection by id:', error);
         return null;
     }
+
     return data;
 }
 
-type CollectionInput = Omit<Collection, 'id' | 'created_at'>;
+type CollectionInput = Omit<Collection, 'id' | 'created_at' | 'products'>;
 
 export async function createCollection(collectionData: CollectionInput) {
     const supabase = createSupabaseServerClient();
@@ -626,3 +638,32 @@ export async function deleteCollection(id: string) {
     }
     revalidatePath('/admin/collections');
 }
+
+
+export async function addProductToCollection(collectionId: string, productId: string) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+        .from('product_collections')
+        .insert({ collection_id: collectionId, product_id: productId });
+
+    if (error) {
+        console.error('Error adding product to collection:', error);
+        throw new Error('Failed to add product to collection.');
+    }
+    revalidatePath(`/admin/collections/${collectionId}/edit`);
+}
+
+export async function removeProductFromCollection(collectionId: string, productId: string) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+        .from('product_collections')
+        .delete()
+        .match({ collection_id: collectionId, product_id: productId });
+    
+    if (error) {
+        console.error('Error removing product from collection:', error);
+        throw new Error('Failed to remove product from collection.');
+    }
+    revalidatePath(`/admin/collections/${collectionId}/edit`);
+}
+
