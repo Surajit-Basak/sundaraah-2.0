@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview } from "@/types";
@@ -167,7 +166,7 @@ export async function getCategories(): Promise<Category[]> {
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
     const supabase = createSupabaseServerClient();
-    const { data, error } = await supabase.from('blog_posts').select('*');
+    const { data, error } = await supabase.from('blog_posts').select('*').order('date', { ascending: false });
 
     if (error) {
         console.error('Error fetching blog posts:', error);
@@ -188,6 +187,49 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | undefi
 
     return { ...data, imageUrl: data.image_url || 'https://placehold.co/400x250.png' };
 }
+
+type BlogPostInput = Omit<BlogPost, 'id' | 'imageUrl'>;
+
+export async function createBlogPost(postData: BlogPostInput) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('blog_posts').insert([postData]);
+
+    if (error) {
+        console.error('Error creating blog post:', error);
+        throw new Error('Failed to create blog post.');
+    }
+
+    revalidatePath('/admin/blog');
+    revalidatePath('/blog');
+}
+
+export async function updateBlogPost(id: string, postData: Partial<BlogPostInput>) {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('blog_posts').update(postData).eq('id', id).select().single();
+
+    if (error) {
+        console.error('Error updating blog post:', error);
+        throw new Error('Failed to update blog post.');
+    }
+    
+    revalidatePath('/admin/blog');
+    revalidatePath('/blog');
+    revalidatePath(`/blog/${data.slug}`);
+}
+
+export async function deleteBlogPost(id: string) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('blog_posts').delete().eq('id', id);
+
+    if (error) {
+        console.error('Error deleting blog post:', error);
+        throw new Error('Failed to delete blog post.');
+    }
+
+    revalidatePath('/admin/blog');
+    revalidatePath('/blog');
+}
+
 
 export async function getTeamMembers(): Promise<TeamMember[]> {
     const supabase = createSupabaseServerClient();
