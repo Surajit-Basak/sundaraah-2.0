@@ -1,8 +1,3 @@
 
-// IMPORTANT: These values are now loaded from the .env file
-export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('Supabase URL and Anon Key must be defined in the .env file');
-}
+export const SUPABASE_URL = "https://yuvglciamvkfwhlkphop.supabase.co";
+export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1dmdsY2lhbXZrZndobGtwaG9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1NTU5ODMsImV4cCI6MjA2OTEzMTk4M30.i5rH2XYpm2964yWD8l5RsJwAN80WrMjvavqV--dO6UE";
