@@ -23,14 +23,20 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { MediaPicker } from "@/components/ui/media-picker";
+import { hexToHsl, isHexColor } from "@/lib/utils";
+
+const colorSchema = z.string().refine(value => {
+    const isHsl = /^hsl\(\d{1,3} \d{1,3}% \d{1,3}%\)$/.test(value);
+    return isHsl || isHexColor(value);
+}, { message: "Must be a valid HSL or Hex color string (e.g., hsl(30 50% 98%) or #fdfa_f7)" });
 
 const settingsSchema = z.object({
   site_name: z.string().min(2, "Site name must be at least 2 characters."),
   logo_url: z.string().optional(),
   theme_colors: z.object({
-    primary: z.string().regex(/^hsl\(\d{1,3} \d{1,3}% \d{1,3}%\)$/, { message: "Must be a valid HSL color string (e.g., hsl(347 65% 25%))" }),
-    background: z.string().regex(/^hsl\(\d{1,3} \d{1,3}% \d{1,3}%\)$/, { message: "Must be a valid HSL color string (e.g., hsl(30 50% 98%))" }),
-    accent: z.string().regex(/^hsl\(\d{1,3} \d{1,3}% \d{1,3}%\)$/, { message: "Must be a valid HSL color string (e.g., hsl(45 85% 55%))" }),
+    primary: colorSchema,
+    background: colorSchema,
+    accent: colorSchema,
   }),
   whatsapp_number: z.string().optional(),
   whatsapp_enabled: z.boolean().default(true),
@@ -63,7 +69,18 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
 
   const onSubmit = async (data: SettingsFormValues) => {
     try {
-      await updateSettings(data);
+      // Convert any hex colors to HSL before saving
+      const processedColors = {
+        primary: isHexColor(data.theme_colors.primary) ? hexToHsl(data.theme_colors.primary) : data.theme_colors.primary,
+        background: isHexColor(data.theme_colors.background) ? hexToHsl(data.theme_colors.background) : data.theme_colors.background,
+        accent: isHexColor(data.theme_colors.accent) ? hexToHsl(data.theme_colors.accent) : data.theme_colors.accent,
+      };
+
+      await updateSettings({
+        ...data,
+        theme_colors: processedColors,
+      });
+
       toast({
         title: "Success!",
         description: "Settings have been updated.",
@@ -125,7 +142,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
             <CardHeader>
                 <CardTitle>Theme Colors</CardTitle>
                 <FormDescription>
-                    Define the main colors for your website. Use HSL format (e.g., `hsl(347 65% 25%)`).
+                    Define the main colors for your website. Use HSL (e.g., `hsl(347 65% 25%)`) or Hex (e.g., `#5d1d39`).
                 </FormDescription>
             </CardHeader>
             <CardContent className="space-y-6">

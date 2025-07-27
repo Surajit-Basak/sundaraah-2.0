@@ -3,9 +3,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
-import { CartProvider } from '@/context/cart-context';
-import { PwaProvider } from '@/context/pwa-context';
 import { getSettings, getPageSeo } from '@/lib/data';
+import { Providers } from './providers';
 
 // This function now generates metadata dynamically
 export async function generateMetadata(): Promise<Metadata> {
@@ -53,12 +52,10 @@ export default async function RootLayout({
         {themeStyle && <style dangerouslySetInnerHTML={{ __html: themeStyle }} />}
       </head>
       <body className={cn("font-body antialiased")}>
-        <PwaProvider>
-          <CartProvider>
-            {children}
-            <Toaster />
-          </CartProvider>
-        </PwaProvider>
+        <Providers>
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

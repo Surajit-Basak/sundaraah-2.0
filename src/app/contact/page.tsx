@@ -33,7 +33,7 @@ export default async function ContactPage() {
       <section className="relative h-[50vh] flex items-center justify-center text-center text-primary-foreground">
         <div className="absolute inset-0 bg-primary/80 z-10" />
         <Image
-          src="https://placehold.co/1800x600.png"
+          src={heroContent.image_url || "https://placehold.co/1800x600.png"}
           alt="Contact Sundaraah"
           data-ai-hint="customer service"
           fill
@@ -61,18 +61,24 @@ export default async function ContactPage() {
                     {infoContent.text || "Whether you have a question about our products, a custom design idea, or anything else, our team is ready to answer all your questions."}
                  </p>
                 <div className="space-y-4 text-lg">
-                  <div className="flex items-center gap-4">
-                    <Mail className="h-6 w-6 text-accent" />
-                    <a href="mailto:hello@sundaraah.com" className="hover:text-accent">hello@sundaraah.com</a>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Phone className="h-6 w-6 text-accent" />
-                    <a href="tel:+1234567890" className="hover:text-accent">+1 (234) 567-890</a>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <MapPin className="h-6 w-6 text-accent mt-1" />
-                    <span>123 Elegance St, Jewel City, 45678</span>
-                  </div>
+                  {infoContent.email && (
+                    <div className="flex items-center gap-4">
+                        <Mail className="h-6 w-6 text-accent" />
+                        <a href={`mailto:${infoContent.email}`} className="hover:text-accent">{infoContent.email}</a>
+                    </div>
+                  )}
+                  {infoContent.phone && (
+                    <div className="flex items-center gap-4">
+                        <Phone className="h-6 w-6 text-accent" />
+                        <a href={`tel:${infoContent.phone}`} className="hover:text-accent">{infoContent.phone}</a>
+                    </div>
+                  )}
+                  {infoContent.address && (
+                    <div className="flex items-start gap-4">
+                        <MapPin className="h-6 w-6 text-accent mt-1" />
+                        <span>{infoContent.address}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
