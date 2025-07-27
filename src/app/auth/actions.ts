@@ -50,6 +50,14 @@ export async function signup(formData: FormData) {
   redirect('/auth/confirm');
 }
 
+export async function logout() {
+  const supabase = createSupabaseServerClient()
+  await supabase.auth.signOut()
+  revalidatePath('/', 'layout')
+  redirect('/login')
+}
+
+
 export async function adminLogin(formData: FormData) {
   const supabase = createSupabaseServerClient()
 
@@ -68,4 +76,3 @@ export async function adminLogin(formData: FormData) {
   revalidatePath('/admin', 'layout')
   redirect('/admin/dashboard')
 }
-
