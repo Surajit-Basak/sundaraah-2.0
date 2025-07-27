@@ -414,6 +414,23 @@ export async function getOrdersByUserId(userId: string): Promise<Order[]> {
     return data;
 }
 
+export async function updateOrderStatus(orderId: string, status: Order['status']) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', orderId);
+
+    if (error) {
+        console.error('Error updating order status:', error);
+        throw new Error('Failed to update order status.');
+    }
+
+    revalidatePath('/admin/orders');
+    revalidatePath(`/admin/orders/${orderId}`);
+}
+
+
 // Product Review Functions
 type ReviewInput = Omit<ProductReview, 'id' | 'created_at'>;
 
