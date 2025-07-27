@@ -47,6 +47,56 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   };
 }
 
+export async function getRelatedProducts(categoryId: string, currentProductId: string): Promise<Product[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+        .from('products')
+        .select(`
+            *,
+            categories (name)
+        `)
+        .eq('category_id', categoryId)
+        .neq('id', currentProductId)
+        .limit(4);
+
+    if (error) {
+        console.error('Error fetching related products:', error);
+        return [];
+    }
+    
+    return data.map(p => ({ 
+        ...p, 
+        category: p.categories.name, 
+        imageUrl: p.image_url || 'https://placehold.co/600x600.png' 
+    })) || [];
+}
+
+export async function getProductsByIds(ids: string[]): Promise<Product[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+        .from('products')
+        .select(`
+            *,
+            categories (name)
+        `)
+        .in('id', ids);
+
+    if (error) {
+        console.error('Error fetching products by ids:', error);
+        return [];
+    }
+    
+    const products = data.map(p => ({ 
+        ...p, 
+        category: p.categories.name, 
+        imageUrl: p.image_url || 'https://placehold.co/600x600.png' 
+    })) || [];
+
+    // Preserve the order of the original IDs array
+    return ids.map(id => products.find(p => p.id === id)).filter((p): p is Product => !!p);
+}
+
+
 type ProductInput = Omit<Product, 'id' | 'imageUrl' | 'category'> & { image_url?: string };
 
 export async function createProduct(productData: ProductInput) {

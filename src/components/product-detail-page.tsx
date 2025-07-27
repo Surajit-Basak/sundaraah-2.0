@@ -4,11 +4,13 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Check, ShoppingCart, Loader2 } from "lucide-react";
-import RecommendationSection from "@/components/recommendation-section";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
 import { useCart } from "@/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
+import RelatedProducts from "./related-products";
+import RecentlyViewedProducts from "./recently-viewed-products";
 
 type ProductDetailPageClientProps = {
   product: Product;
@@ -18,6 +20,23 @@ export default function ProductDetailPageClient({ product }: ProductDetailPageCl
   const { addItem, isAdding } = useCart();
   const { toast } = useToast();
 
+  useEffect(() => {
+    const storeRecentlyViewed = (productId: string) => {
+      let viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+      // Remove the product if it's already there to move it to the front
+      viewed = viewed.filter((id: string) => id !== productId);
+      // Add the new product to the front
+      viewed.unshift(productId);
+      // Keep only the last 5 viewed products
+      const recentlyViewed = viewed.slice(0, 5);
+      localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+    };
+
+    if (product) {
+      storeRecentlyViewed(product.id);
+    }
+  }, [product]);
+
   const handleAddToCart = () => {
     if (!product) return;
     addItem(product, 1);
@@ -26,6 +45,10 @@ export default function ProductDetailPageClient({ product }: ProductDetailPageCl
       description: `${product.name} has been added to your cart.`,
     });
   };
+
+  if (!product) {
+    return null; // Or a loading/error state
+  }
 
   return (
     <div className="bg-background">
@@ -81,7 +104,9 @@ export default function ProductDetailPageClient({ product }: ProductDetailPageCl
           </div>
         </div>
 
-        <RecommendationSection product={product} />
+        <RelatedProducts categoryId={product.category_id} currentProductId={product.id} />
+        <RecentlyViewedProducts currentProductId={product.id} />
+
       </div>
     </div>
   );
