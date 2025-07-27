@@ -36,7 +36,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
         categories (name),
         product_images (image_url),
         product_reviews (*)
-    `).eq('slug', slug).single();
+    `).eq('slug', slug).order('created_at', { referencedTable: 'product_reviews', ascending: false }).single();
 
   if (error || !data) {
     console.error('Error fetching product by slug:', error);
@@ -319,6 +319,23 @@ export async function getOrdersByUserId(userId: string): Promise<Order[]> {
         console.error('Error fetching orders by user id:', error);
         return [];
     }
+
+    return data;
+}
+
+
+type ReviewInput = Omit<ProductReview, 'id' | 'created_at'>;
+
+export async function createProductReview(reviewData: ReviewInput, productSlug: string) {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('product_reviews').insert([reviewData]).select().single();
+
+    if (error) {
+        console.error('Error creating product review:', error);
+        throw new Error('Failed to create product review.');
+    }
+    
+    revalidatePath(`/shop/${productSlug}`);
 
     return data;
 }

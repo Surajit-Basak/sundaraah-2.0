@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+   env: {
+    CURRENCY: process.env.CURRENCY,
+  }
 };
 
 export default nextConfig;

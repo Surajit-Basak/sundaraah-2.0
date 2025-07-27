@@ -138,7 +138,7 @@ export default function ProductDetailPageClient({ product }: ProductDetailPageCl
           </div>
         </div>
 
-        <ProductReviews reviews={product.reviews} />
+        <ProductReviews productId={product.id} reviews={product.reviews} />
         <RelatedProducts categoryId={product.category_id} currentProductId={product.id} />
         <RecentlyViewedProducts currentProductId={product.id} />
 
