@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Search, LogOut, LogIn } from "lucide-react";
+import { Menu, X, Search, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "../ui/input";
 import { CartSheet } from "../cart/cart-sheet";
@@ -142,7 +142,7 @@ export default function Header() {
     return (
       <HeaderIcon ariaLabel="Login" asChild>
           <Link href="/login">
-              <LogIn className="h-6 w-6" />
+              <User className="h-6 w-6" />
           </Link>
       </HeaderIcon>
     )
