@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import OrderConfirmationEmail from "@/components/emails/order-confirmation-email";
 import GenericNotificationEmail from "@/components/emails/generic-notification-email";
+import Razorpay from "razorpay";
 
 
 // Product Functions
@@ -1001,5 +1002,35 @@ async function sendTemplatedEmail(template: EmailTemplate, order: Order) {
         });
     } catch (emailError) {
         console.error(`Email sending failed for event ${template.event_trigger}:`, emailError);
+    }
+}
+
+// Razorpay Integration
+export async function createRazorpayOrder(options: { amount: number; currency: string; }) {
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+        throw new Error('Razorpay API keys are not configured.');
+    }
+
+    const razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+
+    try {
+        const order = await razorpay.orders.create({
+            amount: options.amount * 100, // Amount in the smallest currency unit (paise for INR)
+            currency: options.currency,
+            receipt: `receipt_order_${new Date().getTime()}`,
+        });
+
+        return {
+            id: order.id,
+            currency: order.currency,
+            amount: order.amount,
+            keyId: process.env.RAZORPAY_KEY_ID,
+        };
+    } catch (error) {
+        console.error('Error creating Razorpay order:', error);
+        throw new Error('Could not create payment order.');
     }
 }
