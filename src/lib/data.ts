@@ -938,6 +938,36 @@ export async function deleteTestimonial(id: string) {
 }
 
 // Email Functions
+export async function getEmailTemplates(): Promise<EmailTemplate[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('email_templates').select('*').order('name');
+    if (error) {
+        console.error('Error fetching email templates:', error);
+        return [];
+    }
+    return data || [];
+}
+
+export async function getEmailTemplateById(id: number): Promise<EmailTemplate | null> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('email_templates').select('*').eq('id', id).single();
+    if (error || !data) {
+        console.error('Error fetching email template by id:', error);
+        return null;
+    }
+    return data;
+}
+
+export async function updateEmailTemplate(id: number, templateData: Partial<Omit<EmailTemplate, 'id' | 'created_at'>>) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('email_templates').update(templateData).eq('id', id);
+    if (error) {
+        console.error('Error updating email template:', error);
+        throw new Error('Failed to update email template.');
+    }
+    revalidatePath('/admin/emails');
+}
+
 async function sendTemplatedEmail(template: EmailTemplate, order: Order) {
     const resendApiKey = process.env.RESEND_API_KEY;
     if (!resendApiKey) {
