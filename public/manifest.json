@@ -1,8 +1,11 @@
-
 {
   "name": "Sundaraah Showcase",
   "short_name": "Sundaraah",
   "description": "Exquisite Handcrafted Jewelry",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#5d1d39",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -14,10 +17,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "theme_color": "#5d1d39",
-  "background_color": "#fbf8f7",
-  "start_url": "/",
-  "display": "standalone",
-  "orientation": "portrait"
+  ]
 }
