@@ -31,6 +31,7 @@ export async function signup(formData: FormData) {
   const email = data.email as string;
   const password = data.password as string;
   
+  // This now only signs up the user in auth.users. The trigger will handle the public.users table.
   const { error: signUpError } = await supabase.auth.signUp({
     email: email,
     password: password,
@@ -74,7 +75,17 @@ export async function adminLogin(formData: FormData) {
   if (error) {
     console.error('Admin Login error:', error.message)
     redirect('/admin/login?error=Invalid credentials')
+    return
   }
+
+  const { data: userProfile } = await supabase.from('users').select('user_role').single();
+
+  if (userProfile?.user_role !== 'admin') {
+    await supabase.auth.signOut();
+    redirect('/admin/login?error=Access Denied');
+    return
+  }
+
 
   revalidatePath('/admin', 'layout')
   redirect('/admin/dashboard')

@@ -498,6 +498,7 @@ export async function deleteBanner(id: string) {
 
 export async function getUsers(): Promise<UserProfile[]> {
     const supabase = createSupabaseServerClient();
+    // This now fetches from the public 'users' table
     const { data, error } = await supabase.from('users').select('*').order('email');
 
     if (error) {
