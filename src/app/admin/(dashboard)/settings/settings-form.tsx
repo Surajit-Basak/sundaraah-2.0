@@ -22,9 +22,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { MediaPicker } from "@/components/ui/media-picker";
 
 const settingsSchema = z.object({
   site_name: z.string().min(2, "Site name must be at least 2 characters."),
+  logo_url: z.string().optional(),
   theme_colors: z.object({
     primary: z.string().regex(/^hsl\(\d{1,3} \d{1,3}% \d{1,3}%\)$/, { message: "Must be a valid HSL color string (e.g., hsl(347 65% 25%))" }),
     background: z.string().regex(/^hsl\(\d{1,3} \d{1,3}% \d{1,3}%\)$/, { message: "Must be a valid HSL color string (e.g., hsl(30 50% 98%))" }),
@@ -48,6 +50,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
     resolver: zodResolver(settingsSchema),
     defaultValues: initialData || {
       site_name: "Sundaraah Showcase",
+      logo_url: "",
       theme_colors: {
         primary: "hsl(347 65% 25%)",
         background: "hsl(30 50% 98%)",
@@ -82,7 +85,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
             <CardHeader>
                 <CardTitle>Site Identity</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
                 <FormField
                   control={form.control}
                   name="site_name"
@@ -93,7 +96,23 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <Input placeholder="Sundaraah Showcase" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormDescription>
-                        The name of your website, displayed in the header and footer.
+                        The name of your website, displayed if no logo is selected.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="logo_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Site Logo</FormLabel>
+                      <FormControl>
+                        <MediaPicker {...field} />
+                      </FormControl>
+                       <FormDescription>
+                        Upload a logo to the Media Library, then select it here. Recommended size: 200x50 pixels.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

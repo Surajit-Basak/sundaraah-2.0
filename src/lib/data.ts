@@ -569,6 +569,7 @@ export async function getSettings(): Promise<Settings | null> {
         // Provide sensible defaults if the settings row doesn't exist yet
         return { 
             site_name: 'Sundaraah Showcase',
+            logo_url: null,
             theme_colors: {
               primary: "hsl(347 65% 25%)",
               background: "hsl(30 50% 98%)",

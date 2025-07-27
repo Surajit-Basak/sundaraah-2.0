@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { Twitter, Facebook, Instagram, Gem } from "lucide-react";
 import { getSettings } from "@/lib/data";
+import Image from "next/image";
 
 export default async function Footer() {
   const settings = await getSettings();
@@ -15,10 +16,14 @@ export default async function Footer() {
           {/* Brand Section */}
           <div className="md:col-span-4 text-center md:text-left">
             <Link href="/" className="inline-block mb-4">
-                <div className="flex items-center gap-2">
-                    <Gem className="h-8 w-8 text-accent"/>
-                    <h3 className="font-headline text-3xl font-bold">{siteName}</h3>
-                </div>
+               {settings?.logo_url ? (
+                  <Image src={settings.logo_url} alt={`${siteName} logo`} width={150} height={40} className="object-contain" />
+                ) : (
+                  <div className="flex items-center gap-2">
+                      <Gem className="h-8 w-8 text-accent"/>
+                      <h3 className="font-headline text-3xl font-bold">{siteName}</h3>
+                  </div>
+                )}
             </Link>
             <p className="text-primary-foreground/80 mb-6 max-w-sm mx-auto md:mx-0">
               Crafting timeless elegance and moments of beauty with every piece.

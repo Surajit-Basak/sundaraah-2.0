@@ -105,6 +105,7 @@ export type UserProfile = {
 export type Settings = {
   id?: number;
   site_name: string;
+  logo_url: string | null;
   theme_colors: {
     primary: string;
     background: string;
