@@ -87,6 +87,6 @@ export async function adminLogin(formData: FormData) {
   }
 
 
-  revalidatePath('/admin', 'layout')
+  revalidatePath('/admin/dashboard')
   redirect('/admin/dashboard')
 }

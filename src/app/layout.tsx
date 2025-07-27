@@ -25,31 +25,18 @@ export default function RootLayout({
   const isAdminRoute = pathname.startsWith('/admin');
   const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/auth/confirm';
 
-  if (isAdminRoute) {
-    return (
-       <html lang="en" className="scroll-smooth">
-        <head>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
-        </head>
+  const BodyContent = () => {
+    if (isAdminRoute) {
+      return (
         <body className={cn("font-body antialiased bg-secondary")}>
           {children}
           <Toaster />
         </body>
-      </html>
-    )
-  }
+      )
+    }
 
-  return (
-    <html lang="en" className="scroll-smooth">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
-        <meta name="theme-color" content="#5d1d39" />
-      </head>
-      <body className={cn("font-body antialiased", isAuthPage && "bg-secondary")}>
+    return (
+       <body className={cn("font-body antialiased", isAuthPage && "bg-secondary")}>
         <PwaProvider>
           <CartProvider>
             <div className="flex min-h-screen flex-col">
@@ -62,6 +49,18 @@ export default function RootLayout({
           </CartProvider>
         </PwaProvider>
       </body>
+    )
+  }
+
+  return (
+    <html lang="en" className="scroll-smooth">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
+        <meta name="theme-color" content="#5d1d39" />
+      </head>
+      <BodyContent />
     </html>
   );
 }

@@ -34,49 +34,48 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Define routes that require authentication
+  // Define public and protected routes
   const protectedRoutes = ['/account'];
-  const adminRoutes = '/admin';
+  const adminLoginRoute = '/admin/login';
+  const adminDashboardRoute = '/admin/dashboard';
+  const adminBaseRoute = '/admin';
 
-  // If user is not logged in and trying to access a protected route, redirect to login
+  // --- Handle Public User Routes ---
   if (!session && protectedRoutes.some(path => pathname.startsWith(path))) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
-  
-  // Handle admin routes separately
-  if (pathname.startsWith(adminRoutes)) {
-    // If user is not logged in, redirect to admin login page
-    if (!session) {
-      if (pathname === '/admin/login') {
-        return response; // Allow access to the login page
-      }
-      return NextResponse.redirect(new URL('/admin/login', request.url));
-    }
 
-    // If user is logged in, check their role
-    const { data: userProfile } = await supabase
-      .from('users')
-      .select('user_role')
-      .single();
-
-    const isAdmin = userProfile?.user_role === 'admin';
-
-    // If user is not an admin, redirect them away from all admin pages
-    if (!isAdmin) {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-
-    // If an admin is already logged in and tries to access the login page, redirect to dashboard
-    if (isAdmin && pathname === '/admin/login') {
-       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-    }
-  }
-
-  // If a logged-in user tries to access login/signup pages, redirect to home
   if (session && (pathname === '/login' || pathname === '/signup')) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
+  // --- Handle Admin Routes ---
+
+  // Allow access to the admin login page
+  if (pathname === adminLoginRoute) {
+    // If an admin is already logged in, redirect them to the dashboard
+    if (session) {
+       const { data: userProfile } = await supabase.from('users').select('user_role').single();
+       if (userProfile?.user_role === 'admin') {
+         return NextResponse.redirect(new URL(adminDashboardRoute, request.url));
+       }
+    }
+    return response; // Allow non-admins and unauthenticated users to see the login page
+  }
+
+  // Protect all other admin routes
+  if (pathname.startsWith(adminBaseRoute)) {
+    if (!session) {
+      return NextResponse.redirect(new URL(adminLoginRoute, request.url));
+    }
+
+    const { data: userProfile } = await supabase.from('users').select('user_role').single();
+
+    if (userProfile?.user_role !== 'admin') {
+      // If not an admin, redirect to home page
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+  }
 
   return response;
 }
