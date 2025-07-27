@@ -727,7 +727,7 @@ export async function getMedia(): Promise<Media[]> {
     return data || [];
 }
 
-export async function uploadMedia(formData: FormData): Promise<Media> {
+export async function uploadMedia(formData: FormData) {
     const supabase = createSupabaseServerClient();
     const file = formData.get('file') as File;
 
@@ -737,10 +737,8 @@ export async function uploadMedia(formData: FormData): Promise<Media> {
 
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Create a unique file path
     const filePath = `public/${Date.now()}-${file.name}`;
 
-    // Upload to Supabase Storage in the 'media' bucket
     const { error: uploadError } = await supabase.storage
         .from('media')
         .upload(filePath, file, {
@@ -752,7 +750,6 @@ export async function uploadMedia(formData: FormData): Promise<Media> {
         throw new Error('Failed to upload file to storage.');
     }
 
-    // Get public URL from the 'media' bucket
     const { data: { publicUrl } } = supabase.storage
         .from('media')
         .getPublicUrl(filePath);
@@ -761,7 +758,6 @@ export async function uploadMedia(formData: FormData): Promise<Media> {
         throw new Error('Failed to get public URL for the uploaded file.');
     }
 
-    // Insert into media table
     const { data, error: dbError } = await supabase
         .from('media')
         .insert({
@@ -776,7 +772,6 @@ export async function uploadMedia(formData: FormData): Promise<Media> {
     
     if (dbError) {
         console.error('Database insert error:', dbError);
-        // Attempt to delete the file from storage if DB insert fails
         await supabase.storage.from('media').remove([filePath]);
         throw new Error('Failed to save media information to database.');
     }
@@ -788,14 +783,12 @@ export async function uploadMedia(formData: FormData): Promise<Media> {
 export async function deleteMedia(id: string, filePath: string) {
     const supabase = createSupabaseServerClient();
 
-    // 1. Delete from storage
     const { error: storageError } = await supabase.storage.from('media').remove([filePath]);
     if (storageError) {
         console.error("Storage delete error:", storageError);
         throw new Error("Failed to delete file from storage.");
     }
     
-    // 2. Delete from database
     const { error: dbError } = await supabase.from('media').delete().eq('id', id);
     if (dbError) {
         console.error("Database delete error:", dbError);
