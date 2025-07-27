@@ -212,8 +212,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit">
-          {initialData ? "Save changes" : "Create Product"}
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Saving..." : (initialData ? "Save changes" : "Create Product")}
         </Button>
       </form>
     </Form>
