@@ -48,8 +48,12 @@ export default async function RootLayout({
       --background: ${hslToVar(settings.theme_colors.background)};
       --primary: ${hslToVar(settings.theme_colors.primary)};
       --accent: ${hslToVar(settings.theme_colors.accent)};
-      --font-body: "${settings.theme_fonts.body}", sans-serif;
-      --font-headline: "${settings.theme_fonts.headline}", serif;
+    }
+    body {
+      font-family: "${settings.theme_fonts.body}", sans-serif;
+    }
+    h1, h2, h3, h4, h5, h6, .font-headline {
+      font-family: "${settings.theme_fonts.headline}", serif;
     }
   ` : '';
 

@@ -1,10 +1,10 @@
 {
   "name": "Sundaraah Showcase",
   "short_name": "Sundaraah",
-  "description": "Exquisite Handcrafted Jewelry",
+  "description": "Exquisite Handcrafted Jewelry by Sundaraah",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#fdfaf7",
   "theme_color": "#5d1d39",
   "icons": [
     {
