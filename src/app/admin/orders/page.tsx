@@ -1,5 +1,6 @@
 
 
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Table,
@@ -21,14 +22,10 @@ export default async function OrdersPage() {
 
     const getStatusVariant = (status: string) => {
         switch (status) {
-            case "Fulfilled":
-                return "default";
-            case "Processing":
-                return "secondary";
-            case "Cancelled":
-                return "destructive";
-            default:
-                return "outline";
+            case "Fulfilled": return "default";
+            case "Processing": return "secondary";
+            case "Cancelled": return "destructive";
+            default: return "outline";
         }
     }
 
@@ -37,7 +34,7 @@ export default async function OrdersPage() {
       <h2 className="text-3xl font-bold tracking-tight">Orders</h2>
       <Card>
         <CardHeader>
-          <CardTitle>Recent Orders</CardTitle>
+          <CardTitle>All Orders</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
