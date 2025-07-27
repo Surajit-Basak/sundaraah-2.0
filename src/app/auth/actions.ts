@@ -67,23 +67,25 @@ export async function adminLogin(formData: FormData) {
 
   const data = Object.fromEntries(formData)
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data: { user }, error } = await supabase.auth.signInWithPassword({
     email: data.email as string,
     password: data.password as string,
   })
 
-  if (error) {
-    console.error('Admin Login error:', error.message)
-    redirect('/admin/login?error=Invalid credentials')
-    return
+  if (error || !user) {
+    console.error('Admin Login error:', error?.message)
+    return redirect('/admin/login?error=Invalid credentials')
   }
 
-  const { data: userProfile } = await supabase.from('users').select('user_role').single();
+  const { data: userProfile } = await supabase
+    .from('users')
+    .select('user_role')
+    .eq('id', user.id)
+    .single();
 
   if (userProfile?.user_role !== 'admin') {
     await supabase.auth.signOut();
-    redirect('/admin/login?error=Access Denied');
-    return
+    return redirect('/admin/login?error=Access Denied');
   }
 
 
