@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
@@ -715,4 +715,26 @@ export async function removeProductFromCollection(collectionId: string, productI
         throw new Error('Failed to remove product from collection.');
     }
     revalidatePath(`/admin/collections/${collectionId}/edit`);
+}
+
+// Media Library Functions
+export async function getMedia(): Promise<Media[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('media').select('*').order('created_at', { ascending: false });
+    if (error) {
+        console.error('Error fetching media:', error);
+        return [];
+    }
+    return data || [];
+}
+
+type MediaInput = Omit<Media, 'id' | 'created_at'>;
+export async function createMediaItem(mediaData: MediaInput) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('media').insert([mediaData]);
+    if (error) {
+        console.error('Error creating media item:', error);
+        throw new Error('Failed to create media item.');
+    }
+    revalidatePath('/admin/media');
 }

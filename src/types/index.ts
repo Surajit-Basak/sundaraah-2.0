@@ -130,3 +130,13 @@ export type Collection = {
     created_at: string;
     products?: Product[]; // For holding related products
 }
+
+export type Media = {
+  id: string;
+  user_id: string | null;
+  file_name: string | null;
+  file_path: string | null;
+  url: string | null;
+  alt_text: string | null;
+  created_at: string;
+};
