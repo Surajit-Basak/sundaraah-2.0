@@ -57,7 +57,6 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { session } } = await supabase.auth.getSession();
-  
   const { pathname } = request.nextUrl;
 
   const isAuthRoute = pathname === '/login' || pathname === '/signup';
@@ -65,35 +64,31 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = pathname.startsWith('/admin');
   const isAccountRoute = pathname.startsWith('/account');
 
-  // If user is not logged in, handle redirects
-  if (!session) {
+  if (session) {
+    const isAdminUser = session.user.user_metadata?.user_role === 'admin';
+
+    if (isAuthRoute) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+
+    // If a non-admin tries to access any admin page, redirect them to home.
+    if (isAdminRoute && !isAdminUser) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+    
+    // If an admin is logged in and tries to access the admin login page,
+    // redirect them to the dashboard.
+    if (isAdminLogin && isAdminUser) {
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    }
+  } else {
+    // If user is not logged in and trying to access a protected route,
+    // redirect them to the appropriate login page.
     if (isAccountRoute) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
-    // If trying to access any admin page except the login page, redirect to admin login
     if (isAdminRoute && !isAdminLogin) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
-    }
-    // Allow access to /admin/login if not logged in
-    return response;
-  }
-
-  // If user is logged in, handle role-based access and redirects
-  const isAdminUser = session.user.user_metadata?.user_role === 'admin';
-
-  if (isAuthRoute) {
-      // If a logged-in user tries to access login/signup, redirect to home
-      return NextResponse.redirect(new URL('/', request.url));
-  }
-
-  if (isAdminRoute) {
-    // If a non-admin tries to access any admin route, redirect to home
-    if (!isAdminUser) {
-        return NextResponse.redirect(new URL('/', request.url));
-    }
-    // If an admin is already logged in and visits the admin login page, redirect to dashboard
-    if (isAdminLogin) {
-        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
   }
 

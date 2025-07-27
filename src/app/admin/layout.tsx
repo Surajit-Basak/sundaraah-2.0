@@ -39,8 +39,7 @@ export default async function AdminLayout({
     return <div className="bg-secondary">{children}</div>
   }
   
-  // If no user, or user is not admin, middleware should have redirected.
-  // This is a failsafe.
+  // This is a failsafe. Middleware should handle redirection.
   if (!user || user.user_metadata.user_role !== 'admin') {
     redirect('/admin/login');
   }
