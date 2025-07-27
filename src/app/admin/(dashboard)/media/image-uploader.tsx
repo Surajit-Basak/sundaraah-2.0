@@ -35,7 +35,7 @@ export function ImageUploader({ onUploadSuccess }: ImageUploaderProps) {
 
   const handleUpload = async () => {
     if (!file) {
-      toast({ variant: 'destructive', title: 'No file selected', description: 'Please choose an image to upload.' });
+      toast({ variant: 'destructive', title: 'No file selected', description: 'Please choose a file to upload.' });
       return;
     }
     setIsUploading(true);
@@ -64,17 +64,19 @@ export function ImageUploader({ onUploadSuccess }: ImageUploaderProps) {
       setIsUploading(false);
     }
   };
+  
+  const isVideo = file?.type.startsWith('video/');
 
   return (
     <div className="grid md:grid-cols-2 gap-8 items-start">
       <div className="space-y-4">
         <div className="grid w-full max-w-sm items-center gap-1.5">
-          <Label htmlFor="picture">Choose Image</Label>
-          <Input id="picture" type="file" accept="image/*" onChange={handleFileChange} ref={fileInputRef} disabled={isUploading} />
+          <Label htmlFor="picture">Choose Image or Video</Label>
+          <Input id="picture" type="file" accept="image/*,video/*" onChange={handleFileChange} ref={fileInputRef} disabled={isUploading} />
         </div>
         <Button onClick={handleUpload} disabled={!file || isUploading}>
           {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-          {isUploading ? 'Uploading...' : 'Upload Image'}
+          {isUploading ? 'Uploading...' : 'Upload Media'}
         </Button>
       </div>
       
@@ -82,7 +84,11 @@ export function ImageUploader({ onUploadSuccess }: ImageUploaderProps) {
         <div className="space-y-2">
             <Label>Preview</Label>
             <div className="relative aspect-video w-full max-w-sm rounded-md border p-2">
-                <Image src={previewUrl} alt="Image preview" fill className="object-contain" />
+                {isVideo ? (
+                    <video src={previewUrl} controls className="w-full h-full object-contain" />
+                ) : (
+                    <Image src={previewUrl} alt="Image preview" fill className="object-contain" />
+                )}
             </div>
         </div>
       )}

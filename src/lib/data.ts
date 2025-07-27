@@ -745,7 +745,9 @@ export async function uploadMedia(formData: FormData): Promise<Media> {
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
         .from('media')
-        .upload(file_path, file);
+        .upload(file_path, file, {
+            contentType: file.type,
+        });
     
     if (uploadError) {
         console.error('Storage upload error:', uploadError);
@@ -769,6 +771,7 @@ export async function uploadMedia(formData: FormData): Promise<Media> {
             file_name: file.name,
             file_path: file_path,
             url: publicUrl,
+            content_type: file.type,
         })
         .select()
         .single();

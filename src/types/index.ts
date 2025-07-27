@@ -138,5 +138,6 @@ export type Media = {
   file_path: string | null;
   url: string | null;
   alt_text: string | null;
+  content_type: string | null;
   created_at: string;
 };
