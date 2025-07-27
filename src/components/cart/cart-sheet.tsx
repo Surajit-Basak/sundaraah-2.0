@@ -10,16 +10,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { ScrollArea } from "../ui/scroll-area";
 import { useDebouncedCallback } from "use-debounce";
+import { useState } from "react";
 
 export function CartSheet() {
     const { cartItems, cartCount, cartTotal, removeItem, updateItemQuantity, clearCart } = useCart();
+    const [isSheetOpen, setSheetOpen] = useState(false);
 
     const handleQuantityChange = useDebouncedCallback((productId: string, quantity: number) => {
         updateItemQuantity(productId, quantity);
     }, 300);
 
     return (
-        <Sheet>
+        <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Shopping Cart" className="relative text-primary transition-colors hover:bg-primary/10 rounded-full">
                     <ShoppingCart className="h-6 w-6" />
@@ -44,7 +46,7 @@ export function CartSheet() {
                                         <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
                                     </div>
                                     <div className="flex-1">
-                                        <Link href={`/shop/${item.slug}`} className="font-semibold hover:underline">{item.name}</Link>
+                                        <Link href={`/shop/${item.slug}`} className="font-semibold hover:underline" onClick={() => setSheetOpen(false)}>{item.name}</Link>
                                         <p className="text-sm text-muted-foreground">{formatPrice(item.price)}</p>
                                         <div className="mt-2 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
@@ -71,7 +73,9 @@ export function CartSheet() {
                             <span>{formatPrice(cartTotal)}</span>
                         </div>
                         <p className="text-sm text-muted-foreground text-center">Shipping & taxes calculated at checkout.</p>
-                        <Button size="lg" className="w-full">Checkout</Button>
+                        <Button asChild size="lg" className="w-full" onClick={() => setSheetOpen(false)}>
+                            <Link href="/checkout">Checkout</Link>
+                        </Button>
                         <Button variant="outline" className="w-full" onClick={clearCart}>Clear Cart</Button>
                     </SheetFooter>
                     </>
@@ -91,4 +95,3 @@ export function CartSheet() {
         </Sheet>
     );
 }
-

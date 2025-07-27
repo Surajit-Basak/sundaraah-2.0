@@ -186,3 +186,54 @@ export async function getOrderById(id: string): Promise<OrderWithItems | null> {
 
     return { ...data, order_items: transformedItems };
 }
+
+
+type NewOrder = {
+    customer_name: string;
+    customer_email: string;
+    total: number;
+    items: { product_id: string; quantity: number; price: number }[];
+}
+export async function createOrder(orderData: NewOrder): Promise<string> {
+    const supabase = createSupabaseServerClient();
+
+    // Create the main order record
+    const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+            customer_name: orderData.customer_name,
+            customer_email: orderData.customer_email,
+            total: orderData.total,
+            status: 'Processing',
+        })
+        .select('id')
+        .single();
+
+    if (orderError || !order) {
+        console.error('Error creating order:', orderError);
+        throw new Error('Failed to create order.');
+    }
+
+    const orderId = order.id;
+
+    // Create the order items records
+    const orderItems = orderData.items.map(item => ({
+        order_id: orderId,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: item.price,
+    }));
+
+    const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+
+    if (itemsError) {
+        console.error('Error creating order items:', itemsError);
+        // If items fail, we should ideally delete the order record to avoid orphans.
+        await supabase.from('orders').delete().eq('id', orderId);
+        throw new Error('Failed to create order items.');
+    }
+
+    revalidatePath('/admin/orders');
+
+    return orderId;
+}
