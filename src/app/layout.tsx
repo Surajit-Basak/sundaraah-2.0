@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/context/cart-context';
 import { PwaProvider } from '@/context/pwa-context';
-import { headers } from 'next/headers';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import FloatingButtons from '@/components/layout/floating-buttons';
@@ -21,36 +20,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = headers().get('next-url') || '';
-  const isAdminRoute = pathname.startsWith('/admin');
-  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/auth/confirm';
-
-  const BodyContent = () => {
-    if (isAdminRoute) {
-      return (
-        <body className={cn("font-body antialiased bg-secondary")}>
-          {children}
-          <Toaster />
-        </body>
-      )
-    }
-
-    return (
-       <body className={cn("font-body antialiased", isAuthPage && "bg-secondary")}>
-        <PwaProvider>
-          <CartProvider>
-            <div className="flex min-h-screen flex-col">
-              {!isAuthPage && <Header />}
-              <main className="flex-1">{children}</main>
-              {!isAuthPage && <Footer />}
-            </div>
-            <Toaster />
-            {!isAuthPage && <FloatingButtons />}
-          </CartProvider>
-        </PwaProvider>
-      </body>
-    )
-  }
+  // The logic to differentiate between admin/public pages is now handled by the presence
+  // of this RootLayout's components (Header, Footer) and the admin-specific layout.
+  // We can render a simpler body structure here.
 
   return (
     <html lang="en" className="scroll-smooth">
@@ -60,7 +32,14 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
         <meta name="theme-color" content="#5d1d39" />
       </head>
-      <BodyContent />
+      <body className={cn("font-body antialiased")}>
+        <PwaProvider>
+          <CartProvider>
+            {children}
+            <Toaster />
+          </CartProvider>
+        </PwaProvider>
+      </body>
     </html>
   );
 }

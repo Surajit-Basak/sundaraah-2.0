@@ -15,7 +15,7 @@ import Link from "next/link";
 
 export default function SignupPage() {
   return (
-    <div className="flex items-center justify-center py-12">
+    <div className="flex items-center justify-center py-12 bg-secondary min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Sign Up</CardTitle>

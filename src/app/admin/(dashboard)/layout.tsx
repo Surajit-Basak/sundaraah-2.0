@@ -18,11 +18,6 @@ import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Sundaraah Admin",
-  description: "Admin dashboard for Sundaraah Showcase",
-};
-
 export default async function AdminDashboardLayout({
   children,
 }: {
@@ -49,7 +44,7 @@ export default async function AdminDashboardLayout({
       { href: "/admin/team", label: "Team", icon: <Users /> },
       { href: "/admin/banners", label: "Banners", icon: <ImageIcon /> },
       { href: "#", label: "Analytics", icon: <BarChart3 /> },
-      { href: "#", label: "Settings", icon: <Settings /> },
+      { href: "#", a: true, label: "Settings", icon: <Settings /> },
   ]
 
   const handleLogout = async () => {

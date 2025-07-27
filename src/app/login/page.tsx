@@ -15,7 +15,7 @@ import { login } from "@/app/auth/actions";
 
 export default function LoginPage() {
   return (
-    <div className="flex items-center justify-center py-12">
+    <div className="flex items-center justify-center py-12 bg-secondary min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>

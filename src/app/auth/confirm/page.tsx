@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function AuthConfirmPage() {
   return (
-    <div className="flex items-center justify-center py-12">
+    <div className="flex items-center justify-center py-12 bg-secondary min-h-screen">
       <Card className="w-full max-w-md text-center">
         <CardHeader>
           <div className="flex justify-center">
