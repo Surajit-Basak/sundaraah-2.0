@@ -5,19 +5,20 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/context/cart-context';
 import { PwaProvider } from '@/context/pwa-context';
-import { getSettings } from '@/lib/data';
+import { getSettings, getPageSeo } from '@/lib/data';
 
 // This function now generates metadata dynamically
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
   const siteName = settings?.site_name || 'Sundaraah Showcase';
+  const seoData = await getPageSeo('home');
   
   return {
     title: {
-      default: siteName,
+      default: seoData?.seo_title || siteName,
       template: `%s | ${siteName}`,
     },
-    description: 'Exquisite Handcrafted Jewelry',
+    description: seoData?.meta_description || 'Exquisite Handcrafted Jewelry',
     manifest: '/manifest.json'
   };
 }

@@ -1,15 +1,14 @@
 
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getTeamMembers, getPageContent } from "@/lib/data";
+import { getTeamMembers, getPageContent, getPageSeo } from "@/lib/data";
 import type { TeamMember, PageContent } from "@/types";
 
 export async function generateMetadata() {
-  const content = await getPageContent("about");
-  const heroContent = content.find(s => s.section === 'hero')?.content;
+  const seoData = await getPageSeo("about");
   return {
-    title: `${heroContent?.title || "About Us"} | Sundaraah Showcase`,
-    description: heroContent?.subtitle || "Learn about the story, passion, and people behind Sundaraah Showcase.",
+    title: seoData?.seo_title || "About Us | Sundaraah Showcase",
+    description: seoData?.meta_description || "Learn about the story, passion, and people behind Sundaraah Showcase.",
   };
 }
 

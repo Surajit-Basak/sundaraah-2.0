@@ -1,14 +1,13 @@
 
 import BlogPostCard from "@/components/blog-post-card";
-import { getBlogPosts, getPageContent } from "@/lib/data";
+import { getBlogPosts, getPageContent, getPageSeo } from "@/lib/data";
 import type { BlogPost, PageContent } from "@/types";
 
 export async function generateMetadata() {
-  const content = await getPageContent("blog");
-  const headerContent = content.find(s => s.section === 'header')?.content;
+  const seoData = await getPageSeo("blog");
   return {
-    title: `${headerContent?.title || "Blog"} | Sundaraah Showcase`,
-    description: headerContent?.subtitle || "Read our stories, tips, and insights on handcrafted jewelry and art.",
+    title: seoData?.seo_title || "Our Journal | Sundaraah Showcase",
+    description: seoData?.meta_description || "Read our stories, tips, and insights on handcrafted jewelry and art.",
   };
 }
 

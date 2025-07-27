@@ -121,6 +121,13 @@ export type PageContent = {
   content: { [key: string]: any } | null;
 };
 
+export type PageSeo = {
+  id: number;
+  page_identifier: string;
+  seo_title: string | null;
+  meta_description: string | null;
+};
+
 export type Collection = {
     id: string;
     name: string;

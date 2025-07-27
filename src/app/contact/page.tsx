@@ -5,15 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin } from "lucide-react";
 import Image from "next/image";
-import { getPageContent } from "@/lib/data";
+import { getPageContent, getPageSeo } from "@/lib/data";
 import type { PageContent } from "@/types";
 
 export async function generateMetadata() {
-  const content = await getPageContent("contact");
-  const heroContent = content.find(s => s.section === 'hero')?.content;
+  const seoData = await getPageSeo("contact");
   return {
-    title: `${heroContent?.title || "Contact Us"} | Sundaraah Showcase`,
-    description: heroContent?.subtitle || "Get in touch with us for inquiries, custom orders, or just to say hello.",
+    title: seoData?.seo_title || "Contact Us | Sundaraah Showcase",
+    description: seoData?.meta_description || "Get in touch with us for inquiries, custom orders, or just to say hello.",
   };
 }
 

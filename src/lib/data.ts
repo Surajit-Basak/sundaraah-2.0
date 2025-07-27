@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
@@ -620,6 +620,36 @@ export async function updatePageContent(page: string, section: string, content: 
     revalidatePath('/', 'layout'); // Revalidate the whole site
 }
 
+// Page SEO Functions
+export async function getPageSeo(pageIdentifier: string): Promise<PageSeo | null> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+        .from('pages')
+        .select('*')
+        .eq('page_identifier', pageIdentifier)
+        .single();
+    if (error) {
+        console.error(`Error fetching SEO for page "${pageIdentifier}":`, error);
+        return null;
+    }
+    return data;
+}
+
+export async function updatePageSeo(pageIdentifier: string, seoData: Partial<Omit<PageSeo, 'id' | 'page_identifier'>>) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+        .from('pages')
+        .update(seoData)
+        .eq('page_identifier', pageIdentifier);
+    if (error) {
+        console.error(`Error updating SEO for page "${pageIdentifier}":`, error);
+        throw new Error('Failed to update page SEO.');
+    }
+    revalidatePath(`/admin/seo/${pageIdentifier}`);
+    revalidatePath(`/${pageIdentifier}`); // Revalidate public page
+}
+
+
 // Collection Functions
 export async function getCollections(): Promise<Collection[]> {
     const supabase = createSupabaseServerClient();
@@ -736,6 +766,9 @@ export async function uploadMedia(formData: FormData) {
   }
 
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('User must be logged in to upload media.');
+  }
 
   const filePath = `public/${Date.now()}-${file.name}`;
 

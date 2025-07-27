@@ -1,11 +1,11 @@
 
-import { getPageContent } from "@/lib/data";
+import { getPageContent, getPageSeo } from "@/lib/data";
 
 export async function generateMetadata() {
-  const content = await getPageContent("returns");
-  const pageData = content.find(s => s.section === 'content')?.content;
+  const seoData = await getPageSeo("returns");
   return {
-    title: `${pageData?.title || "Return Policy"} | Sundaraah Showcase`,
+    title: seoData?.seo_title || "Return Policy | Sundaraah Showcase",
+    description: seoData?.meta_description || "Read our policy on returns, exchanges, and refunds.",
   };
 }
 

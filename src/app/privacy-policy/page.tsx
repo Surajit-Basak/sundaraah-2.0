@@ -1,22 +1,22 @@
 
-import { getPageContent } from "@/lib/data";
+import { getPageContent, getPageSeo } from "@/lib/data";
 
 export async function generateMetadata() {
-  const content = await getPageContent("shipping");
-  const pageData = content.find(s => s.section === 'content')?.content;
+  const seoData = await getPageSeo("privacy");
   return {
-    title: `${pageData?.title || "Shipping Policy"} | Sundaraah Showcase`,
+    title: seoData?.seo_title || "Privacy Policy | Sundaraah Showcase",
+    description: seoData?.meta_description || "Review our privacy policy to understand how we handle your data.",
   };
 }
 
-export default async function ShippingPolicyPage() {
-  const content = await getPageContent("shipping");
+export default async function PrivacyPolicyPage() {
+  const content = await getPageContent("privacy");
   const pageData = content.find(s => s.section === 'content')?.content;
 
   if (!pageData) {
     return (
         <div className="container mx-auto px-4 py-16 md:py-24">
-            <h1 className="font-headline text-4xl font-bold text-primary mb-8">Shipping Policy</h1>
+            <h1 className="font-headline text-4xl font-bold text-primary mb-8">Privacy Policy</h1>
             <p>Content not available. Please check back later.</p>
         </div>
     )
