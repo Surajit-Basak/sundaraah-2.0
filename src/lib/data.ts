@@ -738,12 +738,12 @@ export async function uploadMedia(formData: FormData): Promise<Media> {
     const { data: { user } } = await supabase.auth.getUser();
 
     // Create a unique file path
-    const file_path = `public/${Date.now()}-${file.name}`;
+    const filePath = `public/${Date.now()}-${file.name}`;
 
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage in the 'media' bucket
     const { error: uploadError } = await supabase.storage
         .from('media')
-        .upload(file_path, file, {
+        .upload(filePath, file, {
             contentType: file.type,
         });
     
@@ -752,10 +752,10 @@ export async function uploadMedia(formData: FormData): Promise<Media> {
         throw new Error('Failed to upload file to storage.');
     }
 
-    // Get public URL
+    // Get public URL from the 'media' bucket
     const { data: { publicUrl } } = supabase.storage
         .from('media')
-        .getPublicUrl(file_path);
+        .getPublicUrl(filePath);
     
     if (!publicUrl) {
         throw new Error('Failed to get public URL for the uploaded file.');
@@ -767,7 +767,7 @@ export async function uploadMedia(formData: FormData): Promise<Media> {
         .insert({
             user_id: user?.id,
             file_name: file.name,
-            file_path: file_path,
+            file_path: filePath,
             url: publicUrl,
             content_type: file.type,
         })
@@ -777,7 +777,7 @@ export async function uploadMedia(formData: FormData): Promise<Media> {
     if (dbError) {
         console.error('Database insert error:', dbError);
         // Attempt to delete the file from storage if DB insert fails
-        await supabase.storage.from('media').remove([file_path]);
+        await supabase.storage.from('media').remove([filePath]);
         throw new Error('Failed to save media information to database.');
     }
 
@@ -804,5 +804,3 @@ export async function deleteMedia(id: string, filePath: string) {
 
     revalidatePath('/admin/media');
 }
-
-    
