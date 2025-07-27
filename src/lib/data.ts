@@ -176,19 +176,19 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
     return data.map(p => ({ ...p, imageUrl: p.image_url || 'https://placehold.co/400x250.png' })) || [];
 }
 
-export async function getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
+export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('blog_posts').select('*').eq('slug', slug).single();
 
     if (error || !data) {
         console.error('Error fetching blog post by slug:', error);
-        return undefined;
+        return null;
     }
 
     return { ...data, imageUrl: data.image_url || 'https://placehold.co/400x250.png' };
 }
 
-type BlogPostInput = Omit<BlogPost, 'id' | 'imageUrl'>;
+type BlogPostInput = Omit<BlogPost, 'id' | 'imageUrl'> & { image_url?: string };
 
 export async function createBlogPost(postData: BlogPostInput) {
     const supabase = createSupabaseServerClient();
@@ -233,7 +233,7 @@ export async function deleteBlogPost(id: string) {
 
 export async function getTeamMembers(): Promise<TeamMember[]> {
     const supabase = createSupabaseServerClient();
-    const { data, error } = await supabase.from('team_members').select('*');
+    const { data, error } = await supabase.from('team_members').select('*').order('created_at', { ascending: true });
 
     if (error) {
         console.error('Error fetching team members:', error);
@@ -242,6 +242,59 @@ export async function getTeamMembers(): Promise<TeamMember[]> {
 
     return data.map(m => ({ ...m, imageUrl: m.image_url || 'https://placehold.co/400x400.png' })) || [];
 }
+
+export async function getTeamMemberById(id: string): Promise<TeamMember | null> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('team_members').select('*').eq('id', id).single();
+     if (error || !data) {
+        console.error('Error fetching team member by id:', error);
+        return null;
+    }
+
+    return { ...data, imageUrl: data.image_url || 'https://placehold.co/400x400.png' };
+}
+
+type TeamMemberInput = Omit<TeamMember, 'id' | 'imageUrl'> & { image_url?: string };
+
+export async function createTeamMember(memberData: TeamMemberInput) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('team_members').insert([memberData]);
+
+    if (error) {
+        console.error('Error creating team member:', error);
+        throw new Error('Failed to create team member.');
+    }
+
+    revalidatePath('/admin/team');
+    revalidatePath('/about');
+}
+
+export async function updateTeamMember(id: string, memberData: Partial<TeamMemberInput>) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('team_members').update(memberData).eq('id', id);
+
+    if (error) {
+        console.error('Error updating team member:', error);
+        throw new Error('Failed to update team member.');
+    }
+    
+    revalidatePath('/admin/team');
+    revalidatePath('/about');
+}
+
+export async function deleteTeamMember(id: string) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('team_members').delete().eq('id', id);
+
+    if (error) {
+        console.error('Error deleting team member:', error);
+        throw new Error('Failed to delete team member.');
+    }
+
+    revalidatePath('/admin/team');
+    revalidatePath('/about');
+}
+
 
 export async function getOrders(): Promise<Order[]> {
     const supabase = createSupabaseServerClient();
