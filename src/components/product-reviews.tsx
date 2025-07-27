@@ -3,7 +3,7 @@
 import type { ProductReview } from "@/types";
 import { Star, StarHalf, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Progress } from "./ui/progress";
 
 type ProductReviewsProps = {
