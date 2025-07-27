@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -37,6 +37,7 @@ export default function Header() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
   const searchInputRef = useRef<HTMLInputElement>(null);
   
   const supabase = createSupabaseBrowserClient();
@@ -78,6 +79,15 @@ export default function Header() {
   const handleSearchToggle = () => {
     setIsSearchOpen(!isSearchOpen);
   };
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const searchTerm = searchInputRef.current?.value;
+    if (searchTerm) {
+      router.push(`/shop?search=${encodeURIComponent(searchTerm)}`);
+      // It will also close because of the pathname change effect
+    }
+  }
 
   const NavLink = ({ href, label }: { href: string; label: string }) => (
     <Link
@@ -148,13 +158,15 @@ export default function Header() {
                 ))}
             </nav>
             <div className={cn("relative w-full max-w-2xl", !isSearchOpen && "hidden")}>
-              <Input
-                ref={searchInputRef}
-                type="search"
-                placeholder="Search products..."
-                className="w-full pl-12 h-12 text-base rounded-full bg-secondary border-transparent focus:border-primary focus:ring-primary"
-              />
-              <Search className="absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
+              <form onSubmit={handleSearchSubmit}>
+                <Input
+                  ref={searchInputRef}
+                  type="search"
+                  placeholder="Search products..."
+                  className="w-full pl-12 h-12 text-base rounded-full bg-secondary border-transparent focus:border-primary focus:ring-primary"
+                />
+                <Search className="absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
+              </form>
             </div>
         </div>
 

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from 'next/navigation';
 import ProductCard from "@/components/product-card";
 import { getProducts, getCategories } from "@/lib/data";
 import { Slider } from "@/components/ui/slider";
@@ -18,6 +19,9 @@ export default function ShopPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [maxPrice, setMaxPrice] = useState(1000);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get('search') || '';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,10 +43,15 @@ export default function ShopPage() {
     fetchData();
   }, []);
 
-  const filteredProducts = allProducts.filter(product => 
-    (selectedCategory === "All" || product.category === selectedCategory) &&
-    product.price >= priceRange[0] && product.price <= priceRange[1]
-  );
+  const filteredProducts = allProducts.filter(product => {
+    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
+    const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
+    const matchesSearch = searchQuery 
+      ? product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        product.description.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+    return matchesCategory && matchesPrice && matchesSearch;
+  });
 
   return (
     <div className="bg-background">
@@ -117,12 +126,21 @@ export default function ShopPage() {
               ) : (
                 <>
                   <div className="mb-4">
+                     {searchQuery && (
+                      <h2 className="text-xl mb-2">
+                        Search results for: <span className="font-bold text-primary">"{searchQuery}"</span>
+                      </h2>
+                    )}
                     <p className="text-sm text-muted-foreground">Showing {filteredProducts.length} of {allProducts.length} products</p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                     {filteredProducts.length > 0 ? filteredProducts.map((product) => (
                       <ProductCard key={product.id} product={product} />
-                    )) : <p>No products match your criteria.</p>}
+                    )) : (
+                        <p className="md:col-span-3 text-center text-muted-foreground">
+                            No products match your criteria.
+                        </p>
+                    )}
                   </div>
                 </>
               )}
