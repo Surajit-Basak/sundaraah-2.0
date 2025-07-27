@@ -193,6 +193,7 @@ type NewOrder = {
     customer_email: string;
     total: number;
     items: { product_id: string; quantity: number; price: number }[];
+    user_id?: string | null;
 }
 export async function createOrder(orderData: NewOrder): Promise<string> {
     const supabase = createSupabaseServerClient();
@@ -205,6 +206,7 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
             customer_email: orderData.customer_email,
             total: orderData.total,
             status: 'Processing',
+            user_id: orderData.user_id
         })
         .select('id')
         .single();
@@ -234,6 +236,26 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
     }
 
     revalidatePath('/admin/orders');
+    if (orderData.user_id) {
+        revalidatePath('/account');
+    }
+
 
     return orderId;
+}
+
+export async function getOrdersByUserId(userId: string): Promise<Order[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching orders by user id:', error);
+        return [];
+    }
+
+    return data;
 }

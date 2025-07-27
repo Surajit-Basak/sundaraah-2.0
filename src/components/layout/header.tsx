@@ -121,8 +121,8 @@ export default function Header() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild><Link href="#">Profile</Link></DropdownMenuItem>
-            <DropdownMenuItem asChild><Link href="#">My Orders</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href="/account">Profile</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href="/account">My Orders</Link></DropdownMenuItem>
             <DropdownMenuSeparator />
              <DropdownMenuItem onSelect={async (e) => { e.preventDefault(); await logout(); }}>
               <LogOut className="mr-2 h-4 w-4" />

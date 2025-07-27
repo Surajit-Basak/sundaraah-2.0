@@ -60,11 +60,22 @@ export async function middleware(request: NextRequest) {
   
   const { pathname } = request.nextUrl;
 
-  // if user is not logged in and is trying to access admin routes, redirect to admin login
-  if (!session && pathname.startsWith('/admin')) {
+  const isAuthRoute = pathname === '/login' || pathname === '/signup';
+  const isAdminRoute = pathname.startsWith('/admin');
+  const isAccountRoute = pathname.startsWith('/account');
+
+  // if user is not logged in, redirect them to login page
+  if (!session && (isAdminRoute || isAccountRoute)) {
     const url = request.nextUrl.clone()
-    url.pathname = '/admin/login'
+    url.pathname = isAdminRoute ? '/admin/login' : '/login'
     return NextResponse.redirect(url)
+  }
+
+  // if user is logged in and tries to access auth pages, redirect to home
+  if (session && isAuthRoute) {
+     const url = request.nextUrl.clone()
+     url.pathname = '/'
+     return NextResponse.redirect(url)
   }
 
   // if user is logged in and tries to access admin login, redirect to dashboard
@@ -73,7 +84,6 @@ export async function middleware(request: NextRequest) {
     url.pathname = '/admin/dashboard'
     return NextResponse.redirect(url)
   }
-
 
   return response
 }
@@ -85,9 +95,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - auth routes
+     * - auth/confirm (the supabase email confirmation page)
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|auth/.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|auth/confirm|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

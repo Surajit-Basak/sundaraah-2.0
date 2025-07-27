@@ -11,14 +11,26 @@ import Image from "next/image";
 import { createOrder } from "@/lib/data";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    const fetchUser = async () => {
+        const { data } = await supabase.auth.getUser();
+        setUser(data.user);
+    };
+    fetchUser();
+  }, []);
 
   const handlePlaceOrder = async (formData: FormData) => {
     setIsLoading(true);
@@ -41,6 +53,7 @@ export default function CheckoutPage() {
         customer_email: customerEmail,
         total: cartTotal,
         items: cartItems.map(item => ({ product_id: item.id, quantity: item.quantity, price: item.price })),
+        user_id: user?.id,
       });
       
       clearCart();
@@ -116,11 +129,11 @@ export default function CheckoutPage() {
               <form action={handlePlaceOrder} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" name="name" type="text" placeholder="Your full name" required />
+                  <Input id="name" name="name" type="text" placeholder="Your full name" defaultValue={user?.user_metadata?.full_name || ''} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" name="email" type="email" placeholder="you@example.com" required />
+                  <Input id="email" name="email" type="email" placeholder="you@example.com" defaultValue={user?.email || ''} required />
                 </div>
                 <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}

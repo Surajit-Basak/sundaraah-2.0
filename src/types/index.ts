@@ -46,6 +46,7 @@ export type Order = {
   customer_email: string;
   total: number;
   status: 'Processing' | 'Fulfilled' | 'Cancelled';
+  user_id?: string | null;
 };
 
 export type OrderItem = {
