@@ -73,3 +73,14 @@ export type OrderItem = {
 export type OrderWithItems = Order & {
     order_items: OrderItem[];
 }
+
+export type Banner = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  image_url: string;
+  link_href: string | null;
+  link_text: string | null;
+  is_active: boolean;
+  sort_order: number;
+};

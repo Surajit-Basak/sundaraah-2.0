@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Home, Package, Settings, ShoppingCart, BarChart3, Gem, LogOut, BookOpen, Users } from "lucide-react";
+import { Home, Package, Settings, ShoppingCart, BarChart3, Gem, LogOut, BookOpen, Users, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -36,6 +36,7 @@ export default function AdminLayout({
       { href: "/admin/products", label: "Products", icon: <Package /> },
       { href: "/admin/blog", label: "Blog", icon: <BookOpen /> },
       { href: "/admin/team", label: "Team", icon: <Users /> },
+      { href: "/admin/banners", label: "Banners", icon: <ImageIcon /> },
       { href: "#", label: "Analytics", icon: <BarChart3 /> },
       { href: "#", label: "Settings", icon: <Settings /> },
   ]

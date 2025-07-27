@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -433,4 +433,65 @@ export async function createProductReview(reviewData: ReviewInput, productSlug: 
     revalidatePath(`/shop/${productSlug}`);
 
     return data;
+}
+
+
+export async function getBanners(): Promise<Banner[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+        .from('banners')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+    
+    if (error) {
+        console.error('Error fetching banners:', error);
+        return [];
+    }
+    return data || [];
+}
+
+export async function getBannerById(id: string): Promise<Banner | null> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('banners').select('*').eq('id', id).single();
+    if (error || !data) {
+        console.error('Error fetching banner by id:', error);
+        return null;
+    }
+    return data;
+}
+
+type BannerInput = Omit<Banner, 'id'>;
+
+export async function createBanner(bannerData: BannerInput) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('banners').insert([bannerData]);
+    if (error) {
+        console.error('Error creating banner:', error);
+        throw new Error('Failed to create banner.');
+    }
+    revalidatePath('/admin/banners');
+    revalidatePath('/');
+}
+
+export async function updateBanner(id: string, bannerData: Partial<BannerInput>) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('banners').update(bannerData).eq('id', id);
+    if (error) {
+        console.error('Error updating banner:', error);
+        throw new Error('Failed to update banner.');
+    }
+    revalidatePath('/admin/banners');
+    revalidatePath('/');
+}
+
+export async function deleteBanner(id: string) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('banners').delete().eq('id', id);
+    if (error) {
+        console.error('Error deleting banner:', error);
+        throw new Error('Failed to delete banner.');
+    }
+    revalidatePath('/admin/banners');
+    revalidatePath('/');
 }
