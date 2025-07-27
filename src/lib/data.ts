@@ -728,57 +728,54 @@ export async function getMedia(): Promise<Media[]> {
 }
 
 export async function uploadMedia(formData: FormData) {
-    const supabase = createSupabaseServerClient();
-    const file = formData.get('file') as File;
+  'use server';
+  const supabase = createSupabaseServerClient();
+  const file = formData.get('file') as File;
 
-    if (!file) {
-        throw new Error('No file provided.');
-    }
+  if (!file) {
+    throw new Error('No file provided.');
+  }
 
-    const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-    const filePath = `public/${Date.now()}-${file.name}`;
+  const filePath = `public/${Date.now()}-${file.name}`;
 
-    const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(filePath, file, {
-            contentType: file.type,
-        });
-    
-    if (uploadError) {
-        console.error('Storage upload error:', uploadError);
-        throw new Error('Failed to upload file to storage.');
-    }
+  const { error: uploadError } = await supabase.storage
+    .from('media')
+    .upload(filePath, file);
+  
+  if (uploadError) {
+    console.error('Storage upload error:', uploadError);
+    throw new Error('Failed to upload file to storage.');
+  }
 
-    const { data: { publicUrl } } = supabase.storage
-        .from('media')
-        .getPublicUrl(filePath);
-    
-    if (!publicUrl) {
-        throw new Error('Failed to get public URL for the uploaded file.');
-    }
+  const { data: { publicUrl } } = supabase.storage
+    .from('media')
+    .getPublicUrl(filePath);
+  
+  if (!publicUrl) {
+    throw new Error('Failed to get public URL for the uploaded file.');
+  }
 
-    const { data, error: dbError } = await supabase
-        .from('media')
-        .insert({
-            user_id: user?.id,
-            file_name: file.name,
-            file_path: filePath,
-            url: publicUrl,
-            content_type: file.type,
-        })
-        .select()
-        .single();
-    
-    if (dbError) {
-        console.error('Database insert error:', dbError);
-        await supabase.storage.from('media').remove([filePath]);
-        throw new Error('Failed to save media information to database.');
-    }
+  const { error: dbError } = await supabase
+    .from('media')
+    .insert({
+      user_id: user?.id,
+      file_name: file.name,
+      file_path: filePath,
+      url: publicUrl,
+      content_type: file.type,
+    });
+  
+  if (dbError) {
+    console.error('Database insert error:', dbError);
+    await supabase.storage.from('media').remove([filePath]);
+    throw new Error('Failed to save media information to database.');
+  }
 
-    revalidatePath('/admin/media');
-    return data;
+  revalidatePath('/admin/media');
 }
+
 
 export async function deleteMedia(id: string, filePath: string) {
     const supabase = createSupabaseServerClient();
