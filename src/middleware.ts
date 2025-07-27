@@ -19,38 +19,14 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
+          request.cookies.set({ name, value, ...options })
+          response = NextResponse.next({ request: { headers: request.headers } })
+          response.cookies.set({ name, value, ...options })
         },
         remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
+          request.cookies.set({ name, value: '', ...options })
+          response = NextResponse.next({ request: { headers: request.headers } })
+          response.cookies.set({ name, value: '', ...options })
         },
       },
     }
@@ -59,40 +35,43 @@ export async function middleware(request: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession();
   const { pathname } = request.nextUrl;
 
-  const isAuthRoute = pathname === '/login' || pathname === '/signup';
-  const isAdminLogin = pathname === '/admin/login';
   const isAdminRoute = pathname.startsWith('/admin');
   const isAccountRoute = pathname.startsWith('/account');
+  const isAuthRoute = pathname === '/login' || pathname === '/signup';
+  const isAdminLoginPage = pathname === '/admin/login';
 
+  // If the user is logged in
   if (session) {
     const isAdminUser = session.user.user_metadata?.user_role === 'admin';
 
+    // If a logged-in user tries to access a public auth page (/login, /signup)
     if (isAuthRoute) {
       return NextResponse.redirect(new URL('/', request.url));
     }
-
-    // If a non-admin tries to access any admin page, redirect them to home.
-    if (isAdminRoute && !isAdminUser) {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
     
-    // If an admin is logged in and tries to access the admin login page,
-    // redirect them to the dashboard.
-    if (isAdminLogin && isAdminUser) {
+    // If an admin is logged in and visits the admin login page, redirect to dashboard
+    if (isAdminUser && isAdminLoginPage) {
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
-  } else {
-    // If user is not logged in and trying to access a protected route,
-    // redirect them to the appropriate login page.
+
+    // If a non-admin user tries to access any admin page, redirect them to the home page
+    if (!isAdminUser && isAdminRoute) {
+        return NextResponse.redirect(new URL('/', request.url));
+    }
+  } 
+  // If the user is not logged in
+  else {
+    // Protect the account page
     if (isAccountRoute) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
-    if (isAdminRoute && !isAdminLogin) {
+    // Protect all admin pages except the login page itself
+    if (isAdminRoute && !isAdminLoginPage) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
   }
 
-  return response
+  return response;
 }
 
 export const config = {

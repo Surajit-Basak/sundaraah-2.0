@@ -30,16 +30,14 @@ export default async function AdminLayout({
 }) {
   const supabase = createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-
   const pathname = headers().get('next-url') || '';
-  const isLoginPage = pathname === '/admin/login';
 
   // If on login page, render children directly without the sidebar layout
-  if (isLoginPage) {
-    return <div className="bg-secondary">{children}</div>
+  if (pathname === '/admin/login') {
+    return <div className="bg-secondary">{children}</div>;
   }
   
-  // This is a failsafe. Middleware should handle redirection.
+  // This is a failsafe, middleware should handle redirection primarily.
   if (!user || user.user_metadata.user_role !== 'admin') {
     redirect('/admin/login');
   }
