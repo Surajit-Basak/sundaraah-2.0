@@ -62,10 +62,11 @@ export default function CheckoutPage() {
 
     } catch (error) {
       console.error("Failed to create order:", error);
+      const errorMessage = error instanceof Error ? error.message : "There was a problem placing your order. Please try again.";
       toast({
         variant: "destructive",
         title: "Order Failed",
-        description: "There was a problem placing your order. Please try again.",
+        description: errorMessage,
       });
       setIsLoading(false);
     }

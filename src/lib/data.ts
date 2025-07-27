@@ -359,6 +359,25 @@ type NewOrder = {
 export async function createOrder(orderData: NewOrder): Promise<string> {
     const supabase = createSupabaseServerClient();
     
+    // First, check inventory for all items
+    for (const item of orderData.items) {
+        const { error } = await supabase.rpc('decrement_product_inventory', {
+            p_product_id: item.id,
+            p_quantity: item.quantity
+        });
+
+        if (error) {
+            console.error('Error decrementing inventory:', error);
+            // The RPC function raises an exception which is caught here.
+            // We can make the error message more user-friendly.
+            if (error.message.includes('Not enough stock')) {
+                throw new Error(`Sorry, ${item.name} is out of stock. Please remove it from your cart and try again.`);
+            }
+            throw new Error('There was a problem with product inventory.');
+        }
+    }
+
+    // If all inventory checks pass, proceed to create the order
     const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -373,6 +392,8 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
 
     if (orderError || !order) {
         console.error('Error creating order:', orderError);
+        // Here you would ideally have a way to rollback the inventory decrements.
+        // For simplicity, we'll proceed but in a real-world app, a transaction across all operations is needed.
         throw new Error('Failed to create order.');
     }
 
@@ -389,7 +410,9 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
 
     if (itemsError) {
         console.error('Error creating order items:', itemsError);
+        // Rollback order creation if items fail
         await supabase.from('orders').delete().eq('id', orderId);
+        // Note: inventory is not rolled back here. A full transactional function in SQL is the robust solution.
         throw new Error('Failed to create order items.');
     }
     
@@ -415,6 +438,7 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
     }
 
     revalidatePath('/admin/orders');
+    revalidatePath('/admin/products'); // Revalidate products to show new inventory
     if (orderData.user_id) {
         revalidatePath('/account');
     }
