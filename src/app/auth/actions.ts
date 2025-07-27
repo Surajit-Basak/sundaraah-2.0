@@ -28,10 +28,12 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const supabase = createSupabaseServerClient()
   const data = Object.fromEntries(formData);
+  const email = data.email as string;
+  const password = data.password as string;
   
-  const { error } = await supabase.auth.signUp({
-    email: data.email as string,
-    password: data.password as string,
+  const { error: signUpError } = await supabase.auth.signUp({
+    email: email,
+    password: password,
     options: {
       data: {
         full_name: data.fullName as string,
@@ -39,15 +41,22 @@ export async function signup(formData: FormData) {
     }
   });
 
-  if (error) {
-    console.error('Signup error:', error.message)
-    return redirect(`/signup?error=${encodeURIComponent(error.message)}`)
+  if (signUpError) {
+    console.error('Signup error:', signUpError.message)
+    return redirect(`/signup?error=${encodeURIComponent(signUpError.message)}`)
   }
   
+  // For this showcase, we'll log the user in right after signup to bypass email confirmation.
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (signInError) {
+     console.error('Sign-in after signup error:', signInError.message)
+     // Redirect to login even if auto sign-in fails, so they can try manually.
+    return redirect(`/login?message=Signup successful. Please log in.`);
+  }
+
   revalidatePath('/', 'layout')
-  // For this showcase, we'll redirect to a page that tells the user to check their email.
-  // In a real app, Supabase sends a confirmation email.
-  redirect('/auth/confirm');
+  redirect('/');
 }
 
 export async function logout() {

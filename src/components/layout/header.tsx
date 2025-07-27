@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, X, Search, LogOut, LogIn } from "lucide-react";
+import { Menu, X, Search, LogOut, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "../ui/input";
 import { CartSheet } from "../cart/cart-sheet";
@@ -92,7 +92,7 @@ export default function Header() {
     </Link>
   );
   
-  const HeaderIcon = ({ children, ariaLabel, onClick, asChild, href }: { children: React.ReactNode; ariaLabel: string, onClick?: () => void, asChild?: boolean, href?: string }) => {
+  const HeaderIcon = ({ children, ariaLabel, onClick, asChild }: { children: React.ReactNode; ariaLabel: string, onClick?: () => void, asChild?: boolean }) => {
     const Comp = asChild ? Slot : Button;
     return (
      <Comp 
@@ -140,10 +140,10 @@ export default function Header() {
     }
 
     return (
-        <HeaderIcon ariaLabel="Login">
-            <Link href="/login">
-                <LogIn className="h-6 w-6" />
-            </Link>
+      <HeaderIcon ariaLabel="Login" asChild>
+          <Link href="/login">
+              <LogIn className="h-6 w-6" />
+          </Link>
       </HeaderIcon>
     )
   }
