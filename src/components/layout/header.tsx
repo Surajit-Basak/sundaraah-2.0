@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { logout } from "@/app/auth/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Slot } from "@radix-ui/react-slot";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -92,21 +91,6 @@ export default function Header() {
     </Link>
   );
   
-  const HeaderIcon = ({ children, ariaLabel, onClick, asChild }: { children: React.ReactNode; ariaLabel: string, onClick?: () => void, asChild?: boolean }) => {
-    const Comp = asChild ? Slot : Button;
-    return (
-     <Comp 
-        onClick={onClick} 
-        variant="ghost" 
-        size="icon" 
-        aria-label={ariaLabel} 
-        className="text-primary transition-colors hover:bg-primary/10 rounded-full"
-    >
-        {children}
-     </Comp>
-    )
-  }
-
   const UserButton = () => {
     if (isLoading) {
       return <Button variant="ghost" size="icon" className="text-primary rounded-full w-9 h-9 animate-pulse bg-primary/10"></Button>
@@ -140,11 +124,11 @@ export default function Header() {
     }
 
     return (
-      <HeaderIcon ariaLabel="Login" asChild>
+      <Button asChild variant="ghost" size="icon" aria-label="Login" className="text-primary transition-colors hover:bg-primary/10 rounded-full">
           <Link href="/login">
               <User className="h-6 w-6" />
           </Link>
-      </HeaderIcon>
+      </Button>
     )
   }
 
@@ -176,9 +160,9 @@ export default function Header() {
 
         {/* Right side icons & mobile menu */}
         <div className="flex items-center gap-2">
-           <HeaderIcon ariaLabel="Toggle Search" onClick={handleSearchToggle}>
+           <Button variant="ghost" size="icon" aria-label="Toggle Search" onClick={handleSearchToggle} className="text-primary transition-colors hover:bg-primary/10 rounded-full">
             {isSearchOpen ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
-          </HeaderIcon>
+          </Button>
           
           <CartSheet />
 

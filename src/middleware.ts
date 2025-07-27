@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
           })
           response.cookies.set({
             name,
-            value: '',
+            value,
             ...options,
           })
         },
@@ -61,28 +61,28 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isAuthRoute = pathname === '/login' || pathname === '/signup';
+  const isAdminLogin = pathname === '/admin/login';
   const isAdminRoute = pathname.startsWith('/admin');
   const isAccountRoute = pathname.startsWith('/account');
 
-  // if user is not logged in, redirect them to login page
-  if (!session && (isAdminRoute || isAccountRoute)) {
-    const url = request.nextUrl.clone()
-    url.pathname = isAdminRoute ? '/admin/login' : '/login'
-    return NextResponse.redirect(url)
+  // If user is not logged in, redirect them to the appropriate login page.
+  if (!session) {
+    if (isAccountRoute) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    if (isAdminRoute && !isAdminLogin) {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
   }
 
-  // if user is logged in and tries to access auth pages, redirect to home
-  if (session && isAuthRoute) {
-     const url = request.nextUrl.clone()
-     url.pathname = '/'
-     return NextResponse.redirect(url)
-  }
-
-  // if user is logged in and tries to access admin login, redirect to dashboard
-  if (session && pathname === '/admin/login') {
-    const url = request.nextUrl.clone()
-    url.pathname = '/admin/dashboard'
-    return NextResponse.redirect(url)
+  // If user is logged in, handle redirects away from auth pages.
+  if (session) {
+    if (isAuthRoute) {
+       return NextResponse.redirect(new URL('/', request.url));
+    }
+    if (isAdminLogin) {
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    }
   }
 
   return response

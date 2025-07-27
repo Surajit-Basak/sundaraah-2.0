@@ -31,7 +31,6 @@ export async function signup(formData: FormData) {
   const email = data.email as string;
   const password = data.password as string;
   
-  // The new database trigger will automatically create a profile row from the metadata.
   const { error: signUpError } = await supabase.auth.signUp({
     email: email,
     password: password,
@@ -47,17 +46,8 @@ export async function signup(formData: FormData) {
     return redirect(`/signup?error=${encodeURIComponent(signUpError.message)}`)
   }
   
-  // For this showcase, we'll log the user in right after signup to bypass email confirmation.
-  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (signInError) {
-     console.error('Sign-in after signup error:', signInError.message)
-     // Redirect to login even if auto sign-in fails, so they can try manually.
-    return redirect(`/login?message=Signup successful. Please log in.`);
-  }
-
-  revalidatePath('/', 'layout')
-  redirect('/');
+  // Redirect to a page that tells the user to confirm their email
+  return redirect('/auth/confirm');
 }
 
 export async function logout() {
