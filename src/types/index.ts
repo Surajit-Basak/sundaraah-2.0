@@ -8,11 +8,21 @@ export type Product = {
   category_id: string;
   price: number;
   imageUrl: string;
-  image_url?: string; // from supabase
+  imageUrls: string[]; // For multiple images
   description: string;
   details: string[];
   inventory: number;
+  reviews: ProductReview[];
 };
+
+export type ProductReview = {
+  id: string;
+  rating: number;
+  title: string;
+  comment: string | null;
+  author_name: string | null;
+  created_at: string;
+}
 
 export type Category = {
   id: string;

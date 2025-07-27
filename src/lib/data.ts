@@ -1,7 +1,8 @@
 
+
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -22,7 +23,9 @@ export async function getProducts(): Promise<Product[]> {
     return data.map(p => ({ 
         ...p, 
         category: p.categories.name, 
-        imageUrl: p.image_url || 'https://placehold.co/600x600.png' 
+        imageUrl: p.image_url || 'https://placehold.co/600x600.png',
+        imageUrls: [],
+        reviews: [],
     })) || [];
 }
 
@@ -30,9 +33,9 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase.from('products').select(`
         *,
-        categories (
-            name
-        )
+        categories (name),
+        product_images (image_url),
+        product_reviews (*)
     `).eq('slug', slug).single();
 
   if (error || !data) {
@@ -40,10 +43,14 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     return null;
   }
 
+  const imageUrls = data.product_images.map((img: { image_url: string }) => img.image_url);
+  
   return { 
     ...data, 
     category: data.categories.name, 
-    imageUrl: data.image_url || 'https://placehold.co/600x600.png' 
+    imageUrl: data.image_url || 'https://placehold.co/600x600.png',
+    imageUrls: imageUrls.length > 0 ? imageUrls : [data.image_url || 'https://placehold.co/600x600.png'],
+    reviews: data.product_reviews as ProductReview[] || []
   };
 }
 
@@ -67,7 +74,9 @@ export async function getRelatedProducts(categoryId: string, currentProductId: s
     return data.map(p => ({ 
         ...p, 
         category: p.categories.name, 
-        imageUrl: p.image_url || 'https://placehold.co/600x600.png' 
+        imageUrl: p.image_url || 'https://placehold.co/600x600.png',
+        imageUrls: [],
+        reviews: [],
     })) || [];
 }
 
@@ -89,7 +98,9 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
     const products = data.map(p => ({ 
         ...p, 
         category: p.categories.name, 
-        imageUrl: p.image_url || 'https://placehold.co/600x600.png' 
+        imageUrl: p.image_url || 'https://placehold.co/600x600.png',
+        imageUrls: [],
+        reviews: [],
     })) || [];
 
     // Preserve the order of the original IDs array
@@ -97,7 +108,7 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
 }
 
 
-type ProductInput = Omit<Product, 'id' | 'imageUrl' | 'category'> & { image_url?: string };
+type ProductInput = Omit<Product, 'id' | 'imageUrl' | 'imageUrls' | 'reviews' | 'category'> & { image_url?: string };
 
 export async function createProduct(productData: ProductInput) {
     const supabase = createSupabaseServerClient();
@@ -230,7 +241,9 @@ export async function getOrderById(id: string): Promise<OrderWithItems | null> {
         product: item.products ? {
             ...item.products,
             category: item.products.categories.name,
-            imageUrl: item.products.image_url || 'https://placehold.co/100x100.png'
+            imageUrl: item.products.image_url || 'https://placehold.co/100x100.png',
+            imageUrls: [],
+            reviews: []
         } : null
     }));
 

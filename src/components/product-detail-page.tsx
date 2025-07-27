@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Image from "next/image";
@@ -8,9 +9,11 @@ import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
 import { useCart } from "@/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import RelatedProducts from "./related-products";
 import RecentlyViewedProducts from "./recently-viewed-products";
+import ProductReviews from "./product-reviews";
+import { cn } from "@/lib/utils";
 
 type ProductDetailPageClientProps = {
   product: Product;
@@ -19,6 +22,13 @@ type ProductDetailPageClientProps = {
 export default function ProductDetailPageClient({ product }: ProductDetailPageClientProps) {
   const { addItem, isAdding } = useCart();
   const { toast } = useToast();
+  const [selectedImage, setSelectedImage] = useState(product?.imageUrl);
+
+  useEffect(() => {
+    if (product) {
+      setSelectedImage(product.imageUrl);
+    }
+  }, [product]);
 
   useEffect(() => {
     const storeRecentlyViewed = (productId: string) => {
@@ -49,23 +59,47 @@ export default function ProductDetailPageClient({ product }: ProductDetailPageCl
   if (!product) {
     return null; // Or a loading/error state
   }
+  
+  const allImages = [product.imageUrl, ...product.imageUrls.filter(url => url !== product.imageUrl)];
 
   return (
     <div className="bg-background">
       <div className="container mx-auto px-4 py-16 md:py-24">
         <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
-          {/* Product Image */}
-          <div className="w-full h-96 md:h-auto">
-            <div className="relative aspect-square rounded-lg overflow-hidden shadow-lg">
+          {/* Product Image Gallery */}
+          <div className="flex flex-col gap-4">
+             <div className="relative aspect-square rounded-lg overflow-hidden shadow-lg">
                 <Image
-                src={product.imageUrl}
-                alt={product.name}
-                data-ai-hint="jewelry detail"
-                fill
-                className="object-cover"
-                priority
+                  src={selectedImage}
+                  alt={product.name}
+                  data-ai-hint="jewelry detail"
+                  fill
+                  className="object-cover transition-all duration-300"
+                  priority
+                  key={selectedImage}
                 />
             </div>
+            {allImages.length > 1 && (
+                <div className="grid grid-cols-5 gap-2">
+                    {allImages.map((imgUrl, index) => (
+                        <button 
+                            key={index} 
+                            className={cn(
+                                "relative aspect-square rounded-md overflow-hidden transition-all",
+                                selectedImage === imgUrl ? "ring-2 ring-primary ring-offset-2" : "opacity-70 hover:opacity-100"
+                            )}
+                            onClick={() => setSelectedImage(imgUrl)}
+                        >
+                            <Image
+                                src={imgUrl}
+                                alt={`${product.name} thumbnail ${index + 1}`}
+                                fill
+                                className="object-cover"
+                            />
+                        </button>
+                    ))}
+                </div>
+            )}
           </div>
 
           {/* Product Details */}
@@ -104,6 +138,7 @@ export default function ProductDetailPageClient({ product }: ProductDetailPageCl
           </div>
         </div>
 
+        <ProductReviews reviews={product.reviews} />
         <RelatedProducts categoryId={product.category_id} currentProductId={product.id} />
         <RecentlyViewedProducts currentProductId={product.id} />
 
