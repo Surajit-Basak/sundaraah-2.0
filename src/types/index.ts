@@ -78,7 +78,9 @@ export type OrderWithItems = Order & {
     order_items: OrderItem[];
 }
 
-export type FullOrderForEmail = Order & {
+export type FullOrderForEmail = Omit<Order, 'id' | 'created_at'> & {
+  id: string;
+  created_at: string;
   order_items: CartItem[];
 }
 
@@ -101,6 +103,7 @@ export type UserProfile = {
 };
 
 export type Settings = {
+  id?: number;
   site_name: string;
   theme_colors: {
     primary: string;

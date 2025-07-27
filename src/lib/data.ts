@@ -1,13 +1,11 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import OrderConfirmationEmail from "@/components/emails/order-confirmation-email";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Product Functions
 export async function getProducts(): Promise<Product[]> {
@@ -360,6 +358,7 @@ type NewOrder = {
 export async function createOrder(orderData: NewOrder): Promise<string> {
     const supabase = createSupabaseServerClient();
     const settings = await getSettings();
+    const resendApiKey = process.env.RESEND_API_KEY;
 
     const { data: order, error: orderError } = await supabase
         .from('orders')
@@ -395,20 +394,25 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
         throw new Error('Failed to create order items.');
     }
     
-    // Send confirmation email
-    try {
-        await resend.emails.send({
-            from: `"${settings?.site_name || 'Sundaraah'}" <noreply@sundaraah.com>`,
-            to: [orderData.customer_email],
-            subject: 'Your Sundaraah Order Confirmation',
-            react: OrderConfirmationEmail({
-                order: { ...order, ...orderData, order_items: orderData.items },
-                siteName: settings?.site_name || 'Sundaraah Showcase',
-            }),
-        });
-    } catch (emailError) {
-        console.error('Email sending failed:', emailError);
-        // Do not throw an error here, the order was still placed successfully.
+    // Send confirmation email only if API key exists
+    if (resendApiKey) {
+        try {
+            const resend = new Resend(resendApiKey);
+            await resend.emails.send({
+                from: `"${settings?.site_name || 'Sundaraah'}" <noreply@sundaraah.com>`,
+                to: [orderData.customer_email],
+                subject: 'Your Sundaraah Order Confirmation',
+                react: OrderConfirmationEmail({
+                    order: { ...order, ...orderData, order_items: orderData.items },
+                    siteName: settings?.site_name || 'Sundaraah Showcase',
+                }),
+            });
+        } catch (emailError) {
+            console.error('Email sending failed:', emailError);
+            // Do not throw an error here, the order was still placed successfully.
+        }
+    } else {
+        console.warn("RESEND_API_KEY is not set. Skipping order confirmation email.");
     }
 
     revalidatePath('/admin/orders');
@@ -578,7 +582,7 @@ export async function getSettings(): Promise<Settings | null> {
     return data;
 }
 
-export async function updateSettings(settingsData: Partial<Settings>) {
+export async function updateSettings(settingsData: Partial<Omit<Settings, 'id'>>) {
     const supabase = createSupabaseServerClient();
     const { error } = await supabase.from('settings').update(settingsData).eq('id', 1);
     if (error) {
