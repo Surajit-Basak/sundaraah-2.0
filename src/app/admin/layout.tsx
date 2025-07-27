@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   description: "Admin dashboard for Sundaraah Showcase",
 };
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -57,7 +57,7 @@ export default function AdminLayout({
       redirect('/admin/login');
     }
   };
-  checkAdmin();
+  await checkAdmin();
 
   const isLoginPage = pathname === '/admin/login';
   

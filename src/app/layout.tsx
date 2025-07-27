@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   const pathname = headers().get('next-url') || '';
   const isAdminRoute = pathname.startsWith('/admin');
-  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/auth/confirm' || pathname === '/admin/login';
+  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/auth/confirm';
 
   if (isAdminRoute) {
     return (

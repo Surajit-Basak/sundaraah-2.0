@@ -80,15 +80,16 @@ export async function middleware(request: NextRequest) {
     if (isAuthRoute) {
        return NextResponse.redirect(new URL('/', request.url));
     }
+
+    const isAdminUser = session.user.user_metadata?.user_role === 'admin';
+
     if (isAdminLogin) {
-       // Check if the user has admin role
-      if (session.user.user_metadata?.user_role === 'admin') {
+      if (isAdminUser) {
          return NextResponse.redirect(new URL('/admin/dashboard', request.url));
       }
     }
     if (isAdminRoute && !isAdminLogin) {
-        // If user is not an admin, redirect them away from admin routes
-        if (session.user.user_metadata?.user_role !== 'admin') {
+        if (!isAdminUser) {
             return NextResponse.redirect(new URL('/', request.url));
         }
     }
