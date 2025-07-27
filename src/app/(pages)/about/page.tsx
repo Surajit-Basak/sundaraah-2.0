@@ -33,8 +33,8 @@ export default async function AboutPage() {
       <section className="relative h-[50vh] flex items-center justify-center text-center text-primary-foreground">
         <div className="absolute inset-0 bg-primary/80 z-10" />
         <Image
-          src="https://placehold.co/1800x800.png"
-          alt="Artisan workshop"
+          src={heroContent.image_url || "https://placehold.co/1800x800.png"}
+          alt={heroContent.title || "Artisan workshop"}
           data-ai-hint="artisan workshop"
           fill
           className="object-cover"
@@ -60,8 +60,8 @@ export default async function AboutPage() {
             </div>
             <div>
               <Image
-                src="https://placehold.co/600x700.png"
-                alt="Jewelry making process"
+                src={missionContent.image_url || "https://placehold.co/600x700.png"}
+                alt={missionContent.title || "Jewelry making process"}
                 data-ai-hint="jewelry making"
                 width={600}
                 height={700}
