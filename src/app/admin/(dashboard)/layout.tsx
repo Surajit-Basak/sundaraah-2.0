@@ -43,7 +43,7 @@ export default async function AdminDashboardLayout({
       { href: "/admin/blog", label: "Blog", icon: <BookOpen /> },
       { href: "/admin/team", label: "Team", icon: <Users /> },
       { href: "/admin/banners", label: "Banners", icon: <ImageIcon /> },
-      { href: "#", label: "Analytics", icon: <BarChart3 /> },
+      { href: "/admin/analytics", label: "Analytics", icon: <BarChart3 /> },
       { href: "#", a: true, label: "Settings", icon: <Settings /> },
   ]
 
