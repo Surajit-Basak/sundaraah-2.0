@@ -1,5 +1,4 @@
 
-
 export type Product = {
   id: string;
   name: string;
@@ -94,6 +93,12 @@ export type UserProfile = {
 };
 
 export type Settings = {
+  site_name: string;
+  theme_colors: {
+    primary: string;
+    background: string;
+    accent: string;
+  };
   whatsapp_number: string | null;
   whatsapp_enabled: boolean;
 };

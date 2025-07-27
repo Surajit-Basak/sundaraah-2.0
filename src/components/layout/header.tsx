@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { logout } from "@/app/auth/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { getSettings } from "@/lib/data";
+import type { Settings } from "@/types";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -35,6 +37,7 @@ export default function Header() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [settings, setSettings] = useState<Settings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
@@ -43,13 +46,18 @@ export default function Header() {
   const supabase = createSupabaseBrowserClient();
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchInitialData = async () => {
+      setIsLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
+      
+      const fetchedSettings = await getSettings();
+      setSettings(fetchedSettings);
+      
       setIsLoading(false);
     };
 
-    fetchUser();
+    fetchInitialData();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
@@ -100,6 +108,8 @@ export default function Header() {
       {label}
     </Link>
   );
+
+  const siteName = settings?.site_name || "Sundaraah";
   
   const UserButton = () => {
     if (isLoading) {
@@ -147,7 +157,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-20 max-w-screen-2xl items-center justify-between px-4 gap-8">
         <Link href="/" className="font-headline text-3xl font-bold text-primary hidden sm:block">
-          Sundaraah
+          {siteName}
         </Link>
         
         {/* Main Navigation & Search Container */}
@@ -191,7 +201,7 @@ export default function Header() {
               <div className="flex flex-col h-full">
                 <div className="flex justify-between items-center p-4 border-b">
                    <Link href="/" className="font-headline text-2xl font-bold text-primary" onClick={() => setMobileMenuOpen(false)}>
-                    Sundaraah
+                    {siteName}
                   </Link>
                   <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
                     <X className="h-6 w-6 text-primary" />

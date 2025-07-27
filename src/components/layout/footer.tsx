@@ -1,8 +1,12 @@
 
 import Link from "next/link";
 import { Twitter, Facebook, Instagram, Gem } from "lucide-react";
+import { getSettings } from "@/lib/data";
 
-export default function Footer() {
+export default async function Footer() {
+  const settings = await getSettings();
+  const siteName = settings?.site_name || "Sundaraah Showcase";
+
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 py-16">
@@ -13,7 +17,7 @@ export default function Footer() {
             <Link href="/" className="inline-block mb-4">
                 <div className="flex items-center gap-2">
                     <Gem className="h-8 w-8 text-accent"/>
-                    <h3 className="font-headline text-3xl font-bold">Sundaraah</h3>
+                    <h3 className="font-headline text-3xl font-bold">{siteName}</h3>
                 </div>
             </Link>
             <p className="text-primary-foreground/80 mb-6 max-w-sm mx-auto md:mx-0">
@@ -64,7 +68,7 @@ export default function Footer() {
 
         </div>
         <div className="border-t border-primary-foreground/20 mt-12 pt-8 text-center text-sm text-primary-foreground/80">
-          <p>&copy; {new Date().getFullYear()} Sundaraah Showcase. All Rights Reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {siteName}. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

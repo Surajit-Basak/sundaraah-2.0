@@ -12,15 +12,13 @@ export default async function SettingsPage() {
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Store Settings</CardTitle>
-          <CardDescription>Manage general store settings and contact information.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SettingsForm initialData={settings} />
-        </CardContent>
-      </Card>
+        <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold tracking-tight">Store Settings</h2>
+        </div>
+        <p className="text-muted-foreground">
+            Manage your site's identity, theme colors, and other global settings.
+        </p>
+        <SettingsForm initialData={settings} />
     </div>
   );
 }

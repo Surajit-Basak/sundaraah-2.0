@@ -17,6 +17,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getSettings } from "@/lib/data";
 
 export default async function AdminDashboardLayout({
   children,
@@ -25,6 +26,8 @@ export default async function AdminDashboardLayout({
 }) {
   const supabase = createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const settings = await getSettings();
+  
   // We need to adjust how we get the pathname, as it will include the group
   const rawPathname = headers().get('next-url') || '';
   const pathname = rawPathname.replace('/(dashboard)', '');
@@ -62,7 +65,7 @@ export default async function AdminDashboardLayout({
         <SidebarHeader>
           <div className="flex items-center gap-2 p-2">
             <Gem className="h-8 w-8 text-accent group-data-[state=collapsed]:h-6 group-data-[state=collapsed]:w-6 group-data-[state=collapsed]:mx-auto"/>
-            <h3 className="font-headline text-2xl font-bold text-primary group-data-[state=collapsed]:hidden">Sundaraah</h3>
+            <h3 className="font-headline text-2xl font-bold text-primary group-data-[state=collapsed]:hidden">{settings?.site_name || "Sundaraah"}</h3>
             <div className="flex-1" />
             <SidebarTrigger className="group-data-[state=collapsed]:hidden" />
           </div>

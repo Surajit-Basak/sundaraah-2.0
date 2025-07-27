@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection } from "@/types";
@@ -526,7 +525,17 @@ export async function getSettings(): Promise<Settings | null> {
     const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single();
     if (error) {
         console.error('Error fetching settings:', error);
-        return { whatsapp_number: '', whatsapp_enabled: false };
+        // Provide sensible defaults if the settings row doesn't exist yet
+        return { 
+            site_name: 'Sundaraah Showcase',
+            theme_colors: {
+              primary: "hsl(347 65% 25%)",
+              background: "hsl(30 50% 98%)",
+              accent: "hsl(45 85% 55%)",
+            },
+            whatsapp_number: '', 
+            whatsapp_enabled: false 
+        };
     }
     return data;
 }
@@ -538,8 +547,7 @@ export async function updateSettings(settingsData: Partial<Settings>) {
         console.error('Error updating settings:', error);
         throw new Error('Failed to update settings.');
     }
-    revalidatePath('/admin/settings');
-    revalidatePath('/');
+    revalidatePath('/', 'layout'); // Revalidate the whole site to apply changes
 }
 
 // Page Content Functions
@@ -666,4 +674,3 @@ export async function removeProductFromCollection(collectionId: string, productI
     }
     revalidatePath(`/admin/collections/${collectionId}/edit`);
 }
-

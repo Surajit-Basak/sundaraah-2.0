@@ -5,24 +5,42 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/context/cart-context';
 import { PwaProvider } from '@/context/pwa-context';
-import Header from '@/components/layout/header';
-import Footer from '@/components/layout/footer';
-import FloatingButtons from '@/components/layout/floating-buttons';
+import { getSettings } from '@/lib/data';
 
-export const metadata: Metadata = {
-  title: 'Sundaraah Showcase',
-  description: 'Exquisite Handcrafted Jewelry',
-  manifest: '/manifest.json'
+// This function now generates metadata dynamically
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  const siteName = settings?.site_name || 'Sundaraah Showcase';
+  
+  return {
+    title: {
+      default: siteName,
+      template: `%s | ${siteName}`,
+    },
+    description: 'Exquisite Handcrafted Jewelry',
+    manifest: '/manifest.json'
+  };
+}
+
+// Helper to convert HSL string to CSS variable format
+const hslToVar = (hslStr: string) => {
+  return hslStr.replace('hsl(', '').replace(')', '').replace(/%/g, '');
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // The logic to differentiate between admin/public pages is now handled by the presence
-  // of this RootLayout's components (Header, Footer) and the admin-specific layout.
-  // We can render a simpler body structure here.
+  const settings = await getSettings();
+  
+  const themeStyle = settings?.theme_colors ? `
+    :root {
+      --background: ${hslToVar(settings.theme_colors.background)};
+      --primary: ${hslToVar(settings.theme_colors.primary)};
+      --accent: ${hslToVar(settings.theme_colors.accent)};
+    }
+  ` : '';
 
   return (
     <html lang="en" className="scroll-smooth">
@@ -31,6 +49,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
         <meta name="theme-color" content="#5d1d39" />
+        {themeStyle && <style dangerouslySetInnerHTML={{ __html: themeStyle }} />}
       </head>
       <body className={cn("font-body antialiased")}>
         <PwaProvider>
