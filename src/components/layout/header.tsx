@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { logout } from "@/app/auth/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Slot } from "@radix-ui/react-slot";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -92,12 +93,17 @@ export default function Header() {
   );
   
   const HeaderIcon = ({ children, ariaLabel, onClick, asChild, href }: { children: React.ReactNode; ariaLabel: string, onClick?: () => void, asChild?: boolean, href?: string }) => {
-    const Component = asChild ? Link : Button;
-    const props = asChild ? { href } : { onClick };
+    const Comp = asChild ? Slot : Button;
     return (
-     <Component {...props} asChild={asChild} variant="ghost" size="icon" aria-label={ariaLabel} className="text-primary transition-colors hover:bg-primary/10 rounded-full">
+     <Comp 
+        onClick={onClick} 
+        variant="ghost" 
+        size="icon" 
+        aria-label={ariaLabel} 
+        className="text-primary transition-colors hover:bg-primary/10 rounded-full"
+    >
         {children}
-     </Component>
+     </Comp>
     )
   }
 
@@ -134,8 +140,10 @@ export default function Header() {
     }
 
     return (
-      <HeaderIcon asChild href="/login" ariaLabel="Login">
-          <LogIn className="h-6 w-6" />
+        <HeaderIcon ariaLabel="Login">
+            <Link href="/login">
+                <LogIn className="h-6 w-6" />
+            </Link>
       </HeaderIcon>
     )
   }
