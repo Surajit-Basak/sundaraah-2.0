@@ -59,10 +59,10 @@ export default async function AdminDashboardLayout({
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2 p-2">
-            <Gem className="h-8 w-8 text-accent"/>
-            <h3 className="font-headline text-2xl font-bold text-primary group-data-[collapsible=icon]:hidden">Sundaraah</h3>
+            <Gem className="h-8 w-8 text-accent group-data-[state=collapsed]:h-6 group-data-[state=collapsed]:w-6 group-data-[state=collapsed]:mx-auto"/>
+            <h3 className="font-headline text-2xl font-bold text-primary group-data-[state=collapsed]:hidden">Sundaraah</h3>
             <div className="flex-1" />
-            <SidebarTrigger className="group-data-[collapsible=icon]:hidden" />
+            <SidebarTrigger className="group-data-[state=collapsed]:hidden" />
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -80,6 +80,7 @@ export default async function AdminDashboardLayout({
             </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
+           <SidebarTrigger className="mx-auto" />
            <SidebarMenu>
                 <SidebarMenuItem>
                     <form action={handleLogout} className="w-full">
