@@ -6,7 +6,6 @@ import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import OrderConfirmationEmail from "@/components/emails/order-confirmation-email";
-import { getSettings } from "./data";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
