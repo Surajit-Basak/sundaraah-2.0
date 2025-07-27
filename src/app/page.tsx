@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Gem, HandHeart, Sparkles } from "lucide-react";
 import ProductCard from "@/components/product-card";
 import BlogPostCard from "@/components/blog-post-card";
-import { getProducts, getBlogPosts, getTeamMembers, getPageContent } from "@/lib/data";
+import { getProducts, getBlogPosts, getTeamMembers, getPageContent, getTestimonials } from "@/lib/data";
 import TestimonialCard from "@/components/testimonial-card";
 import {
   Carousel,
@@ -18,7 +18,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input";
-import type { Product, BlogPost, TeamMember, PageContent } from "@/types";
+import type { Product, BlogPost, TeamMember, PageContent, Testimonial } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import HeroBanner from "@/components/layout/hero-banner";
 
@@ -32,21 +32,24 @@ export default function Home() {
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [mainArtisan, setMainArtisan] = useState<TeamMember | null>(null);
   const [pageContent, setPageContent] = useState<PageContent[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const [products, posts, team, content] = await Promise.all([
+      const [products, posts, team, content, fetchedTestimonials] = await Promise.all([
         getProducts(),
         getBlogPosts(),
         getTeamMembers(),
         getPageContent("home"),
+        getTestimonials(true),
       ]);
       setAllProducts(products);
       setRecentPosts(posts);
       setMainArtisan(team[1] ?? null); // Rohan Verma, Master Artisan
       setPageContent(content);
+      setTestimonials(fetchedTestimonials);
       setIsLoading(false);
     };
     fetchData();
@@ -66,29 +69,6 @@ export default function Home() {
     { name: "Bracelets", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "bracelet jewelry" },
     { name: "Rings", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "ring jewelry" },
     { name: "Anklets", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "anklet jewelry" },
-  ];
-
-  const testimonials = [
-    {
-      quote: "The necklace I bought is absolutely stunning. The craftsmanship is top-notch, and I get compliments every time I wear it!",
-      author: "Priya K.",
-    },
-    {
-      quote: "Sundaraah's customer service is as wonderful as their jewelry. They helped me pick the perfect gift, and it was a huge hit.",
-      author: "Rahul S.",
-    },
-    {
-      quote: "I'm in love with my new earrings. They are elegant, unique, and beautifully made. I'll definitely be coming back for more.",
-      author: "Anjali M.",
-    },
-     {
-      quote: "The quality is exceptional. You can feel the love and dedication that goes into each piece. A truly special brand.",
-      author: "Sameer T.",
-    },
-    {
-      quote: "My bracelet is my new favorite accessory. It's so versatile and beautifully crafted. I'll be a returning customer for sure.",
-      author: "Divya R.",
-    },
   ];
 
   const features = [
@@ -261,17 +241,19 @@ export default function Home() {
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             {getContent(pageContent, 'testimonials').title || "Words from Our Customers"}
           </h2>
-          <Carousel opts={{ align: "start", loop: true }} className="w-full">
-            <CarouselContent>
-              {testimonials.map((testimonial, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3 p-4">
-                   <TestimonialCard {...testimonial} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
-          </Carousel>
+          {testimonials.length > 0 && (
+            <Carousel opts={{ align: "start", loop: true }} className="w-full">
+              <CarouselContent>
+                {testimonials.map((testimonial) => (
+                  <CarouselItem key={testimonial.id} className="md:basis-1/2 lg:basis-1/3 p-4">
+                     <TestimonialCard {...testimonial} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden md:flex" />
+              <CarouselNext className="hidden md:flex" />
+            </Carousel>
+          )}
         </div>
       </section>
 

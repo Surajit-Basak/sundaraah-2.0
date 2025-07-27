@@ -149,3 +149,11 @@ export type Media = {
   content_type: string | null;
   created_at: string;
 };
+
+export type Testimonial = {
+  id: string;
+  quote: string;
+  author: string;
+  is_active: boolean;
+  created_at: string;
+};

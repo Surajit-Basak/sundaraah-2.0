@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo, Testimonial } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
@@ -827,4 +827,64 @@ export async function deleteMedia(id: string, filePath: string) {
     }
 
     revalidatePath('/admin/media');
+}
+
+// Testimonial Functions
+export async function getTestimonials(onlyActive = false): Promise<Testimonial[]> {
+    const supabase = createSupabaseServerClient();
+    let query = supabase.from('testimonials').select('*').order('created_at', { ascending: false });
+    if (onlyActive) {
+        query = query.eq('is_active', true);
+    }
+    const { data, error } = await query;
+    if (error) {
+        console.error('Error fetching testimonials:', error);
+        return [];
+    }
+    return data || [];
+}
+
+export async function getTestimonialById(id: string): Promise<Testimonial | null> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('testimonials').select('*').eq('id', id).single();
+    if (error || !data) {
+        console.error('Error fetching testimonial by id:', error);
+        return null;
+    }
+    return data;
+}
+
+type TestimonialInput = Omit<Testimonial, 'id' | 'created_at'>;
+
+export async function createTestimonial(testimonialData: TestimonialInput) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('testimonials').insert([testimonialData]);
+    if (error) {
+        console.error('Error creating testimonial:', error);
+        throw new Error('Failed to create testimonial.');
+    }
+    revalidatePath('/admin/testimonials');
+    revalidatePath('/');
+}
+
+export async function updateTestimonial(id: string, testimonialData: Partial<TestimonialInput>) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('testimonials').update(testimonialData).eq('id', id);
+    if (error) {
+        console.error('Error updating testimonial:', error);
+        throw new Error('Failed to update testimonial.');
+    }
+    revalidatePath('/admin/testimonials');
+    revalidatePath('/');
+}
+
+export async function deleteTestimonial(id: string) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('testimonials').delete().eq('id', id);
+    if (error) {
+        console.error('Error deleting testimonial:', error);
+        throw new Error('Failed to delete testimonial.');
+    }
+    revalidatePath('/admin/testimonials');
+    revalidatePath('/');
 }
