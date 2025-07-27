@@ -1,7 +1,6 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/config'
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -10,9 +9,11 @@ export async function middleware(request: NextRequest) {
     },
   })
 
+  // IMPORTANT: The Supabase client is created with credentials directly from process.env here.
+  // This is the correct way to access them in the middleware's Edge Runtime.
   const supabase = createServerClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         get(name: string) {

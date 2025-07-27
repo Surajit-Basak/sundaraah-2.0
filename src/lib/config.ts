@@ -1,4 +1,8 @@
-// IMPORTANT: Replace with your actual Supabase project URL and anon key
-// You can get these from your Supabase project settings
+
+// IMPORTANT: These values are now loaded from the .env file
 export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Supabase URL and Anon Key must be defined in the .env file');
+}
