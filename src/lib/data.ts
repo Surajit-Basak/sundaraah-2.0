@@ -2,7 +2,7 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -569,4 +569,60 @@ export async function updatePageContent(page: string, section: string, content: 
         throw new Error('Failed to update page content.');
     }
     revalidatePath('/', 'layout'); // Revalidate the whole site
+}
+
+// Collection Functions
+export async function getCollections(): Promise<Collection[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('collections').select('*').order('created_at', { ascending: false });
+    if (error) {
+        console.error('Error fetching collections:', error);
+        return [];
+    }
+    return data || [];
+}
+
+export async function getCollectionById(id: string): Promise<Collection | null> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('collections').select('*').eq('id', id).single();
+    if (error || !data) {
+        console.error('Error fetching collection by id:', error);
+        return null;
+    }
+    return data;
+}
+
+type CollectionInput = Omit<Collection, 'id' | 'created_at'>;
+
+export async function createCollection(collectionData: CollectionInput) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('collections').insert([collectionData]);
+    if (error) {
+        console.error('Error creating collection:', error);
+        throw new Error('Failed to create collection.');
+    }
+    revalidatePath('/admin/collections');
+}
+
+export async function updateCollection(id: string, collectionData: Partial<CollectionInput>) {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('collections').update(collectionData).eq('id', id).select().single();
+    if (error) {
+        console.error('Error updating collection:', error);
+        throw new Error('Failed to update collection.');
+    }
+    revalidatePath('/admin/collections');
+    revalidatePath(`/admin/collections/${data.id}/edit`);
+}
+
+export async function deleteCollection(id: string) {
+    const supabase = createSupabaseServerClient();
+    // Also need to delete from the join table
+    await supabase.from('product_collections').delete().eq('collection_id', id);
+    const { error } = await supabase.from('collections').delete().eq('id', id);
+    if (error) {
+        console.error('Error deleting collection:', error);
+        throw new Error('Failed to delete collection.');
+    }
+    revalidatePath('/admin/collections');
 }

@@ -104,3 +104,12 @@ export type PageContent = {
   section: string;
   content: { [key: string]: any } | null;
 };
+
+export type Collection = {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    image_url: string | null;
+    created_at: string;
+}
