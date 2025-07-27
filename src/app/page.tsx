@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Gem, HandHeart, Sparkles } from "lucide-react";
 import ProductCard from "@/components/product-card";
 import BlogPostCard from "@/components/blog-post-card";
-import { getProducts, getBlogPosts, getTeamMembers } from "@/lib/data";
+import { getProducts, getBlogPosts, getTeamMembers, getPageContent } from "@/lib/data";
 import TestimonialCard from "@/components/testimonial-card";
 import {
   Carousel,
@@ -18,27 +18,35 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input";
-import type { Product, BlogPost, TeamMember } from "@/types";
+import type { Product, BlogPost, TeamMember, PageContent } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import HeroBanner from "@/components/layout/hero-banner";
+
+// Helper to extract content from fetched data
+const getContent = (sections: PageContent[], sectionName: string) => {
+  return sections.find(s => s.section === sectionName)?.content || {};
+};
 
 export default function Home() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [mainArtisan, setMainArtisan] = useState<TeamMember | null>(null);
+  const [pageContent, setPageContent] = useState<PageContent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const [products, posts, team] = await Promise.all([
+      const [products, posts, team, content] = await Promise.all([
         getProducts(),
         getBlogPosts(),
         getTeamMembers(),
+        getPageContent("home"),
       ]);
       setAllProducts(products);
       setRecentPosts(posts);
       setMainArtisan(team[1] ?? null); // Rohan Verma, Master Artisan
+      setPageContent(content);
       setIsLoading(false);
     };
     fetchData();
@@ -47,6 +55,10 @@ export default function Home() {
   const featuredProducts = allProducts.slice(0, 6);
   const trendingProducts = allProducts.slice(3, 9).sort(() => 0.5 - Math.random());
   const bestSellers = allProducts.slice(1, 7).sort(() => 0.5 - Math.random());
+  
+  const craftsmanshipContent = getContent(pageContent, 'craftsmanship');
+  const giftingContent = getContent(pageContent, 'gifting');
+  const newsletterContent = getContent(pageContent, 'newsletter');
 
   const categories = [
     { name: "Necklaces", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "necklace jewelry" },
@@ -54,8 +66,8 @@ export default function Home() {
     { name: "Bracelets", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "bracelet jewelry" },
     { name: "Rings", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "ring jewelry" },
     { name: "Anklets", href: "/shop", imageUrl: "https://placehold.co/400x500.png", hint: "anklet jewelry" },
-
   ];
+
   const testimonials = [
     {
       quote: "The necklace I bought is absolutely stunning. The craftsmanship is top-notch, and I get compliments every time I wear it!",
@@ -127,7 +139,6 @@ export default function Home() {
     <div className="flex flex-col">
       <HeroBanner />
       
-      {/* Why Choose Us Section */}
       <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
@@ -144,11 +155,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Products Section */}
       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
-            Featured Collection
+            {getContent(pageContent, 'featured_products').title || "Featured Collection"}
           </h2>
           {isLoading ? <ProductCarouselSkeleton/> : <ProductCarousel products={featuredProducts} />}
           <div className="text-center mt-12">
@@ -161,11 +171,10 @@ export default function Home() {
         </div>
       </section>
       
-      {/* Shop by Category Section */}
       <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
-            Shop by Category
+            {getContent(pageContent, 'categories').title || "Shop by Category"}
           </h2>
           <Carousel opts={{ align: "start" }}>
             <CarouselContent>
@@ -193,36 +202,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trending Products Section */}
       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
-            Trending Now
+            {getContent(pageContent, 'trending').title || "Trending Now"}
           </h2>
           {isLoading ? <ProductCarouselSkeleton/> : <ProductCarousel products={trendingProducts} />}
         </div>
       </section>
 
-      {/* Our Craftsmanship Section */}
       <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="prose prose-lg max-w-none text-foreground">
-              <h2 className="font-headline text-3xl md:text-4xl text-primary mb-4">The Soul of Sundaraah</h2>
-              {isLoading || !mainArtisan ? (
+              <h2 className="font-headline text-3xl md:text-4xl text-primary mb-4">{craftsmanshipContent.title || "The Soul of Sundaraah"}</h2>
+              {isLoading ? (
                 <div className="space-y-4">
-                  <Skeleton className="h-6 w-3/4" />
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-5/6" />
                 </div>
               ) : (
                 <>
-                <p>
-                  Behind every piece of Sundaraah jewelry lies a story of tradition, skill, and dedication. Our master artisans, like {mainArtisan.name}, pour their hearts into crafting each item, ensuring it's not just an accessory, but a work of art.
-                </p>
-                <p>
-                  We believe in the beauty of the human touch. From the initial sketch to the final polish, every step is a testament to our commitment to exceptional craftsmanship and timeless design.
-                </p>
+                <p>{craftsmanshipContent.paragraph1}</p>
+                <p>{craftsmanshipContent.paragraph2}</p>
                 </>
               )}
               <Button asChild variant="link" className="text-accent p-0 mt-4 text-lg">
@@ -245,29 +247,21 @@ export default function Home() {
         </div>
       </section>
       
-      {/* Best Sellers Section */}
        <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
-            Our Best Sellers
+            {getContent(pageContent, 'bestsellers').title || "Our Best Sellers"}
           </h2>
           {isLoading ? <ProductCarouselSkeleton/> : <ProductCarousel products={bestSellers} />}
         </div>
       </section>
       
-      {/* Testimonials Section */}
       <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
-            Words from Our Customers
+            {getContent(pageContent, 'testimonials').title || "Words from Our Customers"}
           </h2>
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            className="w-full"
-          >
+          <Carousel opts={{ align: "start", loop: true }} className="w-full">
             <CarouselContent>
               {testimonials.map((testimonial, index) => (
                 <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3 p-4">
@@ -281,7 +275,6 @@ export default function Home() {
         </div>
       </section>
 
-       {/* Gifting Banner Section */}
        <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="relative bg-primary text-primary-foreground rounded-lg shadow-xl overflow-hidden">
@@ -295,9 +288,9 @@ export default function Home() {
                 />
             </div>
             <div className="relative text-center p-12 md:p-20">
-              <h2 className="font-headline text-3xl md:text-4xl font-bold mb-4">The Art of Gifting</h2>
+              <h2 className="font-headline text-3xl md:text-4xl font-bold mb-4">{giftingContent.title || "The Art of Gifting"}</h2>
               <p className="max-w-2xl mx-auto mb-8 text-lg text-primary-foreground/80">
-                Find the perfect expression of your affection. Our handcrafted pieces make for unforgettable gifts that will be treasured forever.
+                {giftingContent.subtitle || "Find the perfect expression of your affection. Our handcrafted pieces make for unforgettable gifts that will be treasured forever."}
               </p>
               <Button asChild size="lg" variant="secondary" className="bg-accent text-accent-foreground hover:bg-accent/90">
                 <Link href="/shop">
@@ -309,18 +302,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Blog Section */}
       <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
-            From Our Journal
+            {getContent(pageContent, 'blog').title || "From Our Journal"}
           </h2>
-           <Carousel
-            opts={{
-              align: "start",
-            }}
-            className="w-full"
-          >
+           <Carousel opts={{ align: "start" }} className="w-full">
             <CarouselContent>
               {recentPosts.map((post) => (
                 <CarouselItem key={post.id} className="md:basis-1/2 lg:basis-1/3 p-4">
@@ -341,13 +328,12 @@ export default function Home() {
         </div>
       </section>
 
-       {/* Newsletter Section */}
        <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="bg-secondary p-10 rounded-lg shadow-lg text-center">
-            <h2 className="font-headline text-3xl md:text-4xl font-bold text-primary mb-4">Join Our World</h2>
+            <h2 className="font-headline text-3xl md:text-4xl font-bold text-primary mb-4">{newsletterContent.title || "Join Our World"}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-              Subscribe to our newsletter for exclusive updates, new arrivals, and special offers delivered right to your inbox.
+              {newsletterContent.subtitle || "Subscribe to our newsletter for exclusive updates, new arrivals, and special offers delivered right to your inbox."}
             </p>
             <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
               <Input type="email" placeholder="Your email address" className="text-base" />

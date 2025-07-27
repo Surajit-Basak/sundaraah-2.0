@@ -4,10 +4,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from 'next/navigation';
 import ProductCard from "@/components/product-card";
-import { getProducts, getCategories } from "@/lib/data";
+import { getProducts, getCategories, getPageContent } from "@/lib/data";
 import { Slider } from "@/components/ui/slider";
 import { formatPrice } from "@/lib/utils";
-import type { Product, Category } from "@/types";
+import type { Product, Category, PageContent } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
@@ -18,8 +18,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const getContent = (sections: PageContent[], sectionName: string) => {
+  return sections.find(s => s.section === sectionName)?.content || {};
+};
+
 export default function ShopPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [pageContent, setPageContent] = useState<PageContent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -33,15 +38,17 @@ export default function ShopPage() {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const [products, fetchedCategories] = await Promise.all([
+      const [products, fetchedCategories, content] = await Promise.all([
         getProducts(),
-        getCategories()
+        getCategories(),
+        getPageContent("shop"),
       ]);
       
       const publishedProducts = products.sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
       setAllProducts(publishedProducts);
       setCategories([{ id: 'all', name: 'All' }, ...fetchedCategories]);
+      setPageContent(content);
 
       const maxProductPrice = Math.ceil(Math.max(...products.map(p => p.price), 0));
       setMaxPrice(maxProductPrice > 0 ? maxProductPrice : 1000);
@@ -79,15 +86,17 @@ export default function ShopPage() {
     return products;
 
   }, [allProducts, selectedCategory, priceRange, searchQuery, sortBy]);
+  
+  const headerContent = getContent(pageContent, 'header');
 
   return (
     <div className="bg-background">
       {/* Header Section */}
       <section className="bg-secondary py-16 md:py-20 text-center">
         <div className="container mx-auto px-4">
-          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">Our Collection</h1>
+          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">{headerContent.title || "Our Collection"}</h1>
           <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-            Discover pieces designed to be cherished, each with its own story.
+            {headerContent.subtitle || "Discover pieces designed to be cherished, each with its own story."}
           </p>
         </div>
       </section>

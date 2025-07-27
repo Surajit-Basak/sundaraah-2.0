@@ -1,10 +1,11 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 
+// Product Functions
 export async function getProducts(): Promise<Product[]> {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('products').select(`
@@ -102,7 +103,6 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
         reviews: [],
     })) || [];
 
-    // Preserve the order of the original IDs array
     return ids.map(id => products.find(p => p.id === id)).filter((p): p is Product => !!p);
 }
 
@@ -154,6 +154,7 @@ export async function deleteProduct(id: string) {
     revalidatePath('/shop');
 }
 
+// Category Functions
 export async function getCategories(): Promise<Category[]> {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('categories').select('*');
@@ -164,6 +165,7 @@ export async function getCategories(): Promise<Category[]> {
     return data || [];
 }
 
+// Blog Post Functions
 export async function getBlogPosts(): Promise<BlogPost[]> {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('blog_posts').select('*').order('date', { ascending: false });
@@ -230,7 +232,7 @@ export async function deleteBlogPost(id: string) {
     revalidatePath('/blog');
 }
 
-
+// Team Member Functions
 export async function getTeamMembers(): Promise<TeamMember[]> {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('team_members').select('*').order('created_at', { ascending: true });
@@ -295,7 +297,7 @@ export async function deleteTeamMember(id: string) {
     revalidatePath('/about');
 }
 
-
+// Order Functions
 export async function getOrders(): Promise<Order[]> {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
@@ -330,7 +332,6 @@ export async function getOrderById(id: string): Promise<OrderWithItems | null> {
         return null;
     }
     
-    // Transform the order items to include the full product object.
     const transformedItems = data.order_items.map((item: any) => ({
         ...item,
         product: item.products ? {
@@ -345,7 +346,6 @@ export async function getOrderById(id: string): Promise<OrderWithItems | null> {
     return { ...data, order_items: transformedItems };
 }
 
-
 type NewOrder = {
     customer_name: string;
     customer_email: string;
@@ -356,7 +356,6 @@ type NewOrder = {
 export async function createOrder(orderData: NewOrder): Promise<string> {
     const supabase = createSupabaseServerClient();
 
-    // Create the main order record
     const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -376,7 +375,6 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
 
     const orderId = order.id;
 
-    // Create the order items records
     const orderItems = orderData.items.map(item => ({
         order_id: orderId,
         product_id: item.product_id,
@@ -388,7 +386,6 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
 
     if (itemsError) {
         console.error('Error creating order items:', itemsError);
-        // If items fail, we should ideally delete the order record to avoid orphans.
         await supabase.from('orders').delete().eq('id', orderId);
         throw new Error('Failed to create order items.');
     }
@@ -397,7 +394,6 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
     if (orderData.user_id) {
         revalidatePath('/account');
     }
-
 
     return orderId;
 }
@@ -418,7 +414,7 @@ export async function getOrdersByUserId(userId: string): Promise<Order[]> {
     return data;
 }
 
-
+// Product Review Functions
 type ReviewInput = Omit<ProductReview, 'id' | 'created_at'>;
 
 export async function createProductReview(reviewData: ReviewInput, productSlug: string) {
@@ -435,7 +431,7 @@ export async function createProductReview(reviewData: ReviewInput, productSlug: 
     return data;
 }
 
-
+// Banner Functions
 export async function getBanners(): Promise<Banner[]> {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase
@@ -496,9 +492,9 @@ export async function deleteBanner(id: string) {
     revalidatePath('/');
 }
 
+// User Functions
 export async function getUsers(): Promise<UserProfile[]> {
     const supabase = createSupabaseServerClient();
-    // This now fetches from the public 'users' table
     const { data, error } = await supabase.from('users').select('*').order('email');
 
     if (error) {
@@ -523,14 +519,12 @@ export async function updateUserRole(userId: string, role: 'admin' | 'user') {
     revalidatePath('/admin/users');
 }
 
-
-// Settings
+// Settings Functions
 export async function getSettings(): Promise<Settings | null> {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single();
     if (error) {
         console.error('Error fetching settings:', error);
-        // Return default settings if the table is empty or there's an error
         return { whatsapp_number: '', whatsapp_enabled: false };
     }
     return data;
@@ -544,5 +538,34 @@ export async function updateSettings(settingsData: Partial<Settings>) {
         throw new Error('Failed to update settings.');
     }
     revalidatePath('/admin/settings');
-    revalidatePath('/'); // Revalidate home to update floating button
+    revalidatePath('/');
+}
+
+// Page Content Functions
+export async function getPageContent(page: string): Promise<PageContent[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+        .from('page_content')
+        .select('*')
+        .eq('page', page);
+
+    if (error) {
+        console.error(`Error fetching content for page "${page}":`, error);
+        return [];
+    }
+    return data || [];
+}
+
+export async function updatePageContent(page: string, section: string, content: any) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+        .from('page_content')
+        .update({ content })
+        .match({ page, section });
+
+    if (error) {
+        console.error(`Error updating content for ${page}.${section}:`, error);
+        throw new Error('Failed to update page content.');
+    }
+    revalidatePath('/', 'layout'); // Revalidate the whole site
 }

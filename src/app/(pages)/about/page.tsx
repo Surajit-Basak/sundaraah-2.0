@@ -1,15 +1,31 @@
+
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getTeamMembers } from "@/lib/data";
-import type { TeamMember } from "@/types";
+import { getTeamMembers, getPageContent } from "@/lib/data";
+import type { TeamMember, PageContent } from "@/types";
 
-export const metadata = {
-  title: "About Us | Sundaraah Showcase",
-  description: "Learn about the story, passion, and people behind Sundaraah Showcase.",
+export async function generateMetadata() {
+  const content = await getPageContent("about");
+  const heroContent = content.find(s => s.section === 'hero')?.content;
+  return {
+    title: `${heroContent?.title || "About Us"} | Sundaraah Showcase`,
+    description: heroContent?.subtitle || "Learn about the story, passion, and people behind Sundaraah Showcase.",
+  };
+}
+
+const getContent = (sections: PageContent[], sectionName: string) => {
+  return sections.find(s => s.section === sectionName)?.content || {};
 };
 
 export default async function AboutPage() {
-  const team: TeamMember[] = await getTeamMembers();
+  const [team, pageContent] = await Promise.all([
+      getTeamMembers(),
+      getPageContent("about"),
+  ]);
+
+  const heroContent = getContent(pageContent, 'hero');
+  const missionContent = getContent(pageContent, 'mission');
+  const teamContent = getContent(pageContent, 'team');
 
   return (
     <div className="bg-background">
@@ -25,10 +41,10 @@ export default async function AboutPage() {
         />
         <div className="relative z-20 container mx-auto px-4">
           <h1 className="font-headline text-4xl md:text-6xl font-bold drop-shadow-md">
-            Our Story
+            {heroContent.title || "Our Story"}
           </h1>
           <p className="text-lg md:text-xl max-w-3xl mx-auto mt-4">
-            A journey of passion, craftsmanship, and the love for timeless beauty.
+            {heroContent.subtitle || "A journey of passion, craftsmanship, and the love for timeless beauty."}
           </p>
         </div>
       </section>
@@ -38,13 +54,9 @@ export default async function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="prose prose-lg max-w-none text-foreground">
-              <h2 className="font-headline text-3xl md:text-4xl text-primary mb-4">Crafted with Passion</h2>
-              <p>
-                Sundaraah was born from a simple idea: to create jewelry that isn't just an accessory, but a piece of art that tells a story. We believe in the power of handcrafted items to carry intention, love, and a human touch that mass-produced items lack.
-              </p>
-              <p>
-                Our mission is to celebrate individuality and elegance through unique designs. Each piece is thoughtfully designed and meticulously crafted in our studio, using ethically sourced materials and timeless techniques. We aim to create heirlooms for the modern age—jewelry that you'll cherish and wear for years to come.
-              </p>
+              <h2 className="font-headline text-3xl md:text-4xl text-primary mb-4">{missionContent.title || "Crafted with Passion"}</h2>
+              <p>{missionContent.paragraph1}</p>
+              <p>{missionContent.paragraph2}</p>
             </div>
             <div>
               <Image
@@ -64,7 +76,7 @@ export default async function AboutPage() {
       <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
-            Meet the Artisans
+            {teamContent.title || "Meet the Artisans"}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {team.map((member) => (

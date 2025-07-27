@@ -97,3 +97,10 @@ export type Settings = {
   whatsapp_number: string | null;
   whatsapp_enabled: boolean;
 };
+
+export type PageContent = {
+  id: number;
+  page: string;
+  section: string;
+  content: { [key: string]: any } | null;
+};

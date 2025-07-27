@@ -1,16 +1,33 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin } from "lucide-react";
 import Image from "next/image";
+import { getPageContent } from "@/lib/data";
+import type { PageContent } from "@/types";
 
-export const metadata = {
-  title: "Contact Us | Sundaraah Showcase",
-  description: "Get in touch with us for inquiries, custom orders, or just to say hello.",
+export async function generateMetadata() {
+  const content = await getPageContent("contact");
+  const heroContent = content.find(s => s.section === 'hero')?.content;
+  return {
+    title: `${heroContent?.title || "Contact Us"} | Sundaraah Showcase`,
+    description: heroContent?.subtitle || "Get in touch with us for inquiries, custom orders, or just to say hello.",
+  };
+}
+
+const getContent = (sections: PageContent[], sectionName: string) => {
+  return sections.find(s => s.section === sectionName)?.content || {};
 };
 
-export default function ContactPage() {
+
+export default async function ContactPage() {
+  const pageContent = await getPageContent("contact");
+  const heroContent = getContent(pageContent, 'hero');
+  const infoContent = getContent(pageContent, 'info');
+  const formContent = getContent(pageContent, 'form');
+
   return (
     <div className="bg-background">
       {/* Hero Section */}
@@ -25,14 +42,13 @@ export default function ContactPage() {
         />
         <div className="relative z-20 container mx-auto px-4">
           <h1 className="font-headline text-4xl md:text-6xl font-bold drop-shadow-md">
-            Get In Touch
+            {heroContent.title || "Get In Touch"}
           </h1>
           <p className="text-lg md:text-xl max-w-3xl mx-auto mt-4">
-            We'd love to hear from you.
+            {heroContent.subtitle || "We'd love to hear from you."}
           </p>
         </div>
       </section>
-
 
       {/* Content Section */}
       <section className="py-16 md:py-24">
@@ -41,9 +57,9 @@ export default function ContactPage() {
             {/* Contact Info */}
             <div className="space-y-8">
                <div>
-                 <h2 className="font-headline text-2xl md:text-3xl font-bold text-primary mb-6">Contact Information</h2>
+                 <h2 className="font-headline text-2xl md:text-3xl font-bold text-primary mb-6">{infoContent.title || "Contact Information"}</h2>
                  <p className="text-lg text-muted-foreground mb-6">
-                    Whether you have a question about our products, a custom design idea, or anything else, our team is ready to answer all your questions.
+                    {infoContent.text || "Whether you have a question about our products, a custom design idea, or anything else, our team is ready to answer all your questions."}
                  </p>
                 <div className="space-y-4 text-lg">
                   <div className="flex items-center gap-4">
@@ -64,7 +80,7 @@ export default function ContactPage() {
 
             {/* Contact Form */}
             <div>
-              <h2 className="font-headline text-2xl md:text-3xl font-bold text-primary mb-6">Send Us a Message</h2>
+              <h2 className="font-headline text-2xl md:text-3xl font-bold text-primary mb-6">{formContent.title || "Send Us a Message"}</h2>
               <form className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">

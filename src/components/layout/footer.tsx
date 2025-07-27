@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { Twitter, Facebook, Instagram, Gem } from "lucide-react";
 
@@ -55,9 +56,9 @@ export default function Footer() {
            <div className="md:col-span-2">
             <h4 className="font-headline text-lg font-semibold mb-4">Support</h4>
             <ul className="space-y-2">
-              <li><Link href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">FAQ</Link></li>
-              <li><Link href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">Shipping & Returns</Link></li>
-              <li><Link href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">Care Guide</Link></li>
+              <li><Link href="/return-policy" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">Return Policy</Link></li>
+              <li><Link href="/shipping-policy" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">Shipping Policy</Link></li>
+              <li><Link href="/privacy-policy" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
 
