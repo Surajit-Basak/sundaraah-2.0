@@ -4,10 +4,23 @@ import { getBlogPostBySlug, getBlogPosts } from "@/lib/data";
 import Image from "next/image";
 import type { BlogPost } from "@/types";
 import { marked } from "marked";
+import { createClient } from "@supabase/supabase-js";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/config";
+
 
 // This function generates the pages for each blog post at build time
 export async function generateStaticParams() {
-  const posts = await getBlogPosts();
+  // Create a temporary, build-time-only Supabase client
+  // This is necessary because generateStaticParams runs at build time,
+  // where there are no cookies. The regular server client would fail.
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const { data: posts, error } = await supabase.from('blog_posts').select('slug');
+
+  if (error || !posts) {
+    console.error('Error fetching slugs for generateStaticParams:', error);
+    return [];
+  }
+
   return posts.map((post) => ({
     slug: post.slug,
   }));
