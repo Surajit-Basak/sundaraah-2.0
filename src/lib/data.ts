@@ -200,12 +200,60 @@ export async function deleteProduct(id: string) {
 // Category Functions
 export async function getCategories(): Promise<Category[]> {
     const supabase = createSupabaseServerClient();
-    const { data, error } = await supabase.from('categories').select('*');
+    const { data, error } = await supabase.from('categories').select('*').order('name', { ascending: true });
     if (error) {
         console.error('Error fetching categories:', error);
         return [];
     }
     return data || [];
+}
+
+export async function getCategoryById(id: string): Promise<Category | null> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('categories').select('*').eq('id', id).single();
+    if (error || !data) {
+        console.error('Error fetching category by id:', error);
+        return null;
+    }
+    return data;
+}
+
+type CategoryInput = Omit<Category, 'id' | 'created_at'>;
+
+export async function createCategory(categoryData: CategoryInput) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('categories').insert([categoryData]);
+    if (error) {
+        console.error('Error creating category:', error);
+        throw new Error('Failed to create category.');
+    }
+    revalidatePath('/admin/categories');
+    revalidatePath('/admin/products/new');
+    revalidatePath('/admin/products/*/edit');
+}
+
+export async function updateCategory(id: string, categoryData: Partial<CategoryInput>) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('categories').update(categoryData).eq('id', id);
+    if (error) {
+        console.error('Error updating category:', error);
+        throw new Error('Failed to update category.');
+    }
+    revalidatePath('/admin/categories');
+    revalidatePath('/admin/products/new');
+    revalidatePath('/admin/products/*/edit');
+}
+
+export async function deleteCategory(id: string) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from('categories').delete().eq('id', id);
+    if (error) {
+        console.error('Error deleting category:', error);
+        throw new Error('Failed to delete category.');
+    }
+    revalidatePath('/admin/categories');
+    revalidatePath('/admin/products/new');
+    revalidatePath('/admin/products/*/edit');
 }
 
 // Blog Post Functions
@@ -650,11 +698,10 @@ export async function getSettings(): Promise<Settings> {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single();
     
-    // If the query fails or returns no data, provide sensible defaults.
-    // This makes the app more resilient to initial setup issues.
     if (error || !data) {
         console.error('Error fetching settings, returning defaults:', error);
         return { 
+            id: 1,
             site_name: 'Sundaraah Showcase',
             logo_url: null,
             theme_colors: {

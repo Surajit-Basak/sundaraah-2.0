@@ -1,0 +1,74 @@
+
+"use client";
+
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { deleteCategory } from "@/lib/data";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+
+interface DeleteCategoryButtonProps {
+  categoryId: string;
+  onSuccess: () => void;
+}
+
+export function DeleteCategoryButton({ categoryId, onSuccess }: DeleteCategoryButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteCategory(categoryId);
+      toast({
+        title: "Success!",
+        description: "Category has been deleted.",
+      });
+      onSuccess();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem deleting the category. It might still be in use by some products.",
+      });
+    } finally {
+      setIsDeleting(false);
+      setIsOpen(false);
+    }
+  };
+
+  return (
+    <>
+      <AlertDialogTrigger asChild>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          Delete
+        </DropdownMenuItem>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete the category.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+            {isDeleting ? "Deleting..." : "Continue"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </>
+  );
+}

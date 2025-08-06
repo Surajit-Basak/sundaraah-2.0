@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Home, Package, Settings, ShoppingCart, BarChart3, Gem, LogOut, BookOpen, Users, ImageIcon, FileText, FolderKanban, GalleryHorizontal, Search, Star, Mail } from "lucide-react";
+import { Home, Package, Settings, ShoppingCart, BarChart3, Gem, LogOut, BookOpen, Users, ImageIcon, FileText, FolderKanban, GalleryHorizontal, Search, Star, Mail, Tags } from "lucide-react";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -42,6 +42,7 @@ export default async function AdminDashboardLayout({
       { href: "/admin/dashboard", label: "Dashboard", icon: <Home /> },
       { href: "/admin/orders", label: "Orders", icon: <ShoppingCart /> },
       { href: "/admin/products", label: "Products", icon: <Package /> },
+      { href: "/admin/categories", label: "Categories", icon: <Tags /> },
       { href: "/admin/collections", label: "Collections", icon: <FolderKanban /> },
       { href: "/admin/media", label: "Media", icon: <GalleryHorizontal /> },
       { href: "/admin/pages", label: "Page Content", icon: <FileText /> },
@@ -52,7 +53,7 @@ export default async function AdminDashboardLayout({
       { href: "/admin/testimonials", label: "Testimonials", icon: <Star /> },
       { href: "/admin/banners", label: "Banners", icon: <ImageIcon /> },
       { href: "/admin/emails", label: "Emails", icon: <Mail /> },
-      { href: "/admin/analytics", label: "Analytics", icon: <BarChart3G /> },
+      { href: "/admin/analytics", label: "Analytics", icon: <BarChart3 /> },
       { href: "/admin/settings", label: "Settings", icon: <Settings /> },
   ]
 
