@@ -1,61 +1,101 @@
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+"use client";
+
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useState, useEffect } from "react";
+import type { User } from "@supabase/supabase-js";
 import { getOrdersByUserId, getUserProfile } from "@/lib/data";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-  } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, UserCircle, ShoppingCart, Loader2 } from "lucide-react";
 import { ProfileForm } from "./profile-form";
+import type { Order, UserProfile } from "@/types";
+import { cn } from "@/lib/utils";
 
-export const metadata = {
-    title: "My Account | Sundaraah Showcase",
-};
+export default function AccountPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"profile" | "orders">("profile");
 
-export default async function AccountPage() {
-    const supabase = createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    const fetchUserData = async () => {
+      setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUser(user);
+        const [fetchedOrders, fetchedProfile] = await Promise.all([
+          getOrdersByUserId(user.id),
+          getUserProfile(user.id),
+        ]);
+        setOrders(fetchedOrders);
+        setUserProfile(fetchedProfile);
+      }
+      setIsLoading(false);
+    };
+    fetchUserData();
+  }, []);
 
-    if (!user) {
-        // This should be caught by middleware, but as a fallback
-        redirect('/login');
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case "Fulfilled": return "default";
+      case "Processing": return "secondary";
+      case "Cancelled": return "destructive";
+      default: return "outline";
     }
+  };
+  
+  const TabButton = ({ tab, label, icon }: { tab: "profile" | "orders", label: string, icon: React.ReactNode }) => (
+    <Button
+        variant="ghost"
+        onClick={() => setActiveTab(tab)}
+        className={cn(
+            "w-full justify-start gap-3 text-base px-4 py-6",
+            activeTab === tab ? "bg-secondary text-primary font-bold" : "text-muted-foreground"
+        )}
+    >
+        {icon}
+        {label}
+    </Button>
+  )
 
-    const [orders, userProfile] = await Promise.all([
-        getOrdersByUserId(user.id),
-        getUserProfile(user.id)
-    ]);
-
-    const getStatusVariant = (status: string) => {
-        switch (status) {
-            case "Fulfilled": return "default";
-            case "Processing": return "secondary";
-            case "Cancelled": return "destructive";
-            default: return "outline";
-        }
-    }
-
+  if (isLoading) {
     return (
-        <div className="container mx-auto px-4 py-16 md:py-24">
-            <h1 className="font-headline text-4xl font-bold text-primary mb-8">My Account</h1>
-            
-            <div className="grid md:grid-cols-3 gap-12 items-start">
-                {/* Left Sidebar for Profile */}
-                <div className="md:col-span-1">
+        <div className="container mx-auto px-4 py-16 md:py-24 text-center">
+            <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+            <p className="mt-4 text-muted-foreground">Loading your account...</p>
+        </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-16 md:py-24">
+      <h1 className="font-headline text-4xl font-bold text-primary mb-12">My Account</h1>
+      
+      <div className="grid md:grid-cols-12 gap-12 items-start">
+        {/* Left Sidebar for Navigation */}
+        <aside className="md:col-span-3">
+            <div className="sticky top-24 p-2 rounded-lg bg-secondary/50 space-y-2">
+                <TabButton tab="profile" label="My Profile" icon={<UserCircle className="h-5 w-5"/>} />
+                <TabButton tab="orders" label="My Orders" icon={<ShoppingCart className="h-5 w-5"/>} />
+            </div>
+        </aside>
+
+        {/* Right Content */}
+        <main className="md:col-span-9">
+            {activeTab === 'profile' && userProfile && (
+                <div>
+                     <h2 className="font-headline text-2xl font-bold text-primary mb-4">My Profile</h2>
                     <ProfileForm userProfile={userProfile} />
                 </div>
-
-                {/* Right Content for Orders */}
-                <div className="md:col-span-2">
+            )}
+            {activeTab === 'orders' && (
+                 <div>
                     <h2 className="font-headline text-2xl font-bold text-primary mb-4">My Orders</h2>
                     {orders.length > 0 ? (
                         <div className="border rounded-lg">
@@ -99,7 +139,9 @@ export default async function AccountPage() {
                         </div>
                     )}
                 </div>
-            </div>
-        </div>
-    );
+            )}
+        </main>
+      </div>
+    </div>
+  );
 }
