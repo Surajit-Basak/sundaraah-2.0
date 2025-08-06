@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo, Testimonial, EmailTemplate } from "@/types";
@@ -610,23 +611,9 @@ export async function getSettings(): Promise<Settings | null> {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single();
     if (error) {
+        // This case should be rare now with public read access, but is a safe fallback.
         console.error('Error fetching settings:', error);
-        // Provide sensible defaults if the settings row doesn't exist yet
-        return { 
-            site_name: 'Sundaraah Showcase',
-            logo_url: null,
-            theme_colors: {
-              primary: "hsl(347 65% 25%)",
-              background: "hsl(30 50% 98%)",
-              accent: "hsl(45 85% 55%)",
-            },
-            theme_fonts: {
-              body: 'PT Sans',
-              headline: 'Playfair Display'
-            },
-            whatsapp_number: '', 
-            whatsapp_enabled: false 
-        };
+        return null; 
     }
     return data;
 }

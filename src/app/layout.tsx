@@ -23,12 +23,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 // Helper to convert HSL string to CSS variable format
-const hslToVar = (hslStr: string) => {
+const hslToVar = (hslStr: string | undefined | null) => {
+  if (!hslStr) return '';
   return hslStr.replace('hsl(', '').replace(')', '').replace(/%/g, '');
 };
 
 // Helper to create the Google Fonts URL
-const createFontUrl = (fonts: { body: string; headline: string; }) => {
+const createFontUrl = (fonts: { body: string; headline: string; } | undefined | null) => {
+    if (!fonts) return '';
     const familyParams = [
         `family=${fonts.headline.replace(/ /g, '+')}:wght@400;700`,
         `family=${fonts.body.replace(/ /g, '+')}:wght@400;700`
