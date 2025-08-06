@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo, Testimonial, EmailTemplate } from "@/types";
@@ -604,6 +605,48 @@ export async function createProductReview(reviewData: ReviewInput, productSlug: 
 
     return data;
 }
+
+export async function getReviews(): Promise<ProductReview[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+        .from('product_reviews')
+        .select('*, products(name)')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching reviews:', error);
+        return [];
+    }
+
+    return data.map(r => ({
+        ...r,
+        product_name: r.products?.name || 'Unknown Product'
+    })) || [];
+}
+
+export async function deleteReview(id: string) {
+    const supabase = createSupabaseServerClient();
+
+    // To revalidate the product page, we need its slug.
+    const { data: reviewData } = await supabase
+        .from('product_reviews')
+        .select('products(slug)')
+        .eq('id', id)
+        .single();
+
+    const { error } = await supabase.from('product_reviews').delete().eq('id', id);
+
+    if (error) {
+        console.error('Error deleting review:', error);
+        throw new Error('Failed to delete review.');
+    }
+
+    revalidatePath('/admin/reviews');
+    if (reviewData?.products?.slug) {
+        revalidatePath(`/shop/${reviewData.products.slug}`);
+    }
+}
+
 
 // Banner Functions
 export async function getBanners(): Promise<Banner[]> {

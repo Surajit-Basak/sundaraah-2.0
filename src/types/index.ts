@@ -28,7 +28,9 @@ export type ProductReview = {
   comment: string | null;
   author_name: string | null;
   created_at: string;
-}
+  product_name?: string; // For admin view
+  products?: { name: string }; // For admin view
+};
 
 export type Category = {
   id: string;

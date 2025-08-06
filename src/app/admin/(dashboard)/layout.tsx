@@ -43,6 +43,7 @@ export default async function AdminDashboardLayout({
       { href: "/admin/orders", label: "Orders", icon: <ShoppingCart /> },
       { href: "/admin/products", label: "Products", icon: <Package /> },
       { href: "/admin/categories", label: "Categories", icon: <Tags /> },
+      { href: "/admin/reviews", label: "Reviews", icon: <Star /> },
       { href: "/admin/collections", label: "Collections", icon: <FolderKanban /> },
       { href: "/admin/media", label: "Media", icon: <GalleryHorizontal /> },
       { href: "/admin/pages", label: "Page Content", icon: <FileText /> },
