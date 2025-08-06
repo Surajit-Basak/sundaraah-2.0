@@ -52,7 +52,7 @@ export default async function AdminDashboardLayout({
       { href: "/admin/testimonials", label: "Testimonials", icon: <Star /> },
       { href: "/admin/banners", label: "Banners", icon: <ImageIcon /> },
       { href: "/admin/emails", label: "Emails", icon: <Mail /> },
-      { href: "/admin/analytics", label: "Analytics", icon: <BarChart3 /> },
+      { href: "/admin/analytics", label: "Analytics", icon: <BarChart3G /> },
       { href: "/admin/settings", label: "Settings", icon: <Settings /> },
   ]
 
