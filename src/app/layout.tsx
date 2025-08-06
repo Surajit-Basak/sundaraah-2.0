@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { getSettings, getPageSeo } from '@/lib/data';
 import { Providers } from './providers';
+import { Preloader } from '@/components/layout/preloader';
 
 // This function now generates metadata dynamically
 export async function generateMetadata(): Promise<Metadata> {
@@ -71,10 +72,12 @@ export default async function RootLayout({
         {themeStyle && <style dangerouslySetInnerHTML={{ __html: themeStyle }} />}
       </head>
       <body className={cn("font-body antialiased")}>
-        <Providers>
-          {children}
-          <Toaster />
-        </Providers>
+        <Preloader>
+            <Providers>
+              {children}
+              <Toaster />
+            </Providers>
+        </Preloader>
       </body>
     </html>
   );

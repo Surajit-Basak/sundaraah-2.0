@@ -1,7 +1,4 @@
 
-"use client";
-
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -10,30 +7,30 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
 import { getBanners } from "@/lib/data";
 import type { Banner } from "@/types";
 import { ArrowRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function HeroBanner() {
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export default async function HeroBanner() {
+  const banners: Banner[] = await getBanners();
 
-  useEffect(() => {
-    const fetchBanners = async () => {
-      setIsLoading(true);
-      const activeBanners = await getBanners();
-      setBanners(activeBanners);
-      setIsLoading(false);
-    };
-    fetchBanners();
-  }, []);
-
-  if (isLoading) {
+  if (banners.length === 0) {
     return (
-      <section className="relative h-[60vh] md:h-[80vh] w-full flex items-center justify-center text-center text-primary-foreground overflow-hidden">
-        <Skeleton className="absolute inset-0 w-full h-full" />
+      <section className="relative h-[60vh] md:h-[80vh] w-full flex items-center justify-center text-center text-primary-foreground overflow-hidden bg-secondary">
+         <div className="relative z-20 container mx-auto px-4 text-primary">
+            <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold mb-4 drop-shadow-md">
+                Welcome to Our Store
+            </h1>
+            <p className="text-lg md:text-xl max-w-2xl mx-auto mb-8 text-primary/80">
+                Please add a banner in the admin panel to display it here.
+            </p>
+            <Button asChild size="lg">
+                <Link href="/admin/banners">
+                    Go to Admin
+                </Link>
+            </Button>
+        </div>
       </section>
     )
   }
@@ -41,11 +38,6 @@ export default function HeroBanner() {
   return (
     <section className="relative h-[60vh] md:h-[80vh] w-full overflow-hidden">
       <Carousel
-        plugins={[
-          Autoplay({
-            delay: 5000,
-          }),
-        ]}
         opts={{
           loop: true,
         }}

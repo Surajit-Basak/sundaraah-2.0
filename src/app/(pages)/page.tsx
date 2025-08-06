@@ -20,7 +20,6 @@ import {
 import { Input } from "@/components/ui/input";
 import type { Product, BlogPost, TeamMember, PageContent, Testimonial } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import HeroBanner from "@/components/layout/hero-banner";
 
 // Helper to extract content from fetched data
 const getContent = (sections: PageContent[], sectionName: string) => {
@@ -117,8 +116,6 @@ export default function Home() {
 
   return (
     <div className="flex flex-col">
-      <HeroBanner />
-      
       <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
@@ -327,5 +324,4 @@ export default function Home() {
         </div>
       </section>
     </div>
-  );
-}
+  
