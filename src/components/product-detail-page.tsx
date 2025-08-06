@@ -22,8 +22,11 @@ type ProductDetailPageClientProps = {
 export default function ProductDetailPageClient({ product }: ProductDetailPageClientProps) {
   const { addItem, isAdding } = useCart();
   const { toast } = useToast();
+  
+  // Initialize selectedImage with the main product imageUrl.
   const [selectedImage, setSelectedImage] = useState(product?.imageUrl);
 
+  // When the product data changes, update the selected image to the main one.
   useEffect(() => {
     if (product) {
       setSelectedImage(product.imageUrl);
@@ -60,6 +63,7 @@ export default function ProductDetailPageClient({ product }: ProductDetailPageCl
     return null; // Or a loading/error state
   }
   
+  // Create a combined list of images, ensuring the main imageUrl is first and there are no duplicates.
   const allImages = [product.imageUrl, ...product.imageUrls.filter(url => url !== product.imageUrl)];
 
   return (
@@ -76,7 +80,7 @@ export default function ProductDetailPageClient({ product }: ProductDetailPageCl
                   fill
                   className="object-cover transition-all duration-300"
                   priority
-                  key={selectedImage}
+                  key={selectedImage} // Force re-render on image change for transition
                 />
             </div>
             {allImages.length > 1 && (

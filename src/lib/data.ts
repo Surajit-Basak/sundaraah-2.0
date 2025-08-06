@@ -112,31 +112,68 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
 }
 
 
-type ProductInput = Omit<Product, 'id' | 'imageUrl' | 'imageUrls' | 'reviews' | 'category' | 'created_at'> & { image_url?: string };
+type ProductInput = Omit<Product, 'id' | 'imageUrl' | 'reviews' | 'category' | 'created_at'>;
 
 export async function createProduct(productData: ProductInput) {
     const supabase = createSupabaseServerClient();
-    const { data, error } = await supabase.from('products').insert([productData]).select().single();
+    const { imageUrls, ...mainProductData } = productData;
+    
+    const { data: newProduct, error } = await supabase.from('products').insert([mainProductData]).select().single();
 
-    if (error) {
+    if (error || !newProduct) {
         console.error('Error creating product:', error);
         throw new Error('Failed to create product.');
+    }
+
+    if (imageUrls && imageUrls.length > 0) {
+        const productImages = imageUrls.map(url => ({
+            product_id: newProduct.id,
+            image_url: url
+        }));
+        const { error: imageError } = await supabase.from('product_images').insert(productImages);
+        if (imageError) {
+            console.error('Error adding product gallery images:', imageError);
+            // Optionally, rollback product creation or log the issue
+        }
     }
 
     revalidatePath('/admin/products');
     revalidatePath('/shop');
 
-    return data;
+    return newProduct;
 }
 
 export async function updateProduct(id: string, productData: Partial<ProductInput>) {
     const supabase = createSupabaseServerClient();
-    const { data, error } = await supabase.from('products').update(productData).eq('id', id).select().single();
+    const { imageUrls, ...mainProductData } = productData;
 
-    if (error) {
+    const { data, error } = await supabase.from('products').update(mainProductData).eq('id', id).select().single();
+
+    if (error || !data) {
         console.error('Error updating product:', error);
         throw new Error('Failed to update product.');
     }
+    
+    // First, remove all existing gallery images for this product
+    const { error: deleteError } = await supabase.from('product_images').delete().eq('product_id', id);
+    if (deleteError) {
+        console.error("Failed to clear existing product gallery:", deleteError);
+        throw new Error("Failed to update product gallery.");
+    }
+    
+    // Then, insert the new ones if they exist
+    if (imageUrls && imageUrls.length > 0) {
+        const productImages = imageUrls.map(url => ({
+            product_id: id,
+            image_url: url
+        }));
+        const { error: imageError } = await supabase.from('product_images').insert(productImages);
+        if (imageError) {
+            console.error('Error adding new product gallery images:', imageError);
+             throw new Error("Failed to update product gallery images.");
+        }
+    }
+
 
     revalidatePath('/admin/products');
     revalidatePath(`/admin/products/${data.slug}/edit`);
@@ -148,6 +185,7 @@ export async function updateProduct(id: string, productData: Partial<ProductInpu
 
 export async function deleteProduct(id: string) {
     const supabase = createSupabaseServerClient();
+    // Deleting the product will cascade and delete related product_images due to the foreign key constraint
     const { error } = await supabase.from('products').delete().eq('id', id);
 
     if (error) {
@@ -612,9 +650,10 @@ export async function getSettings(): Promise<Settings> {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single();
     
+    // If the query fails or returns no data, provide sensible defaults.
+    // This makes the app more resilient to initial setup issues.
     if (error || !data) {
-        console.error('Error fetching settings:', error);
-        // Provide sensible defaults if the settings row doesn't exist or there's an error.
+        console.error('Error fetching settings, returning defaults:', error);
         return { 
             site_name: 'Sundaraah Showcase',
             logo_url: null,

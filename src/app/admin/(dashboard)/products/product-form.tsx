@@ -27,6 +27,9 @@ import type { Product, Category } from "@/types";
 import { createProduct, updateProduct, getCategories } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { MediaPicker } from "@/components/ui/media-picker";
+import { Separator } from "@/components/ui/separator";
+
 
 const productSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -35,6 +38,8 @@ const productSchema = z.object({
   category_id: z.string().min(1, "Category is required."),
   details: z.string().min(1, "Please provide at least one detail."),
   inventory: z.coerce.number().min(0, "Inventory must be a positive number."),
+  image_url: z.string().url("Please select a valid image URL."),
+  imageUrls: z.array(z.string().url()).optional().default([]),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -62,6 +67,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
       ? {
           ...initialData,
           details: initialData.details.join(", "),
+          image_url: initialData.imageUrl,
+          imageUrls: initialData.imageUrls || [],
         }
       : {
           name: "",
@@ -70,6 +77,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
           category_id: "",
           details: "",
           inventory: 0,
+          image_url: "",
+          imageUrls: [],
         },
   });
 
@@ -78,7 +87,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
         const productData = {
             ...data,
             details: data.details.split(",").map((s) => s.trim()),
-            slug: data.name.toLowerCase().replace(/\s+/g, '-'),
+            slug: data.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, ''),
         };
 
       if (initialData) {
@@ -88,10 +97,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
           description: "Product has been updated.",
         });
       } else {
-        await createProduct({
-            ...productData,
-            image_url: 'https://placehold.co/600x600.png',
-        });
+        await createProduct(productData);
         toast({
             title: "Success!",
             description: "Product has been created.",
@@ -102,58 +108,57 @@ export function ProductForm({ initialData }: ProductFormProps) {
       router.refresh();
 
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "There was a problem with your request.",
-      });
+        const errorMessage = error instanceof Error ? error.message : "There was a problem with your request.";
+        toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong.",
+            description: errorMessage,
+        });
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <FormField
+        <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem>
+            <FormItem>
                 <FormLabel>Product Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Golden Sunstone Necklace" {...field} />
+                <Input placeholder="Golden Sunstone Necklace" {...field} />
                 </FormControl>
                 <FormMessage />
-              </FormItem>
+            </FormItem>
             )}
-          />
-          <FormField
-            control={form.control}
-            name="category_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Category</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <FormField
+                control={form.control}
+                name="category_id"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                        {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+             <FormField
                 control={form.control}
                 name="price"
                 render={({ field }) => (
@@ -166,20 +171,20 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 </FormItem>
                 )}
             />
-            <FormField
-                control={form.control}
-                name="inventory"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Inventory Count</FormLabel>
-                    <FormControl>
-                    <Input type="number" placeholder="10" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
         </div>
+        <FormField
+            control={form.control}
+            name="inventory"
+            render={({ field }) => (
+            <FormItem>
+                <FormLabel>Inventory Count</FormLabel>
+                <FormControl>
+                <Input type="number" placeholder="10" {...field} />
+                </FormControl>
+                <FormMessage />
+            </FormItem>
+            )}
+        />
         <FormField
           control={form.control}
           name="description"
@@ -212,6 +217,43 @@ export function ProductForm({ initialData }: ProductFormProps) {
             </FormItem>
           )}
         />
+        
+        <Separator />
+
+        <div>
+            <h3 className="text-lg font-medium">Product Images</h3>
+            <p className="text-sm text-muted-foreground">
+                Select a main featured image and any additional gallery images.
+            </p>
+        </div>
+
+        <FormField
+          control={form.control}
+          name="image_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Featured Image</FormLabel>
+              <FormControl>
+                <MediaPicker {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+            control={form.control}
+            name="imageUrls"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Gallery Images</FormLabel>
+                <FormControl>
+                    <MediaPicker {...field} multiple />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+        />
+
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? "Saving..." : (initialData ? "Save changes" : "Create Product")}
         </Button>
