@@ -8,8 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "./ui/button";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
+import { useWishlist } from "@/context/wishlist-context";
 import { useToast } from "@/hooks/use-toast";
-import { ShoppingCart, Loader2 } from "lucide-react";
+import { ShoppingCart, Loader2, Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type ProductCardProps = {
   product: Product;
@@ -17,29 +19,51 @@ type ProductCardProps = {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem, isAdding } = useCart();
+  const { wishlist, toggleWishlist, isUpdatingWishlist } = useWishlist();
   const { toast } = useToast();
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault(); // Prevent link navigation if the card is wrapped in a link
+    e.preventDefault();
+    e.stopPropagation();
     addItem(product, 1);
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
     });
   };
+  
+  const handleWishlistToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product.id);
+  }
+
+  const isInWishlist = wishlist.some(item => item.product_id === product.id);
 
   return (
     <Card className="overflow-hidden flex flex-col h-full group transform transition-transform duration-300 hover:scale-105 hover:shadow-xl">
-      <Link href={`/shop/${product.slug}`} className="block overflow-hidden">
-        <Image
-          src={product.imageUrl}
-          alt={product.name}
-          data-ai-hint="jewelry product"
-          width={400}
-          height={400}
-          className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
-        />
-      </Link>
+      <div className="relative">
+        <Link href={`/shop/${product.slug}`} className="block overflow-hidden">
+          <Image
+            src={product.imageUrl}
+            alt={product.name}
+            data-ai-hint="jewelry product"
+            width={400}
+            height={400}
+            className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
+          />
+        </Link>
+        <Button 
+          size="icon" 
+          variant="secondary"
+          className="absolute top-2 right-2 h-9 w-9 rounded-full transition-opacity opacity-80 group-hover:opacity-100"
+          onClick={handleWishlistToggle}
+          disabled={isUpdatingWishlist}
+          aria-label="Add to wishlist"
+        >
+          <Heart className={cn("h-5 w-5", isInWishlist ? "fill-destructive text-destructive" : "text-muted-foreground")} />
+        </Button>
+      </div>
       <CardHeader className="flex-grow">
         <CardDescription>{product.category}</CardDescription>
         <CardTitle className="font-headline text-xl">
