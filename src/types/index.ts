@@ -61,6 +61,7 @@ export type Order = {
   customer_name: string;
   customer_email: string;
   total: number;
+  shipping_fee: number;
   status: 'Processing' | 'Fulfilled' | 'Cancelled';
   user_id?: string | null;
 };
@@ -117,6 +118,8 @@ export type Settings = {
   };
   whatsapp_number: string | null;
   whatsapp_enabled: boolean;
+  shipping_fee: number;
+  free_shipping_threshold: number;
 };
 
 export type PageContent = {

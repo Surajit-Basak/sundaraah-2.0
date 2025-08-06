@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo, Testimonial, EmailTemplate } from "@/types";
@@ -356,6 +355,7 @@ type NewOrder = {
     customer_name: string;
     customer_email: string;
     total: number;
+    shipping_fee: number;
     items: CartItem[];
     user_id?: string | null;
 }
@@ -387,6 +387,7 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
             customer_name: orderData.customer_name,
             customer_email: orderData.customer_email,
             total: orderData.total,
+            shipping_fee: orderData.shipping_fee,
             status: 'Processing',
             user_id: orderData.user_id
         })
@@ -612,7 +613,7 @@ export async function getSettings(): Promise<Settings> {
     const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single();
     
     if (error || !data) {
-        console.error('Error fetching settings, returning defaults:', error);
+        console.error('Error fetching settings:', error);
         // Provide sensible defaults if the settings row doesn't exist or there's an error.
         return { 
             site_name: 'Sundaraah Showcase',
@@ -628,6 +629,8 @@ export async function getSettings(): Promise<Settings> {
             },
             whatsapp_number: null,
             whatsapp_enabled: true,
+            shipping_fee: 50,
+            free_shipping_threshold: 500,
         };
     }
     return data;

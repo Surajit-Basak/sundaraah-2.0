@@ -44,6 +44,8 @@ const settingsSchema = z.object({
   }),
   whatsapp_number: z.string().optional(),
   whatsapp_enabled: z.boolean().default(true),
+  shipping_fee: z.coerce.number().min(0, "Shipping fee must be a positive number.").default(0),
+  free_shipping_threshold: z.coerce.number().min(0, "Threshold must be a positive number.").default(1000),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -86,6 +88,8 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
       },
       whatsapp_number: "",
       whatsapp_enabled: true,
+      shipping_fee: 50,
+      free_shipping_threshold: 500,
     },
   });
 
@@ -257,6 +261,51 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                               ))}
                             </SelectContent>
                           </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                </div>
+            </CardContent>
+        </Card>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle>Shipping</CardTitle>
+                 <CardDescription>
+                    Manage shipping fees for your store.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <FormField
+                      control={form.control}
+                      name="shipping_fee"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Shipping Fee (INR)</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="50" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            This is the flat rate shipping fee applied to orders.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="free_shipping_threshold"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Free Shipping Threshold (INR)</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="500" {...field} />
+                          </FormControl>
+                           <FormDescription>
+                            Orders with a subtotal above this amount get free shipping.
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}

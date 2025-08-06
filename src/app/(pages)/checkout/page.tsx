@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Image from "next/image";
-import { createOrder, createRazorpayOrder } from "@/lib/data";
+import { createOrder, createRazorpayOrder, getSettings } from "@/lib/data";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
@@ -16,6 +16,8 @@ import { Loader2, Lock } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import Script from "next/script";
+import type { Settings } from "@/types";
+import { Separator } from "@/components/ui/separator";
 
 declare global {
     interface Window {
@@ -29,15 +31,25 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [settings, setSettings] = useState<Settings | null>(null);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
-    const fetchUser = async () => {
+    const fetchUserAndSettings = async () => {
         const { data } = await supabase.auth.getUser();
         setUser(data.user);
+        const appSettings = await getSettings();
+        setSettings(appSettings);
     };
-    fetchUser();
+    fetchUserAndSettings();
   }, []);
+
+  const shippingFee = settings?.shipping_fee ?? 0;
+  const freeShippingThreshold = settings?.free_shipping_threshold ?? Infinity;
+  const isEligibleForFreeShipping = cartTotal >= freeShippingThreshold;
+  const finalShippingCost = isEligibleForFreeShipping ? 0 : shippingFee;
+  const orderTotal = cartTotal + finalShippingCost;
+
 
   const handlePlaceOrder = async (formData: FormData) => {
     setIsLoading(true);
@@ -55,7 +67,7 @@ export default function CheckoutPage() {
     }
 
     try {
-        const razorpayOrderData = await createRazorpayOrder({ amount: cartTotal, currency: 'INR' });
+        const razorpayOrderData = await createRazorpayOrder({ amount: orderTotal, currency: 'INR' });
 
         if (!razorpayOrderData) {
             throw new Error("Could not create Razorpay order.");
@@ -67,7 +79,7 @@ export default function CheckoutPage() {
             key: keyId,
             amount: amount,
             currency: currency,
-            name: "Sundaraah Showcase",
+            name: settings?.site_name || "Sundaraah Showcase",
             description: "Jewelry Purchase",
             order_id: order_id,
             handler: async function (response: any) {
@@ -76,9 +88,10 @@ export default function CheckoutPage() {
                     const orderId = await createOrder({
                         customer_name: customerName,
                         customer_email: customerEmail,
-                        total: cartTotal,
+                        total: orderTotal,
                         items: cartItems,
                         user_id: user?.id,
+                        shipping_fee: finalShippingCost,
                         // You can store payment details if needed
                         // payment_id: response.razorpay_payment_id,
                         // order_id: response.razorpay_order_id,
@@ -212,15 +225,35 @@ export default function CheckoutPage() {
                   </div>
                 ))}
               </div>
-              <hr className="my-6" />
+              <Separator className="my-4" />
+                <div className="space-y-2 text-muted-foreground">
+                    <div className="flex justify-between">
+                        <span>Subtotal</span>
+                        <span>{formatPrice(cartTotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span>Shipping</span>
+                        {isEligibleForFreeShipping ? (
+                            <span className="text-green-600">Free</span>
+                        ) : (
+                            <span>{formatPrice(finalShippingCost)}</span>
+                        )}
+                    </div>
+                </div>
+              <Separator className="my-4" />
               <div className="flex justify-between font-bold text-lg mb-6">
                 <p>Total</p>
-                <p>{formatPrice(cartTotal)}</p>
+                <p>{formatPrice(orderTotal)}</p>
               </div>
               <Button form="checkout-form" type="submit" size="lg" className="w-full" disabled={isLoading}>
                     {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Lock className="mr-2 h-5 w-5" />}
-                    {isLoading ? "Processing..." : `Pay ${formatPrice(cartTotal)}`}
+                    {isLoading ? "Processing..." : `Pay ${formatPrice(orderTotal)}`}
                 </Button>
+                 {settings?.free_shipping_threshold && !isEligibleForFreeShipping && cartTotal > 0 &&
+                    <p className="text-xs text-center text-muted-foreground mt-4">
+                        Add {formatPrice(freeShippingThreshold - cartTotal)} more to get free shipping!
+                    </p>
+                }
             </CardContent>
           </Card>
         </div>
