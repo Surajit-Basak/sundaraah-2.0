@@ -1,13 +1,13 @@
 
-
 "use client";
 
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Check, ShoppingCart, Loader2 } from "lucide-react";
+import { Check, ShoppingCart, Loader2, Heart } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
 import { useCart } from "@/context/cart-context";
+import { useWishlist } from "@/context/wishlist-context";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import RelatedProducts from "./related-products";
@@ -21,6 +21,7 @@ type ProductDetailPageClientProps = {
 
 export default function ProductDetailPageClient({ product }: ProductDetailPageClientProps) {
   const { addItem, isAdding } = useCart();
+  const { wishlist, toggleWishlist, isUpdatingWishlist } = useWishlist();
   const { toast } = useToast();
   
   // Initialize selectedImage with the main product imageUrl.
@@ -65,6 +66,7 @@ export default function ProductDetailPageClient({ product }: ProductDetailPageCl
   
   // Create a combined list of images, ensuring the main imageUrl is first and there are no duplicates.
   const allImages = [product.imageUrl, ...product.imageUrls.filter(url => url !== product.imageUrl)];
+  const isInWishlist = wishlist.some(item => item.product_id === product.id);
 
   return (
     <div className="bg-background">
@@ -130,15 +132,20 @@ export default function ProductDetailPageClient({ product }: ProductDetailPageCl
                 ))}
               </ul>
             </div>
-
-            <Button size="lg" className="w-full md:w-auto bg-primary hover:bg-primary/90" onClick={handleAddToCart} disabled={isAdding}>
-              {isAdding ? (
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                  <ShoppingCart className="mr-2 h-5 w-5" />
-              )}
-              Add to Cart
-            </Button>
+            <div className="flex items-center gap-4">
+              <Button size="lg" className="w-full md:w-auto bg-primary hover:bg-primary/90" onClick={handleAddToCart} disabled={isAdding}>
+                {isAdding ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                )}
+                Add to Cart
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => toggleWishlist(product.id)} disabled={isUpdatingWishlist}>
+                 <Heart className={cn("mr-2 h-5 w-5", isInWishlist && "fill-destructive text-destructive")} />
+                 {isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}
+              </Button>
+            </div>
           </div>
         </div>
 

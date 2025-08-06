@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Search, LogOut, User } from "lucide-react";
+import { Menu, X, Search, LogOut, User, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "../ui/input";
 import { CartSheet } from "../cart/cart-sheet";
@@ -134,6 +134,7 @@ export default function Header() {
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild><Link href="/account">Profile</Link></DropdownMenuItem>
             <DropdownMenuItem asChild><Link href="/account">My Orders</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href="/wishlist">My Wishlist</Link></DropdownMenuItem>
             <DropdownMenuSeparator />
              <DropdownMenuItem onSelect={async (e) => { e.preventDefault(); await logout(); }}>
               <LogOut className="mr-2 h-4 w-4" />
@@ -189,6 +190,12 @@ export default function Header() {
         <div className="flex items-center gap-2">
            <Button variant="ghost" size="icon" aria-label="Toggle Search" onClick={handleSearchToggle} className="text-primary transition-colors hover:bg-primary/10 rounded-full">
             {isSearchOpen ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
+          </Button>
+
+          <Button asChild variant="ghost" size="icon" aria-label="Wishlist" className="text-primary transition-colors hover:bg-primary/10 rounded-full">
+            <Link href="/wishlist">
+                <Heart className="h-6 w-6" />
+            </Link>
           </Button>
           
           <CartSheet />

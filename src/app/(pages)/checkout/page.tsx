@@ -4,11 +4,9 @@
 import { useCart } from "@/context/cart-context";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Image from "next/image";
-import { createOrder, createRazorpayOrder, getSettings } from "@/lib/data";
+import { createOrder, createRazorpayOrder, getSettings, getUserProfile } from "@/lib/data";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
@@ -16,7 +14,7 @@ import { Loader2, Lock } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import Script from "next/script";
-import type { Settings } from "@/types";
+import type { Settings, UserProfile } from "@/types";
 import { Separator } from "@/components/ui/separator";
 
 declare global {
@@ -31,18 +29,27 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     const fetchUserAndSettings = async () => {
         const { data } = await supabase.auth.getUser();
+        if (!data.user) {
+          router.push('/login?redirect=/checkout');
+          return;
+        }
         setUser(data.user);
-        const appSettings = await getSettings();
+        const [appSettings, profile] = await Promise.all([
+            getSettings(),
+            getUserProfile(data.user.id)
+        ]);
         setSettings(appSettings);
+        setUserProfile(profile);
     };
     fetchUserAndSettings();
-  }, []);
+  }, [router]);
 
   const shippingFee = settings?.shipping_fee ?? 0;
   const freeShippingThreshold = settings?.free_shipping_threshold ?? Infinity;
@@ -51,16 +58,14 @@ export default function CheckoutPage() {
   const orderTotal = cartTotal + finalShippingCost;
 
 
-  const handlePlaceOrder = async (formData: FormData) => {
+  const handlePlaceOrder = async () => {
     setIsLoading(true);
-    const customerName = formData.get("name") as string;
-    const customerEmail = formData.get("email") as string;
 
-    if (!customerName || !customerEmail || cartItems.length === 0) {
+    if (!userProfile || !userProfile.full_name || !userProfile.email || cartItems.length === 0) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please fill in all fields and make sure your cart is not empty.",
+        description: "Please complete your profile and ensure your cart is not empty before checking out.",
       });
       setIsLoading(false);
       return;
@@ -86,16 +91,12 @@ export default function CheckoutPage() {
                 try {
                     // On successful payment, create the order in our database
                     const orderId = await createOrder({
-                        customer_name: customerName,
-                        customer_email: customerEmail,
+                        customer_name: userProfile.full_name!,
+                        customer_email: userProfile.email!,
                         total: orderTotal,
                         items: cartItems,
                         user_id: user?.id,
                         shipping_fee: finalShippingCost,
-                        // You can store payment details if needed
-                        // payment_id: response.razorpay_payment_id,
-                        // order_id: response.razorpay_order_id,
-                        // signature: response.razorpay_signature
                     });
                     
                     clearCart();
@@ -113,8 +114,8 @@ export default function CheckoutPage() {
                 }
             },
             prefill: {
-                name: customerName,
-                email: customerEmail,
+                name: userProfile.full_name,
+                email: userProfile.email,
             },
             theme: {
                 color: "#5d1d39"
@@ -167,27 +168,26 @@ export default function CheckoutPage() {
         Checkout
       </h1>
       <div className="grid lg:grid-cols-2 gap-12 items-start">
-        {/* Left Side: Forms */}
+        {/* Left Side: Summary */}
         <div className="space-y-8">
-            <form action={handlePlaceOrder} id="checkout-form" className="space-y-8">
-              {/* Customer Information */}
-              <Card>
+            <Card>
                 <CardHeader>
-                  <CardTitle>Your Information</CardTitle>
+                    <CardTitle>Customer & Shipping</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input id="name" name="name" type="text" placeholder="Your full name" defaultValue={user?.user_metadata?.full_name || ''} required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input id="email" name="email" type="email" placeholder="you@example.com" defaultValue={user?.email || ''} required />
-                    </div>
+                <CardContent className="space-y-4">
+                    {userProfile ? (
+                        <>
+                         <p><strong>Name:</strong> {userProfile.full_name}</p>
+                         <p><strong>Email:</strong> {userProfile.email}</p>
+                         <p className="text-sm text-muted-foreground pt-4">Your order will be shipped to your default shipping address. You can change this in your account profile.</p>
+                        </>
+                    ) : (
+                        <p>Loading your details...</p>
+                    )}
                 </CardContent>
-              </Card>
+            </Card>
 
-              <Card>
+            <Card>
                 <CardHeader>
                     <CardTitle>Payment</CardTitle>
                     <CardDescription>
@@ -200,8 +200,7 @@ export default function CheckoutPage() {
                         <span>Payment is secure and encrypted via Razorpay.</span>
                     </div>
                 </CardContent>
-              </Card>
-            </form>
+            </Card>
         </div>
         
         {/* Right Side: Order Summary */}
@@ -245,7 +244,7 @@ export default function CheckoutPage() {
                 <p>Total</p>
                 <p>{formatPrice(orderTotal)}</p>
               </div>
-              <Button form="checkout-form" type="submit" size="lg" className="w-full" disabled={isLoading}>
+              <Button onClick={handlePlaceOrder} size="lg" className="w-full" disabled={isLoading || !userProfile}>
                     {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Lock className="mr-2 h-5 w-5" />}
                     {isLoading ? "Processing..." : `Pay ${formatPrice(orderTotal)}`}
                 </Button>

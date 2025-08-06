@@ -8,11 +8,11 @@ import { Preloader } from "@/components/layout/preloader";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <PwaProvider>
-      <CartProvider>
-        <Preloader>
-            {children}
-        </Preloader>
-      </CartProvider>
+        <CartProvider>
+            <Preloader>
+                {children}
+            </Preloader>
+        </CartProvider>
     </PwaProvider>
   );
 }

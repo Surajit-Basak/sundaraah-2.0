@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo, Testimonial, EmailTemplate } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo, Testimonial, EmailTemplate, WishlistItem } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
@@ -1202,4 +1202,70 @@ export async function createRazorpayOrder(options: { amount: number; currency: s
         console.error('Error creating Razorpay order:', error);
         throw new Error('Could not create payment order.');
     }
+}
+
+// Wishlist Functions
+export async function getWishlistItems(userId: string): Promise<WishlistItem[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+        .from('wishlist_items')
+        .select(`
+            id,
+            user_id,
+            product_id,
+            created_at,
+            product:products (
+                *,
+                category:categories (name)
+            )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching wishlist items:', error);
+        return [];
+    }
+    
+    // Transform the data to match the WishlistItem type structure
+    return data.map((item: any) => ({
+        ...item,
+        product: {
+            ...item.product,
+            category: item.product.category.name,
+            imageUrl: item.product.image_url || 'https://placehold.co/600x600.png',
+            imageUrls: [],
+            reviews: [],
+        }
+    }));
+}
+
+
+export async function addToWishlist(userId: string, productId: string) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+        .from('wishlist_items')
+        .insert({ user_id: userId, product_id: productId });
+    
+    if (error) {
+        // Ignore unique constraint violation error (already in wishlist)
+        if (error.code === '23505') return;
+        console.error('Error adding to wishlist:', error);
+        throw new Error('Failed to add item to wishlist.');
+    }
+    revalidatePath('/wishlist');
+}
+
+export async function removeFromWishlist(userId: string, productId: string) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+        .from('wishlist_items')
+        .delete()
+        .match({ user_id: userId, product_id: productId });
+
+    if (error) {
+        console.error('Error removing from wishlist:', error);
+        throw new Error('Failed to remove item from wishlist.');
+    }
+    revalidatePath('/wishlist');
 }
