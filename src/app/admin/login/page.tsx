@@ -7,15 +7,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Gem } from 'lucide-react';
+import Image from 'next/image';
+import { useState, useEffect } from 'react';
+import { getSettings } from '@/lib/data';
+import type { Settings } from '@/types';
 
 export default function AdminLoginPage() {
+  const [settings, setSettings] = useState<Settings | null>(null);
+
+  useEffect(() => {
+    getSettings().then(setSettings);
+  }, []);
+
+  const siteName = settings?.site_name || "Sundaraah";
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-secondary">
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="text-center">
             <div className="flex justify-center items-center gap-2 mb-4">
-                <Gem className="h-8 w-8 text-accent"/>
-                <h3 className="font-headline text-3xl font-bold text-primary">Sundaraah</h3>
+               {settings?.header_logo_url ? (
+                  <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={150} height={40} className="object-contain h-10" />
+                ) : (
+                  <>
+                    <Gem className="h-8 w-8 text-accent"/>
+                    <h3 className="font-headline text-3xl font-bold text-primary">{siteName}</h3>
+                  </>
+                )}
             </div>
           <CardTitle className="text-2xl">Admin Login</CardTitle>
           <CardDescription>Enter your credentials to access the dashboard.</CardDescription>

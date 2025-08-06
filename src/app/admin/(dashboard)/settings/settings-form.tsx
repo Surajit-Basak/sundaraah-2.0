@@ -20,10 +20,11 @@ import type { Settings } from "@/types";
 import { updateSettings } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { MediaPicker } from "@/components/ui/media-picker";
 import { hexToHsl, isHexColor } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 const colorSchema = z.string().refine(value => {
     const isHsl = /^hsl\(\d{1,3} \d{1,3}% \d{1,3}%\)$/.test(value);
@@ -32,7 +33,8 @@ const colorSchema = z.string().refine(value => {
 
 const settingsSchema = z.object({
   site_name: z.string().min(2, "Site name must be at least 2 characters."),
-  logo_url: z.string().optional(),
+  header_logo_url: z.string().optional(),
+  footer_logo_url: z.string().optional(),
   theme_colors: z.object({
     primary: colorSchema,
     background: colorSchema,
@@ -46,6 +48,7 @@ const settingsSchema = z.object({
   whatsapp_enabled: z.boolean().default(true),
   shipping_fee: z.coerce.number().min(0, "Shipping fee must be a positive number.").default(0),
   free_shipping_threshold: z.coerce.number().min(0, "Threshold must be a positive number.").default(1000),
+  preloader_enabled: z.boolean().default(true),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -76,7 +79,8 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
     resolver: zodResolver(settingsSchema),
     defaultValues: initialData || {
       site_name: "Sundaraah Showcase",
-      logo_url: "",
+      header_logo_url: "",
+      footer_logo_url: "",
       theme_colors: {
         primary: "hsl(347 65% 25%)",
         background: "hsl(30 50% 98%)",
@@ -90,6 +94,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
       whatsapp_enabled: true,
       shipping_fee: 50,
       free_shipping_threshold: 500,
+      preloader_enabled: true,
     },
   });
 
@@ -150,15 +155,31 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                 />
                  <FormField
                   control={form.control}
-                  name="logo_url"
+                  name="header_logo_url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Site Logo</FormLabel>
+                      <FormLabel>Header Logo</FormLabel>
                       <FormControl>
                         <MediaPicker {...field} />
                       </FormControl>
                        <FormDescription>
-                        Upload a logo to the Media Library, then select it here. Recommended size: 200x50 pixels.
+                        Displayed in the site header. Used in the preloader and admin panel. Recommended size: 200x50 pixels.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="footer_logo_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Footer Logo</FormLabel>
+                      <FormControl>
+                        <MediaPicker {...field} />
+                      </FormControl>
+                       <FormDescription>
+                        A separate logo for the site footer. If empty, the site name will be used.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -170,9 +191,9 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
         <Card>
             <CardHeader>
                 <CardTitle>Theme Colors & Fonts</CardTitle>
-                <FormDescription>
+                <CardDescription>
                     Define the main colors and typography for your website.
-                </FormDescription>
+                </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -316,7 +337,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
 
         <Card>
             <CardHeader>
-                <CardTitle>Floating Buttons</CardTitle>
+                <CardTitle>Advanced Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
                 <FormField
@@ -346,6 +367,29 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         </FormLabel>
                         <FormDescription>
                           Show or hide the floating WhatsApp chat button on the public site.
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <Separator />
+                <FormField
+                  control={form.control}
+                  name="preloader_enabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">
+                          Enable Frontend Preloader
+                        </FormLabel>
+                        <FormDescription>
+                          Show a loading animation with your logo before the page content appears.
                         </FormDescription>
                       </div>
                       <FormControl>

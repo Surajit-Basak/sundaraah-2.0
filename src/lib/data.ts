@@ -747,7 +747,8 @@ export async function getSettings(): Promise<Settings> {
         return { 
             id: 1,
             site_name: 'Sundaraah Showcase',
-            logo_url: null,
+            header_logo_url: null,
+            footer_logo_url: null,
             theme_colors: {
                 primary: "hsl(347 65% 25%)",
                 background: "hsl(30 50% 98%)",
@@ -761,6 +762,7 @@ export async function getSettings(): Promise<Settings> {
             whatsapp_enabled: true,
             shipping_fee: 50,
             free_shipping_threshold: 500,
+            preloader_enabled: true,
         };
     }
     return data;

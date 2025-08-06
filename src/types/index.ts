@@ -109,7 +109,8 @@ export type UserProfile = {
 export type Settings = {
   id: number;
   site_name: string;
-  logo_url: string | null;
+  header_logo_url: string | null;
+  footer_logo_url: string | null;
   theme_colors: {
     primary: string;
     background: string;
@@ -123,6 +124,7 @@ export type Settings = {
   whatsapp_enabled: boolean;
   shipping_fee: number;
   free_shipping_threshold: number;
+  preloader_enabled: boolean;
 };
 
 export type PageContent = {

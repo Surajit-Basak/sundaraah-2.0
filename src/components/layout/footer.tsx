@@ -16,10 +16,10 @@ export default async function Footer() {
           {/* Brand Section */}
           <div className="md:col-span-4 text-center md:text-left">
             <Link href="/" className="inline-block mb-4">
-               {settings?.logo_url ? (
-                  <Image src={settings.logo_url} alt={`${siteName} logo`} width={150} height={40} className="object-contain" />
+               {settings?.footer_logo_url ? (
+                  <Image src={settings.footer_logo_url} alt={`${siteName} logo`} width={150} height={40} className="object-contain" />
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 justify-center md:justify-start">
                       <Gem className="h-8 w-8 text-accent"/>
                       <h3 className="font-headline text-3xl font-bold">{siteName}</h3>
                   </div>

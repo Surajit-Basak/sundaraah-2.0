@@ -20,6 +20,7 @@ import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getSettings } from "@/lib/data";
+import Image from "next/image";
 
 export default async function AdminDashboardLayout({
   children,
@@ -72,14 +73,20 @@ export default async function AdminDashboardLayout({
     await supabase.auth.signOut();
     redirect('/admin/login');
   }
+  
+  const siteName = settings?.site_name || "Sundaraah";
 
   return (
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2 p-2">
-            <Gem className="h-8 w-8 text-accent group-data-[state=collapsed]:h-6 group-data-[state=collapsed]:w-6 group-data-[state=collapsed]:mx-auto"/>
-            <h3 className="font-headline text-2xl font-bold text-primary group-data-[state=collapsed]:hidden">{settings?.site_name || "Sundaraah"}</h3>
+            {settings?.header_logo_url ? (
+              <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={120} height={30} className="object-contain group-data-[state=collapsed]:hidden" />
+            ) : (
+               <h3 className="font-headline text-2xl font-bold text-primary group-data-[state=collapsed]:hidden">{siteName}</h3>
+            )}
+            <Gem className="h-6 w-6 text-accent group-data-[state=expanded]:hidden mx-auto"/>
             <div className="flex-1" />
             <SidebarTrigger className="group-data-[state=collapsed]:hidden" />
           </div>
