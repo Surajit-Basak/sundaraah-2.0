@@ -1,7 +1,7 @@
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getOrdersByUserId } from "@/lib/data";
+import { getOrdersByUserId, getUserProfile } from "@/lib/data";
 import {
     Table,
     TableBody,
@@ -14,9 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, User, Mail } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { ArrowRight } from "lucide-react";
+import { ProfileForm } from "./profile-form";
 
 export const metadata = {
     title: "My Account | Sundaraah Showcase",
@@ -31,7 +30,10 @@ export default async function AccountPage() {
         redirect('/login');
     }
 
-    const orders = await getOrdersByUserId(user.id);
+    const [orders, userProfile] = await Promise.all([
+        getOrdersByUserId(user.id),
+        getUserProfile(user.id)
+    ]);
 
     const getStatusVariant = (status: string) => {
         switch (status) {
@@ -46,27 +48,10 @@ export default async function AccountPage() {
         <div className="container mx-auto px-4 py-16 md:py-24">
             <h1 className="font-headline text-4xl font-bold text-primary mb-8">My Account</h1>
             
-            <div className="grid md:grid-cols-3 gap-12">
+            <div className="grid md:grid-cols-3 gap-12 items-start">
                 {/* Left Sidebar for Profile */}
                 <div className="md:col-span-1">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>My Profile</CardTitle>
-                            <CardDescription>Your personal details.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex items-center gap-3">
-                                <User className="w-5 h-5 text-muted-foreground" />
-                                <span className="font-medium">{user.user_metadata.full_name || 'No name provided'}</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <Mail className="w-5 h-5 text-muted-foreground" />
-                                <span className="text-muted-foreground">{user.email}</span>
-                            </div>
-                            <Separator />
-                            <Button variant="outline" className="w-full" disabled>Edit Profile</Button>
-                        </CardContent>
-                    </Card>
+                    <ProfileForm userProfile={userProfile} />
                 </div>
 
                 {/* Right Content for Orders */}
@@ -95,7 +80,6 @@ export default async function AccountPage() {
                                     </TableCell>
                                     <TableCell>
                                         <Button asChild variant="ghost" size="icon">
-                                            {/* This page doesn't exist yet, but we can wire it up for the future */}
                                             <Link href={`/account/orders/${order.id}`} title="View Order">
                                             <ArrowRight className="h-4 w-4" />
                                             </Link>

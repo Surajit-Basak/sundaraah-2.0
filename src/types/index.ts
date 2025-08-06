@@ -99,11 +99,22 @@ export type Banner = {
   sort_order: number;
 };
 
+export type Address = {
+    street?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+};
+
 export type UserProfile = {
   id: string;
   email: string | null;
   full_name: string | null;
   user_role: 'admin' | 'user';
+  dob?: string | null;
+  billing_address?: Address | null;
+  shipping_address?: Address | null;
 };
 
 export type Settings = {

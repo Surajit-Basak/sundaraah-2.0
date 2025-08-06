@@ -11,9 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { UserProfile } from "@/types";
+import type { UserProfile, Address } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import {
   Select,
@@ -23,6 +23,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+
+const formatAddress = (address: Address | null | undefined) => {
+    if (!address) return 'N/A';
+    const parts = [address.street, address.city, address.state, address.postal_code, address.country];
+    return parts.filter(Boolean).join(', ');
+};
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -65,6 +71,7 @@ export default function AdminUsersPage() {
       <Card>
         <CardHeader>
           <CardTitle>User Management</CardTitle>
+          <CardDescription>View and manage all registered users.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -73,13 +80,15 @@ export default function AdminUsersPage() {
                 <TableHead>Email</TableHead>
                 <TableHead>Full Name</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Billing Address</TableHead>
+                <TableHead>Shipping Address</TableHead>
                 <TableHead className="w-[150px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     Loading...
                   </TableCell>
                 </TableRow>
@@ -92,6 +101,8 @@ export default function AdminUsersPage() {
                       {user.user_role}
                     </Badge>
                   </TableCell>
+                  <TableCell>{formatAddress(user.billing_address)}</TableCell>
+                  <TableCell>{formatAddress(user.shipping_address)}</TableCell>
                   <TableCell>
                     <Select
                       defaultValue={user.user_role}

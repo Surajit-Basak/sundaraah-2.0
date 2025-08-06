@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo, Testimonial, EmailTemplate } from "@/types";
@@ -721,6 +720,17 @@ export async function getUsers(): Promise<UserProfile[]> {
     return data || [];
 }
 
+export async function getUserProfile(userId: string): Promise<UserProfile | null> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
+
+    if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+    }
+    return data;
+}
+
 export async function updateUserRole(userId: string, role: 'admin' | 'user') {
     const supabase = createSupabaseServerClient();
     const { error } = await supabase
@@ -735,6 +745,22 @@ export async function updateUserRole(userId: string, role: 'admin' | 'user') {
 
     revalidatePath('/admin/users');
 }
+
+export async function updateUserProfile(userId: string, profileData: Partial<Omit<UserProfile, 'id' | 'email' | 'user_role'>>) {
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+        .from('users')
+        .update(profileData)
+        .eq('id', userId);
+
+    if (error) {
+        console.error('Error updating user profile:', error);
+        throw new Error('Failed to update user profile.');
+    }
+
+    revalidatePath('/account');
+}
+
 
 // Settings Functions
 export async function getSettings(): Promise<Settings> {
