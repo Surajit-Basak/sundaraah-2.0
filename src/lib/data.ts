@@ -607,13 +607,28 @@ export async function updateUserRole(userId: string, role: 'admin' | 'user') {
 }
 
 // Settings Functions
-export async function getSettings(): Promise<Settings | null> {
+export async function getSettings(): Promise<Settings> {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single();
-    if (error) {
-        // This case should be rare now with public read access, but is a safe fallback.
-        console.error('Error fetching settings:', error);
-        return null; 
+    
+    if (error || !data) {
+        console.error('Error fetching settings, returning defaults:', error);
+        // Provide sensible defaults if the settings row doesn't exist or there's an error.
+        return { 
+            site_name: 'Sundaraah Showcase',
+            logo_url: null,
+            theme_colors: {
+                primary: "hsl(347 65% 25%)",
+                background: "hsl(30 50% 98%)",
+                accent: "hsl(45 85% 55%)",
+            },
+            theme_fonts: {
+                body: "PT Sans",
+                headline: "Playfair Display",
+            },
+            whatsapp_number: null,
+            whatsapp_enabled: true,
+        };
     }
     return data;
 }
