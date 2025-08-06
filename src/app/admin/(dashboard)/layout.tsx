@@ -11,6 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Home, Package, Settings, ShoppingCart, BarChart3, Gem, LogOut, BookOpen, Users, ImageIcon, FileText, FolderKanban, GalleryHorizontal, Search, Star, Mail, Tags } from "lucide-react";
 import Link from "next/link";
@@ -38,25 +39,31 @@ export default async function AdminDashboardLayout({
     redirect('/admin/login');
   }
 
-  const adminNavItems = [
+  const navItems = {
+    "Store Management": [
       { href: "/admin/dashboard", label: "Dashboard", icon: <Home /> },
       { href: "/admin/orders", label: "Orders", icon: <ShoppingCart /> },
       { href: "/admin/products", label: "Products", icon: <Package /> },
       { href: "/admin/categories", label: "Categories", icon: <Tags /> },
-      { href: "/admin/reviews", label: "Reviews", icon: <Star /> },
       { href: "/admin/collections", label: "Collections", icon: <FolderKanban /> },
-      { href: "/admin/media", label: "Media", icon: <GalleryHorizontal /> },
-      { href: "/admin/pages", label: "Page Content", icon: <FileText /> },
-      { href: "/admin/seo", label: "SEO", icon: <Search /> },
-      { href: "/admin/users", label: "Users", icon: <Users /> },
+      { href: "/admin/reviews", label: "Reviews", icon: <Star /> },
+    ],
+    "Content Management": [
       { href: "/admin/blog", label: "Blog", icon: <BookOpen /> },
+      { href: "/admin/pages", label: "Page Content", icon: <FileText /> },
+      { href: "/admin/banners", label: "Banners", icon: <ImageIcon /> },
+      { href: "/admin/media", label: "Media", icon: <GalleryHorizontal /> },
       { href: "/admin/team", label: "Team", icon: <Users /> },
       { href: "/admin/testimonials", label: "Testimonials", icon: <Star /> },
-      { href: "/admin/banners", label: "Banners", icon: <ImageIcon /> },
-      { href: "/admin/emails", label: "Emails", icon: <Mail /> },
-      { href: "/admin/analytics", label: "Analytics", icon: <BarChart3 /> },
-      { href: "/admin/settings", label: "Settings", icon: <Settings /> },
-  ]
+    ],
+    "Administration": [
+        { href: "/admin/users", label: "Users", icon: <Users /> },
+        { href: "/admin/emails", label: "Emails", icon: <Mail /> },
+        { href: "/admin/analytics", label: "Analytics", icon: <BarChart3 /> },
+        { href: "/admin/seo", label: "SEO", icon: <Search /> },
+        { href: "/admin/settings", label: "Settings", icon: <Settings /> },
+    ]
+  }
 
   const handleLogout = async () => {
     'use server';
@@ -78,15 +85,20 @@ export default async function AdminDashboardLayout({
         </SidebarHeader>
         <SidebarContent>
             <SidebarMenu>
-                {adminNavItems.map((item) => (
-                    <SidebarMenuItem key={item.label}>
-                        <SidebarMenuButton asChild tooltip={item.label} isActive={pathname.startsWith(item.href) && item.href !== '#'}>
-                            <Link href={item.href}>
-                                {item.icon}
-                                <span>{item.label}</span>
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
+                 {Object.entries(navItems).map(([group, items]) => (
+                    <React.Fragment key={group}>
+                         <SidebarSeparator />
+                         {items.map((item) => (
+                            <SidebarMenuItem key={item.label}>
+                                <SidebarMenuButton asChild tooltip={item.label} isActive={pathname.startsWith(item.href) && item.href !== '#'}>
+                                    <Link href={item.href}>
+                                        {item.icon}
+                                        <span>{item.label}</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        ))}
+                    </React.Fragment>
                 ))}
             </SidebarMenu>
         </SidebarContent>

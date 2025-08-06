@@ -333,7 +333,7 @@ const SidebarSeparator = React.forwardRef<
     <Separator
       ref={ref}
       data-sidebar="separator"
-      className={cn("mx-2 w-auto bg-sidebar-border", className)}
+      className={cn("my-2 w-auto bg-sidebar-border/50", className)}
       {...props}
     />
   )
