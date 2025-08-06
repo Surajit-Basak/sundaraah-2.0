@@ -20,10 +20,12 @@ import { createBanner, updateBanner } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
+import { MediaPicker } from "@/components/ui/media-picker";
 
 const bannerSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters."),
   subtitle: z.string().optional(),
+  image_url: z.string().url("Please select a valid image for the banner."),
   link_href: z.string().optional(),
   link_text: z.string().optional(),
   sort_order: z.coerce.number().default(0),
@@ -45,6 +47,7 @@ export function BannerForm({ initialData }: BannerFormProps) {
     defaultValues: initialData || {
       title: "",
       subtitle: "",
+      image_url: "",
       link_href: "",
       link_text: "",
       sort_order: 0,
@@ -61,10 +64,7 @@ export function BannerForm({ initialData }: BannerFormProps) {
           description: "Banner has been updated.",
         });
       } else {
-        await createBanner({
-            ...data,
-            image_url: 'https://placehold.co/1800x1200.png',
-        });
+        await createBanner(data);
         toast({
             title: "Success!",
             description: "Banner has been created.",
@@ -99,6 +99,19 @@ export function BannerForm({ initialData }: BannerFormProps) {
             </FormItem>
           )}
         />
+         <FormField
+          control={form.control}
+          name="image_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Banner Image</FormLabel>
+              <FormControl>
+                <MediaPicker {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="subtitle"
@@ -123,7 +136,7 @@ export function BannerForm({ initialData }: BannerFormProps) {
                 <FormItem>
                   <FormLabel>Link URL (optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="/shop" {...field} />
+                    <Input placeholder="/shop" {...field} value={field.value || ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -136,7 +149,7 @@ export function BannerForm({ initialData }: BannerFormProps) {
                 <FormItem>
                   <FormLabel>Link Button Text (optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Shop Now" {...field} />
+                    <Input placeholder="Shop Now" {...field} value={field.value || ''}/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

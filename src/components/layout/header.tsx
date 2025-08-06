@@ -25,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { getSettings } from "@/lib/data";
 import type { Settings } from "@/types";
 import Image from "next/image";
+import { Skeleton } from "../ui/skeleton";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -154,16 +155,22 @@ export default function Header() {
     )
   }
 
+  const Logo = () => {
+    if (isLoading) return <Skeleton className="h-10 w-36" />;
+    
+    if (settings?.header_logo_url) {
+        return <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={150} height={40} className="object-contain h-10" priority />;
+    }
+    
+    return <span className="font-headline text-3xl font-bold text-primary">{siteName}</span>;
+  }
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-20 max-w-screen-2xl items-center justify-between px-4 gap-8">
         <Link href="/" className="hidden sm:block">
-          {settings?.header_logo_url ? (
-            <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={150} height={40} className="object-contain h-10" priority />
-          ) : (
-            <span className="font-headline text-3xl font-bold text-primary">{siteName}</span>
-          )}
+           <Logo />
         </Link>
         
         {/* Main Navigation & Search Container */}

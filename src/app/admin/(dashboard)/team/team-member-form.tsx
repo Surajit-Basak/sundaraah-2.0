@@ -19,11 +19,13 @@ import type { TeamMember } from "@/types";
 import { createTeamMember, updateTeamMember } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { MediaPicker } from "@/components/ui/media-picker";
 
 const teamMemberSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   role: z.string().min(2, "Role must be at least 2 characters."),
   bio: z.string().min(10, "Bio must be at least 10 characters."),
+  image_url: z.string().url("Please select a valid image."),
 });
 
 type TeamMemberFormValues = z.infer<typeof teamMemberSchema>;
@@ -38,10 +40,11 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
 
   const form = useForm<TeamMemberFormValues>({
     resolver: zodResolver(teamMemberSchema),
-    defaultValues: initialData || {
+    defaultValues: initialData ? { ...initialData, image_url: initialData.imageUrl } : {
       name: "",
       role: "",
       bio: "",
+      image_url: "",
     },
   });
 
@@ -54,10 +57,7 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
           description: "Team member has been updated.",
         });
       } else {
-        await createTeamMember({
-            ...data,
-            image_url: 'https://placehold.co/400x400.png',
-        });
+        await createTeamMember(data);
         toast({
             title: "Success!",
             description: "Team member has been created.",
@@ -100,6 +100,19 @@ export function TeamMemberForm({ initialData }: TeamMemberFormProps) {
               <FormLabel>Role</FormLabel>
               <FormControl>
                 <Input placeholder="e.g., Founder & Lead Designer" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+         <FormField
+          control={form.control}
+          name="image_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Profile Image</FormLabel>
+              <FormControl>
+                <MediaPicker {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
