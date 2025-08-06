@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/data";
 import Image from "next/image";
 import type { BlogPost } from "@/types";
+import { marked } from "marked";
 
 // This function generates the pages for each blog post at build time
 export async function generateStaticParams() {
@@ -32,6 +33,8 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   if (!post) {
     notFound();
   }
+
+  const parsedContent = await marked.parse(post.content);
 
   return (
     <article className="bg-background">
@@ -66,7 +69,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           {/* Post Content */}
           <div
             className="prose lg:prose-xl max-w-none text-foreground"
-            dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }} // A simple way to render paragraphs
+            dangerouslySetInnerHTML={{ __html: parsedContent }}
           />
         </div>
       </div>

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,11 +20,13 @@ import type { BlogPost } from "@/types";
 import { createBlogPost, updateBlogPost } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { MediaPicker } from "@/components/ui/media-picker";
 
 const blogPostSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters."),
   excerpt: z.string().min(10, "Excerpt must be at least 10 characters."),
   content: z.string().min(20, "Content must be at least 20 characters."),
+  image_url: z.string().url("Please select a valid image URL."),
 });
 
 type BlogPostFormValues = z.infer<typeof blogPostSchema>;
@@ -42,6 +45,7 @@ export function BlogPostForm({ initialData }: BlogPostFormProps) {
       title: "",
       excerpt: "",
       content: "",
+      image_url: "",
     },
   });
 
@@ -60,10 +64,7 @@ export function BlogPostForm({ initialData }: BlogPostFormProps) {
           description: "Blog post has been updated.",
         });
       } else {
-        await createBlogPost({
-            ...postData,
-            image_url: 'https://placehold.co/400x250.png',
-        });
+        await createBlogPost(postData);
         toast({
             title: "Success!",
             description: "Blog post has been created.",
@@ -98,6 +99,19 @@ export function BlogPostForm({ initialData }: BlogPostFormProps) {
             </FormItem>
           )}
         />
+         <FormField
+          control={form.control}
+          name="image_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Featured Image</FormLabel>
+              <FormControl>
+                <MediaPicker {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="excerpt"
@@ -119,7 +133,7 @@ export function BlogPostForm({ initialData }: BlogPostFormProps) {
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full Content (Markdown supported)</FormLabel>
+              <FormLabel>Full Content</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Write your full blog post here..."
@@ -127,6 +141,9 @@ export function BlogPostForm({ initialData }: BlogPostFormProps) {
                   {...field}
                 />
               </FormControl>
+               <FormDescription>
+                This field supports Markdown. To add an image, upload it to the Media Library, copy its URL, and use the syntax: `![alt text](image_url)`
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
