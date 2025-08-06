@@ -699,7 +699,8 @@ export async function getSettings(): Promise<Settings> {
     const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single();
     
     if (error || !data) {
-        console.error('Error fetching settings, returning defaults:', error);
+        console.error('Error fetching settings:', error);
+        // Provide sensible defaults if the settings row doesn't exist yet
         return { 
             id: 1,
             site_name: 'Sundaraah Showcase',
