@@ -763,6 +763,12 @@ export async function getSettings(): Promise<Settings> {
             shipping_fee: 50,
             free_shipping_threshold: 500,
             preloader_enabled: true,
+            social_twitter_url: "#",
+            social_twitter_enabled: true,
+            social_facebook_url: "#",
+            social_facebook_enabled: true,
+            social_instagram_url: "#",
+            social_instagram_enabled: true,
         };
     }
     return data;

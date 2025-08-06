@@ -125,6 +125,12 @@ export type Settings = {
   shipping_fee: number;
   free_shipping_threshold: number;
   preloader_enabled: boolean;
+  social_twitter_url: string | null;
+  social_twitter_enabled: boolean;
+  social_facebook_url: string | null;
+  social_facebook_enabled: boolean;
+  social_instagram_url: string | null;
+  social_instagram_enabled: boolean;
 };
 
 export type PageContent = {

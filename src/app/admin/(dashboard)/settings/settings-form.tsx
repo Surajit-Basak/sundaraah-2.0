@@ -49,6 +49,12 @@ const settingsSchema = z.object({
   shipping_fee: z.coerce.number().min(0, "Shipping fee must be a positive number.").default(0),
   free_shipping_threshold: z.coerce.number().min(0, "Threshold must be a positive number.").default(1000),
   preloader_enabled: z.boolean().default(true),
+  social_twitter_url: z.string().optional(),
+  social_twitter_enabled: z.boolean().default(true),
+  social_facebook_url: z.string().optional(),
+  social_facebook_enabled: z.boolean().default(true),
+  social_instagram_url: z.string().optional(),
+  social_instagram_enabled: z.boolean().default(true),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -95,6 +101,12 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
       shipping_fee: 50,
       free_shipping_threshold: 500,
       preloader_enabled: true,
+      social_twitter_url: "#",
+      social_twitter_enabled: true,
+      social_facebook_url: "#",
+      social_facebook_enabled: true,
+      social_instagram_url: "#",
+      social_instagram_enabled: true,
     },
   });
 
@@ -333,6 +345,98 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                     />
                 </div>
             </CardContent>
+        </Card>
+        
+        <Card>
+             <CardHeader>
+                <CardTitle>Social Media Links</CardTitle>
+                <CardDescription>
+                    Manage the social media icons and links in your site's footer.
+                </CardDescription>
+             </CardHeader>
+             <CardContent className="space-y-6">
+                {/* Twitter */}
+                <div className="flex items-end gap-4">
+                    <FormField
+                      control={form.control}
+                      name="social_twitter_url"
+                      render={({ field }) => (
+                        <FormItem className="flex-grow">
+                          <FormLabel>Twitter URL</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://twitter.com/yourprofile" {...field} value={field.value || ''} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="social_twitter_enabled"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col items-center gap-2">
+                           <FormLabel>Enabled</FormLabel>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                </div>
+                 {/* Facebook */}
+                <div className="flex items-end gap-4">
+                    <FormField
+                      control={form.control}
+                      name="social_facebook_url"
+                      render={({ field }) => (
+                        <FormItem className="flex-grow">
+                          <FormLabel>Facebook URL</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://facebook.com/yourprofile" {...field} value={field.value || ''} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="social_facebook_enabled"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col items-center gap-2">
+                           <FormLabel>Enabled</FormLabel>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                </div>
+                 {/* Instagram */}
+                <div className="flex items-end gap-4">
+                    <FormField
+                      control={form.control}
+                      name="social_instagram_url"
+                      render={({ field }) => (
+                        <FormItem className="flex-grow">
+                          <FormLabel>Instagram URL</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://instagram.com/yourprofile" {...field} value={field.value || ''} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="social_instagram_enabled"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col items-center gap-2">
+                           <FormLabel>Enabled</FormLabel>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                </div>
+             </CardContent>
         </Card>
 
         <Card>

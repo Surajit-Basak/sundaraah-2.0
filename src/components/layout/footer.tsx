@@ -29,15 +29,21 @@ export default async function Footer() {
               Crafting timeless elegance and moments of beauty with every piece.
             </p>
             <div className="flex justify-center md:justify-start space-x-4">
-              <Link href="#" aria-label="Twitter" className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors">
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link href="#" aria-label="Facebook" className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors">
-                <Facebook className="h-5 w-5" />
-              </Link>
-              <Link href="#" aria-label="Instagram" className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors">
-                <Instagram className="h-5 w-5" />
-              </Link>
+              {settings.social_twitter_enabled && settings.social_twitter_url && (
+                <Link href={settings.social_twitter_url} aria-label="Twitter" className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors">
+                  <Twitter className="h-5 w-5" />
+                </Link>
+              )}
+              {settings.social_facebook_enabled && settings.social_facebook_url && (
+                <Link href={settings.social_facebook_url} aria-label="Facebook" className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors">
+                  <Facebook className="h-5 w-5" />
+                </Link>
+              )}
+              {settings.social_instagram_enabled && settings.social_instagram_url && (
+                <Link href={settings.social_instagram_url} aria-label="Instagram" className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors">
+                  <Instagram className="h-5 w-5" />
+                </Link>
+              )}
             </div>
           </div>
 
