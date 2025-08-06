@@ -1269,3 +1269,21 @@ export async function removeFromWishlist(userId: string, productId: string) {
     }
     revalidatePath('/wishlist');
 }
+
+export async function getWishlistAnalytics(): Promise<Product[]> {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.rpc('get_wishlist_counts');
+    
+    if (error) {
+        console.error('Error fetching wishlist analytics:', error);
+        return [];
+    }
+
+    return data.map((p: any) => ({
+        ...p,
+        imageUrl: p.image_url || 'https://placehold.co/600x600.png',
+        category: p.category_name,
+        imageUrls: [],
+        reviews: []
+    }));
+}

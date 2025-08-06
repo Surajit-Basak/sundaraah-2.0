@@ -13,6 +13,7 @@ export type Product = {
   inventory: number;
   reviews: ProductReview[];
   created_at: string;
+  wishlist_count?: number; // For wishlist analytics
 };
 
 export interface CartItem extends Product {

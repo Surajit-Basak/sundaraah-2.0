@@ -14,7 +14,7 @@ import {
   SidebarMenuButton,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { Home, Package, Settings, ShoppingCart, BarChart3, Gem, LogOut, BookOpen, Users, ImageIcon, FileText, FolderKanban, GalleryHorizontal, Search, Star, Mail, Tags } from "lucide-react";
+import { Home, Package, Settings, ShoppingCart, BarChart3, Gem, LogOut, BookOpen, Users, ImageIcon, FileText, FolderKanban, GalleryHorizontal, Search, Star, Mail, Tags, Heart } from "lucide-react";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -49,6 +49,7 @@ export default async function AdminDashboardLayout({
       { href: "/admin/categories", label: "Categories", icon: <Tags /> },
       { href: "/admin/collections", label: "Collections", icon: <FolderKanban /> },
       { href: "/admin/reviews", label: "Reviews", icon: <Star /> },
+      { href: "/admin/wishlist", label: "Wishlist", icon: <Heart /> },
     ],
     "Content Management": [
       { href: "/admin/blog", label: "Blog", icon: <BookOpen /> },
