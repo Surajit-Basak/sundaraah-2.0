@@ -163,7 +163,7 @@ export default function Header() {
   }
 
   const Logo = () => {
-    if (isLoading && !settings?.header_logo_url) return <Skeleton className="h-10 w-36" />;
+    if (isLoading) return <Skeleton className="h-10 w-36" />;
     
     if (settings?.header_logo_url) {
         return <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={150} height={40} className="object-contain h-10" priority />;
