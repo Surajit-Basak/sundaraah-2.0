@@ -1,4 +1,7 @@
 
+"use client";
+
+import * as React from "react"
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -7,13 +10,11 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { getBanners } from "@/lib/data";
 import type { Banner } from "@/types";
 import { ArrowRight } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import Autoplay from "embla-carousel-autoplay"
 
-export default async function HeroBanner() {
-  const banners: Banner[] = await getBanners();
+export default function HeroBanner({ banners }: { banners: Banner[] }) {
 
   if (banners.length === 0) {
     return (
@@ -38,6 +39,11 @@ export default async function HeroBanner() {
   return (
     <section className="relative h-[60vh] md:h-[80vh] w-full overflow-hidden">
       <Carousel
+        plugins={[
+          Autoplay({
+            delay: 5000,
+          }),
+        ]}
         opts={{
           loop: true,
         }}
