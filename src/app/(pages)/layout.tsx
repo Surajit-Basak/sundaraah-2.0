@@ -12,7 +12,8 @@ export default function PagesLayout({
     children: React.ReactNode;
   }) {
     const headersList = headers();
-    const pathname = headersList.get('next-url') || '';
+    // Use 'x-pathname' for a more reliable path, with a fallback to 'next-url'.
+    const pathname = headersList.get('x-pathname') || headersList.get('next-url') || '';
 
     return (
         <WishlistProvider>
