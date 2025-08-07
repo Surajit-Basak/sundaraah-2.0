@@ -47,7 +47,7 @@ export default async function HeroBanner() {
           {banners.map((banner) => (
             <CarouselItem key={banner.id} className="h-full">
               <div className="relative h-full w-full flex items-center justify-center text-center text-primary-foreground">
-                <div className="absolute inset-0 bg-primary/80 z-10" />
+                <div className="absolute inset-0 bg-black/40 z-10" />
                 <Image
                   src={banner.image_url}
                   alt={banner.title}

@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Search, LogOut, User, Heart } from "lucide-react";
+import { Menu, X, Search, LogOut, User, Heart, Home, ShoppingBag, Contact } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "../ui/input";
 import { CartSheet } from "../cart/cart-sheet";
@@ -34,6 +34,13 @@ const navLinks = [
   { href: "/blog", label: "Blog" },
   { href: "/contact", label: "Contact" },
 ];
+
+const mobileNavLinks = [
+    { href: "/", label: "Home", icon: <Home className="h-6 w-6" /> },
+    { href: "/shop", label: "Shop", icon: <ShoppingBag className="h-6 w-6" /> },
+    { href: "/wishlist", label: "Wishlist", icon: <Heart className="h-6 w-6" /> },
+    { href: "/account", label: "Account", icon: <User className="h-6 w-6" /> },
+]
 
 export default function Header() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -156,7 +163,7 @@ export default function Header() {
   }
 
   const Logo = () => {
-    if (isLoading) return <Skeleton className="h-10 w-36" />;
+    if (isLoading && !settings?.header_logo_url) return <Skeleton className="h-10 w-36" />;
     
     if (settings?.header_logo_url) {
         return <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={150} height={40} className="object-contain h-10" priority />;
@@ -167,6 +174,7 @@ export default function Header() {
 
 
   return (
+    <>
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-20 max-w-screen-2xl items-center justify-between px-4 gap-8">
         <Link href="/" className="hidden sm:block">
@@ -198,16 +206,20 @@ export default function Header() {
            <Button variant="ghost" size="icon" aria-label="Toggle Search" onClick={handleSearchToggle} className="text-primary transition-colors hover:bg-primary/10 rounded-full">
             {isSearchOpen ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
           </Button>
-
-          <Button asChild variant="ghost" size="icon" aria-label="Wishlist" className="text-primary transition-colors hover:bg-primary/10 rounded-full">
-            <Link href="/wishlist">
-                <Heart className="h-6 w-6" />
-            </Link>
-          </Button>
+          
+          <div className="hidden md:flex">
+             <Button asChild variant="ghost" size="icon" aria-label="Wishlist" className="text-primary transition-colors hover:bg-primary/10 rounded-full">
+                <Link href="/wishlist">
+                    <Heart className="h-6 w-6" />
+                </Link>
+             </Button>
+          </div>
           
           <CartSheet />
 
-          <UserButton />
+          <div className="hidden md:flex">
+            <UserButton />
+          </div>
 
           <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
@@ -248,5 +260,25 @@ export default function Header() {
         </div>
       </div>
     </header>
+
+     {/* Mobile Bottom Navigation */}
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
+        <div className="container mx-auto flex justify-around items-center h-16 px-2">
+            {mobileNavLinks.map(link => (
+                <Link 
+                    key={link.href} 
+                    href={link.href}
+                    className={cn(
+                        "flex flex-col items-center justify-center gap-1 w-full h-full transition-colors",
+                        pathname === link.href ? "text-primary font-bold" : "text-muted-foreground"
+                    )}
+                >
+                    {link.icon}
+                    <span className="text-xs">{link.label}</span>
+                </Link>
+            ))}
+        </div>
+    </nav>
+    </>
   );
 }
