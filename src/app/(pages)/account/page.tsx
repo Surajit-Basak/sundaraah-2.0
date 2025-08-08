@@ -74,10 +74,10 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-16 md:py-24">
-      <h1 className="font-headline text-4xl font-bold text-primary mb-12">My Account</h1>
+    <div className="container mx-auto px-4 py-8 md:py-16">
+      <h1 className="font-headline text-3xl md:text-4xl font-bold text-primary mb-8 md:mb-12">My Account</h1>
       
-      <div className="grid md:grid-cols-12 gap-12 items-start">
+      <div className="grid md:grid-cols-12 gap-8 md:gap-12 items-start">
         {/* Left Sidebar for Navigation */}
         <aside className="md:col-span-3">
             <div className="sticky top-24 p-2 rounded-lg bg-secondary/50 space-y-2">
@@ -98,7 +98,7 @@ export default function AccountPage() {
                  <div>
                     <h2 className="font-headline text-2xl font-bold text-primary mb-4">My Orders</h2>
                     {orders.length > 0 ? (
-                        <div className="border rounded-lg">
+                        <div className="border rounded-lg overflow-x-auto">
                              <Table>
                                 <TableHeader>
                                 <TableRow>

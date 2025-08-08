@@ -37,7 +37,7 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
   }
 
   return (
-    <div className="container mx-auto px-4 py-16 md:py-24">
+    <div className="container mx-auto px-4 py-8 md:py-16">
        <Button asChild variant="outline" className="mb-8">
             <Link href="/account">
                 &larr; Back to My Account
@@ -50,39 +50,41 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
                     <CardTitle className="text-2xl">Products Ordered</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[80px]">Product</TableHead>
-                                <TableHead></TableHead>
-                                <TableHead className="text-center">Quantity</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {order.order_items.map(item => (
-                                <TableRow key={item.id}>
-                                    <TableCell>
-                                        <Image
-                                            src={item.product?.imageUrl || 'https://placehold.co/100x100.png'}
-                                            alt={item.product?.name || "Product image"}
-                                            width={60}
-                                            height={60}
-                                            className="rounded-md object-cover"
-                                        />
-                                    </TableCell>
-                                     <TableCell>
-                                        <Link href={`/shop/${item.product?.slug}`} className="font-medium hover:underline">
-                                            {item.product?.name}
-                                        </Link>
-                                        <p className="text-sm text-muted-foreground">{formatPrice(item.price)}</p>
-                                    </TableCell>
-                                    <TableCell className="text-center">{item.quantity}</TableCell>
-                                    <TableCell className="text-right font-medium">{formatPrice(item.price * item.quantity)}</TableCell>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-[80px]">Product</TableHead>
+                                    <TableHead>Details</TableHead>
+                                    <TableHead className="text-center">Qty</TableHead>
+                                    <TableHead className="text-right">Total</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {order.order_items.map(item => (
+                                    <TableRow key={item.id}>
+                                        <TableCell>
+                                            <Image
+                                                src={item.product?.imageUrl || 'https://placehold.co/100x100.png'}
+                                                alt={item.product?.name || "Product image"}
+                                                width={60}
+                                                height={60}
+                                                className="rounded-md object-cover"
+                                            />
+                                        </TableCell>
+                                         <TableCell>
+                                            <Link href={`/shop/${item.product?.slug}`} className="font-medium hover:underline">
+                                                {item.product?.name}
+                                            </Link>
+                                            <p className="text-sm text-muted-foreground">{formatPrice(item.price)}</p>
+                                        </TableCell>
+                                        <TableCell className="text-center">{item.quantity}</TableCell>
+                                        <TableCell className="text-right font-medium">{formatPrice(item.price * item.quantity)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
         </div>
@@ -95,7 +97,7 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
                 <CardContent className="space-y-4">
                     <div className="flex items-center gap-2">
                         <Hash className="w-5 h-5 text-muted-foreground" />
-                        <p>Order ID: {order.id.substring(0,8).toUpperCase()}</p>
+                        <p className="truncate">Order ID: {order.id.substring(0,8).toUpperCase()}</p>
                     </div>
                      <div className="flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-muted-foreground" />

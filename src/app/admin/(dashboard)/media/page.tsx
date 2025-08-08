@@ -62,7 +62,7 @@ export default function MediaPage() {
     };
 
     return (
-        <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex-1 space-y-4 p-4 sm:p-8 pt-6">
             <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold tracking-tight">Media Library</h2>
             </div>
@@ -89,10 +89,10 @@ export default function MediaPage() {
                 <CardContent>
                     {isLoading ? (
                          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                            {[...Array(6)].map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)}
+                            {[...Array(12)].map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)}
                         </div>
                     ) : mediaItems.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                             {mediaItems.map(item => (
                                 <div key={item.id} className="relative group aspect-square">
                                     {item.content_type?.startsWith('video') ? (
@@ -110,6 +110,7 @@ export default function MediaPage() {
                                             src={item.url!}
                                             alt={item.alt_text || item.file_name || 'Uploaded media'}
                                             fill
+                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                                             className="object-cover rounded-md border"
                                         />
                                     )}

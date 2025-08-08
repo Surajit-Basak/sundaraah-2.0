@@ -81,10 +81,10 @@ export default function HomePageClient({
   ];
 
   const ProductCarousel = ({products}: {products: Product[]}) => (
-     <Carousel opts={{ align: "start", loop: true }}>
+     <Carousel opts={{ align: "start", loop: true }} className="w-full">
       <CarouselContent>
         {products.map((product) => (
-          <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/3 p-4">
+          <CarouselItem key={product.id} className="p-4 sm:basis-1/2 lg:basis-1/3">
             <ProductCard product={product} />
           </CarouselItem>
         ))}
@@ -108,7 +108,7 @@ export default function HomePageClient({
 
   return (
     <div className="flex flex-col">
-      <section className="py-16 md:py-24 bg-secondary">
+      <section className="py-16 md:py-20 bg-secondary">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
             {features.map((feature, index) => (
@@ -145,10 +145,10 @@ export default function HomePageClient({
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
             {getContent(pageContent, 'categories').title || "Shop by Category"}
           </h2>
-          <Carousel opts={{ align: "start" }}>
+          <Carousel opts={{ align: "start" }} className="w-full">
             <CarouselContent>
               {categories.map((category) => (
-                 <CarouselItem key={category.name} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4 p-4">
+                 <CarouselItem key={category.name} className="p-4 basis-3/4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                     <Link href={category.href} className="group relative block overflow-hidden rounded-lg shadow-lg h-full">
                       <Image 
                         src={category.imageUrl} 
@@ -183,7 +183,7 @@ export default function HomePageClient({
       <section className="py-16 md:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="prose prose-lg max-w-none text-foreground">
+            <div className="prose prose-lg max-w-none text-foreground order-last md:order-first">
               <h2 className="font-headline text-3xl md:text-4xl text-primary mb-4">{craftsmanshipContent.title || "The Soul of Sundaraah"}</h2>
               {isLoading ? (
                 <div className="space-y-4">
@@ -234,7 +234,7 @@ export default function HomePageClient({
             <Carousel opts={{ align: "start", loop: true }} className="w-full">
               <CarouselContent>
                 {testimonials.map((testimonial) => (
-                  <CarouselItem key={testimonial.id} className="md:basis-1/2 lg:basis-1/3 p-4">
+                  <CarouselItem key={testimonial.id} className="p-4 sm:basis-1/2 lg:basis-1/3">
                      <TestimonialCard {...testimonial} />
                   </CarouselItem>
                 ))}
@@ -258,7 +258,7 @@ export default function HomePageClient({
                     className="object-cover opacity-20"
                 />
             </div>
-            <div className="relative text-center p-12 md:p-20">
+            <div className="relative text-center p-8 sm:p-12 md:p-20">
               <h2 className="font-headline text-3xl md:text-4xl font-bold mb-4">{giftingContent.title || "The Art of Gifting"}</h2>
               <p className="max-w-2xl mx-auto mb-8 text-lg text-primary-foreground/80">
                 {giftingContent.subtitle || "Find the perfect expression of your affection. Our handcrafted pieces make for unforgettable gifts that will be treasured forever."}
@@ -281,7 +281,7 @@ export default function HomePageClient({
            <Carousel opts={{ align: "start" }} className="w-full">
             <CarouselContent>
               {recentPosts.map((post) => (
-                <CarouselItem key={post.id} className="md:basis-1/2 lg:basis-1/3 p-4">
+                <CarouselItem key={post.id} className="p-4 sm:basis-1/2 lg:basis-1/3">
                   <BlogPostCard post={post} />
                 </CarouselItem>
               ))}
@@ -301,7 +301,7 @@ export default function HomePageClient({
 
        <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
-          <div className="bg-secondary p-10 rounded-lg shadow-lg text-center">
+          <div className="bg-secondary p-8 sm:p-10 rounded-lg shadow-lg text-center">
             <h2 className="font-headline text-3xl md:text-4xl font-bold text-primary mb-4">{newsletterContent.title || "Join Our World"}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
               {newsletterContent.subtitle || "Subscribe to our newsletter for exclusive updates, new arrivals, and special offers delivered right to your inbox."}

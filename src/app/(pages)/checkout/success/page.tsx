@@ -26,7 +26,7 @@ export default function OrderSuccessPage() {
                     Your Order ID is: <span className="font-semibold text-primary">{orderId.substring(0,8).toUpperCase()}</span>
                 </p>
             )}
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Button asChild>
                     <Link href="/shop">Continue Shopping</Link>
                 </Button>

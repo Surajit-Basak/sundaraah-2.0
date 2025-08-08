@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4 sm:p-8 pt-6">
       <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
         </Card>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+        <Card className="col-span-full lg:col-span-4">
             <CardHeader className="flex flex-row items-center">
                 <div className="grid gap-2">
                 <CardTitle>Recent Sales</CardTitle>
@@ -98,14 +98,14 @@ export default async function DashboardPage() {
                 </Link>
                 </Button>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-x-auto">
                  <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Customer</TableHead>
                             <TableHead className="text-center">Status</TableHead>
                             <TableHead className="text-right">Total</TableHead>
-                            <TableHead className="text-right">Date</TableHead>
+                            <TableHead className="hidden sm:table-cell text-right">Date</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -113,20 +113,20 @@ export default async function DashboardPage() {
                              <TableRow key={order.id}>
                                 <TableCell>
                                     <div className="font-medium">{order.customer_name}</div>
-                                    <div className="text-sm text-muted-foreground">{order.customer_email}</div>
+                                    <div className="text-sm text-muted-foreground truncate">{order.customer_email}</div>
                                 </TableCell>
                                 <TableCell className="text-center">
                                     <Badge variant={getStatusVariant(order.status) as any}>{order.status}</Badge>
                                 </TableCell>
                                 <TableCell className="text-right">{formatPrice(order.total)}</TableCell>
-                                <TableCell className="text-right">{new Date(order.created_at).toLocaleDateString()}</TableCell>
+                                <TableCell className="hidden sm:table-cell text-right">{new Date(order.created_at).toLocaleDateString()}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                  </Table>
             </CardContent>
         </Card>
-        <Card className="col-span-3">
+        <Card className="col-span-full lg:col-span-3">
              <CardHeader>
                 <CardTitle>Welcome, Admin!</CardTitle>
              </CardHeader>

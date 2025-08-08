@@ -41,10 +41,13 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
     }
   }, [isSearchOpen]);
   
-  // Close search when navigating
+  // Close search and mobile menu when navigating
   useEffect(() => {
     if (isSearchOpen) {
       setIsSearchOpen(false);
+    }
+    if (isMobileMenuOpen) {
+      setMobileMenuOpen(false);
     }
   }, [pathname]);
 
@@ -131,7 +134,7 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
           </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
          <Button variant="ghost" size="icon" aria-label="Toggle Search" onClick={handleSearchToggle} className="text-primary transition-colors hover:bg-primary/10 rounded-full">
           {isSearchOpen ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
         </Button>

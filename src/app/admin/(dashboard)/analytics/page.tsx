@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import type { Order } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -64,7 +64,7 @@ export default function AnalyticsPage() {
   
   if (isLoading) {
     return (
-        <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex-1 space-y-4 p-4 sm:p-8 pt-6">
             <Skeleton className="h-8 w-48" />
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <Card><CardHeader><Skeleton className="h-5 w-32" /></CardHeader><CardContent><Skeleton className="h-8 w-24" /></CardContent></Card>
@@ -72,15 +72,15 @@ export default function AnalyticsPage() {
                 <Card><CardHeader><Skeleton className="h-5 w-32" /></CardHeader><CardContent><Skeleton className="h-8 w-24" /></CardContent></Card>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-4"><CardHeader><Skeleton className="h-6 w-32" /></CardHeader><CardContent><Skeleton className="h-[350px] w-full" /></CardContent></Card>
-                <Card className="col-span-3"><CardHeader><Skeleton className="h-6 w-32" /></CardHeader><CardContent><Skeleton className="h-[350px] w-full" /></CardContent></Card>
+                <Card className="col-span-full lg:col-span-4"><CardHeader><Skeleton className="h-6 w-32" /></CardHeader><CardContent><Skeleton className="h-[350px] w-full" /></CardContent></Card>
+                <Card className="col-span-full lg:col-span-3"><CardHeader><Skeleton className="h-6 w-32" /></CardHeader><CardContent><Skeleton className="h-[350px] w-full" /></CardContent></Card>
             </div>
         </div>
     );
   }
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4 sm:p-8 pt-6">
       <h2 className="text-3xl font-bold tracking-tight">Analytics</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
@@ -115,7 +115,7 @@ export default function AnalyticsPage() {
         </Card>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+        <Card className="col-span-full lg:col-span-4">
           <CardHeader>
             <CardTitle>Overview</CardTitle>
           </CardHeader>
@@ -136,42 +136,74 @@ export default function AnalyticsPage() {
                         axisLine={false}
                         tickFormatter={(value) => `${formatPrice(value as number)}`}
                     />
+                    <Tooltip
+                        cursor={{ fill: "hsl(var(--muted))" }}
+                        content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                                return (
+                                <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                    <div className="grid grid-cols-2 gap-2">
+                                    <div className="flex flex-col">
+                                        <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                        Month
+                                        </span>
+                                        <span className="font-bold text-foreground">
+                                        {payload[0].payload.name}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                        Revenue
+                                        </span>
+                                        <span className="font-bold">
+                                        {formatPrice(payload[0].value as number)}
+                                        </span>
+                                    </div>
+                                    </div>
+                                </div>
+                                )
+                            }
+                            return null
+                        }}
+                    />
                     <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                 </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card className="col-span-3">
+        <Card className="col-span-full lg:col-span-3">
             <CardHeader>
                 <CardTitle>Recent Orders</CardTitle>
             </CardHeader>
             <CardContent>
                 {allOrders.length > 0 ? (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Customer</TableHead>
-                                <TableHead className="text-center">Status</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {allOrders.slice(0, 10).map(order => (
-                                    <TableRow key={order.id}>
-                                    <TableCell>
-                                        <div className="font-medium">{order.customer_name}</div>
-                                        <div className="hidden text-sm text-muted-foreground md:inline">
-                                            {order.customer_email}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <Badge variant={getStatusVariant(order.status) as any}>{order.status}</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">{formatPrice(order.total)}</TableCell>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Customer</TableHead>
+                                    <TableHead className="text-center">Status</TableHead>
+                                    <TableHead className="text-right">Total</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {allOrders.slice(0, 10).map(order => (
+                                        <TableRow key={order.id}>
+                                        <TableCell>
+                                            <div className="font-medium truncate">{order.customer_name}</div>
+                                            <div className="text-sm text-muted-foreground truncate">
+                                                {order.customer_email}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <Badge variant={getStatusVariant(order.status) as any}>{order.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">{formatPrice(order.total)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center text-center h-[200px] text-muted-foreground">
                         <Package className="h-12 w-12 mb-4" />
