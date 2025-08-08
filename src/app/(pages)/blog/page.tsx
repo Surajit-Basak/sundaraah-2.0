@@ -1,4 +1,3 @@
-
 import BlogPostCard from "@/components/blog-post-card";
 import { getBlogPosts, getPageContent, getPageSeo } from "@/lib/data";
 import type { BlogPost, PageContent } from "@/types";

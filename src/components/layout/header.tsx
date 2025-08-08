@@ -1,8 +1,7 @@
-
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Search, Heart, Home, ShoppingBag, Contact, User } from "lucide-react";
+import { Menu, X, Search, Heart, Home, ShoppingBag, Contact, User, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "../ui/input";
 import { CartSheet } from "../cart/cart-sheet";
@@ -34,7 +33,7 @@ export default async function Header() {
   
   const Logo = () => {
     if (settings?.header_logo_url) {
-        return <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={180} height={45} className="object-contain h-10 w-auto" priority />;
+        return <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={240} height={60} className="object-contain h-12 w-auto" priority />;
     }
     return <span className="font-headline text-3xl font-bold text-primary">{siteName}</span>;
   }
@@ -67,6 +66,7 @@ export default async function Header() {
             ))}
         </div>
     </nav>
+    <div className="pb-16 md:pb-0"></div>
     </>
   );
 }

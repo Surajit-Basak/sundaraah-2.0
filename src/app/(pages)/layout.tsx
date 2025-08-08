@@ -1,4 +1,3 @@
-
 import Footer from "@/components/layout/footer";
 import Header from "@/components/layout/header";
 import FloatingButtons from "@/components/layout/floating-buttons";
