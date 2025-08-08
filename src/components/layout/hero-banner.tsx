@@ -37,7 +37,7 @@ export default function HeroBanner({ banners }: { banners: Banner[] }) {
   }
 
   return (
-    <section className="relative h-[60vh] md:h-[80vh] w-full overflow-hidden">
+    <section className="h-[60vh] md:h-[80vh] w-full">
       <Carousel
         plugins={[
           Autoplay({
@@ -51,32 +51,34 @@ export default function HeroBanner({ banners }: { banners: Banner[] }) {
       >
         <CarouselContent className="h-full">
           {banners.map((banner) => (
-            <CarouselItem key={banner.id} className="h-full relative flex items-center justify-center text-center text-primary-foreground">
-              <div className="absolute inset-0 bg-black/40 z-10" />
-              <Image
-                src={banner.image_url}
-                alt={banner.title}
-                data-ai-hint="elegant jewelry"
-                fill
-                className="object-cover"
-                priority
-              />
-              <div className="relative z-20 container mx-auto px-4">
-                <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold mb-4 drop-shadow-md">
-                  {banner.title}
-                </h1>
-                {banner.subtitle && (
-                  <p className="text-lg md:text-xl max-w-2xl mx-auto mb-8">
-                    {banner.subtitle}
-                  </p>
-                )}
-                {banner.link_href && banner.link_text && (
-                  <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
-                    <Link href={banner.link_href}>
-                      {banner.link_text} <ArrowRight className="ml-2" />
-                    </Link>
-                  </Button>
-                )}
+            <CarouselItem key={banner.id} className="h-full">
+              <div className="relative h-full w-full flex items-center justify-center text-center text-primary-foreground">
+                  <div className="absolute inset-0 bg-black/40 z-10" />
+                  <Image
+                    src={banner.image_url}
+                    alt={banner.title}
+                    data-ai-hint="elegant jewelry"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                  <div className="relative z-20 container mx-auto px-4">
+                    <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold mb-4 drop-shadow-md">
+                      {banner.title}
+                    </h1>
+                    {banner.subtitle && (
+                      <p className="text-lg md:text-xl max-w-2xl mx-auto mb-8">
+                        {banner.subtitle}
+                      </p>
+                    )}
+                    {banner.link_href && banner.link_text && (
+                      <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
+                        <Link href={banner.link_href}>
+                          {banner.link_text} <ArrowRight className="ml-2" />
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
               </div>
             </CarouselItem>
           ))}

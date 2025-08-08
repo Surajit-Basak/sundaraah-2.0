@@ -72,7 +72,7 @@ export default async function RootLayout({
         {themeStyle && <style dangerouslySetInnerHTML={{ __html: themeStyle }} />}
       </head>
       <body className={cn("font-body antialiased")}>
-        <Preloader>
+        <Preloader settings={settings}>
             <Providers>
               {children}
               <Toaster />
