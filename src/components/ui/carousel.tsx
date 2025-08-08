@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -26,8 +27,11 @@ type CarouselContextProps = {
   api: ReturnType<typeof useEmblaCarousel>[1]
   scrollPrev: () => void
   scrollNext: () => void
+  scrollTo: (index: number) => void;
   canScrollPrev: boolean
   canScrollNext: boolean
+  selectedIndex: number;
+  scrollSnaps: number[];
 } & CarouselProps
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
@@ -67,12 +71,14 @@ const Carousel = React.forwardRef<
     )
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
     const [canScrollNext, setCanScrollNext] = React.useState(false)
+    const [selectedIndex, setSelectedIndex] = React.useState(0);
+    const [scrollSnaps, setScrollSnaps] = React.useState<number[]>([]);
 
     const onSelect = React.useCallback((api: CarouselApi) => {
       if (!api) {
         return
       }
-
+      setSelectedIndex(api.selectedScrollSnap());
       setCanScrollPrev(api.canScrollPrev())
       setCanScrollNext(api.canScrollNext())
     }, [])
@@ -84,6 +90,10 @@ const Carousel = React.forwardRef<
     const scrollNext = React.useCallback(() => {
       api?.scrollNext()
     }, [api])
+
+    const scrollTo = React.useCallback((index: number) => {
+        api?.scrollTo(index);
+    }, [api]);
 
     const handleKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -110,10 +120,14 @@ const Carousel = React.forwardRef<
       if (!api) {
         return
       }
-
-      onSelect(api)
-      api.on("reInit", onSelect)
-      api.on("select", onSelect)
+      
+      onSelect(api);
+      setScrollSnaps(api.scrollSnapList());
+      api.on("reInit", (api) => {
+        onSelect(api);
+        setScrollSnaps(api.scrollSnapList());
+      });
+      api.on("select", onSelect);
 
       return () => {
         api?.off("select", onSelect)
@@ -130,8 +144,11 @@ const Carousel = React.forwardRef<
             orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
           scrollPrev,
           scrollNext,
+          scrollTo,
           canScrollPrev,
           canScrollNext,
+          selectedIndex,
+          scrollSnaps
         }}
       >
         <div
@@ -157,11 +174,11 @@ const CarouselContent = React.forwardRef<
   const { carouselRef, orientation } = useCarousel()
 
   return (
-    <div ref={carouselRef} className="overflow-hidden">
+    <div ref={carouselRef} className="overflow-hidden h-full">
       <div
         ref={ref}
         className={cn(
-          "flex",
+          "flex h-full",
           orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
           className
         )}
@@ -184,7 +201,7 @@ const CarouselItem = React.forwardRef<
       role="group"
       aria-roledescription="slide"
       className={cn(
-        "min-w-0 shrink-0 grow-0 basis-full",
+        "min-w-0 shrink-0 grow-0 basis-full h-full",
         orientation === "horizontal" ? "pl-4" : "pt-4",
         className
       )}
@@ -252,6 +269,36 @@ const CarouselNext = React.forwardRef<
 })
 CarouselNext.displayName = "CarouselNext"
 
+
+const CarouselDots = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
+  const { selectedIndex, scrollSnaps, scrollTo } = useCarousel();
+
+  return (
+    <div
+      ref={ref}
+      className={cn("absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2", className)}
+      {...props}
+    >
+      {scrollSnaps.map((_, index) => (
+        <button
+          key={index}
+          onClick={() => scrollTo(index)}
+          className={cn(
+            "h-2 w-2 rounded-full bg-white/50 transition-all",
+            selectedIndex === index ? "w-4 bg-white" : "hover:bg-white/75"
+          )}
+          aria-label={`Go to slide ${index + 1}`}
+        />
+      ))}
+    </div>
+  );
+});
+CarouselDots.displayName = "CarouselDots";
+
+
 export {
   type CarouselApi,
   Carousel,
@@ -259,4 +306,5 @@ export {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  CarouselDots,
 }
