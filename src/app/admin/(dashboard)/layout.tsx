@@ -81,9 +81,9 @@ export default async function AdminDashboardLayout({
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <div className="flex items-center gap-2 p-2">
+          <div className="flex items-center gap-2 p-2 h-14">
             {settings?.header_logo_url ? (
-              <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={120} height={30} className="object-contain group-data-[state=collapsed]:hidden" />
+              <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={240} height={60} className="object-contain max-h-full w-auto group-data-[state=collapsed]:hidden" />
             ) : (
                <h3 className="font-headline text-2xl font-bold text-primary group-data-[state=collapsed]:hidden">{siteName}</h3>
             )}

@@ -37,9 +37,10 @@ export function Preloader({ children, settings }: { children: React.ReactNode, s
         <Image 
           src={settings.header_logo_url} 
           alt={`${settings.site_name} logo`} 
-          width={250} 
-          height={80} 
-          className="animate-pulse"
+          width={300} 
+          height={75} 
+          className="animate-pulse object-contain h-16 w-auto"
+          priority
         />
       </div>
       {children}

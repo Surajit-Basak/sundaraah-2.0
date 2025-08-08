@@ -31,19 +31,10 @@ export default async function Header() {
   const { data: { user } } = await supabase.auth.getUser();
   const settings = await getSettings();
   const siteName = settings?.site_name || "Sundaraah";
-
-  const NavLink = ({ href, label }: { href: string; label: string }) => (
-    <Link
-      href={href}
-      className="text-lg font-medium transition-colors hover:text-primary text-muted-foreground"
-    >
-      {label}
-    </Link>
-  );
   
   const Logo = () => {
     if (settings?.header_logo_url) {
-        return <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={150} height={40} className="object-contain h-10" priority />;
+        return <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={180} height={45} className="object-contain h-10 w-auto" priority />;
     }
     return <span className="font-headline text-3xl font-bold text-primary">{siteName}</span>;
   }

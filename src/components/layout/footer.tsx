@@ -17,7 +17,7 @@ export default async function Footer() {
           <div className="md:col-span-4 text-center md:text-left">
             <Link href="/" className="inline-block mb-4">
                {settings?.footer_logo_url ? (
-                  <Image src={settings.footer_logo_url} alt={`${siteName} logo`} width={150} height={40} className="object-contain" />
+                  <Image src={settings.footer_logo_url} alt={`${siteName} logo`} width={240} height={60} className="object-contain h-12 w-auto" />
                 ) : (
                   <div className="flex items-center gap-2 justify-center md:justify-start">
                       <Gem className="h-8 w-8 text-accent"/>

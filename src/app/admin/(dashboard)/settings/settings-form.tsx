@@ -175,7 +175,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <MediaPicker {...field} />
                       </FormControl>
                        <FormDescription>
-                        Displayed in the site header. Used in the preloader and admin panel. Recommended size: 200x50 pixels.
+                        Displayed in the site header. For best results, upload a transparent PNG at least 600px wide.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -191,7 +191,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <MediaPicker {...field} />
                       </FormControl>
                        <FormDescription>
-                        A separate logo for the site footer. If empty, the site name will be used.
+                        A separate logo for the site footer. If empty, the site name will be used. Recommended minimum width: 600px.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

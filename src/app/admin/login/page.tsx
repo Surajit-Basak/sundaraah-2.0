@@ -25,9 +25,9 @@ export default function AdminLoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-secondary">
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="text-center">
-            <div className="flex justify-center items-center gap-2 mb-4">
+            <div className="flex justify-center items-center gap-2 mb-4 h-12">
                {settings?.header_logo_url ? (
-                  <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={150} height={40} className="object-contain h-10" />
+                  <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={240} height={60} className="object-contain max-h-full w-auto" />
                 ) : (
                   <>
                     <Gem className="h-8 w-8 text-accent"/>
