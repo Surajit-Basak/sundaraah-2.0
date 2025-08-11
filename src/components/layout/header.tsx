@@ -72,7 +72,6 @@ export default async function Header() {
             ))}
         </div>
     </nav>
-    <div className="block h-16 md:hidden"></div>
     </>
   );
 }

@@ -117,19 +117,9 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
 
   return (
     <>
-      <div className={cn("flex-1 flex justify-center items-center transition-all duration-300")}>
-          <nav className={cn("hidden md:flex items-center gap-8", {
-              'hidden': isSearchOpen,
-              'flex': !isSearchOpen
-          })}>
-              {navLinks.map((link) => (
-                  <NavLink key={link.href} href={link.href} label={link.label} />
-              ))}
-          </nav>
-          <div className={cn("relative w-full max-w-2xl", {
-              'hidden': !isSearchOpen,
-              'block': isSearchOpen
-          })}>
+      <div className="flex-1 flex justify-center items-center">
+        {isSearchOpen ? (
+          <div className="relative w-full max-w-2xl">
             <form onSubmit={handleSearchSubmit}>
               <Input
                 ref={searchInputRef}
@@ -140,6 +130,13 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
               <Search className="absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
             </form>
           </div>
+        ) : (
+          <nav className="hidden md:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <NavLink key={link.href} href={link.href} label={link.label} />
+            ))}
+          </nav>
+        )}
       </div>
 
       <div className="flex items-center gap-1 sm:gap-2">
