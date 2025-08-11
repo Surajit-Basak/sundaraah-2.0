@@ -3,10 +3,10 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Menu, X, Search, LogOut, User, Heart, Gem } from "lucide-react";
+import { Menu, X, Search, LogOut, User, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "../ui/input";
 import { CartSheet } from "../cart/cart-sheet";
@@ -51,6 +51,7 @@ export default function HeaderClientActions({ user, siteName, logoUrl, navLinks 
     if (isMobileMenuOpen) {
       setMobileMenuOpen(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   const handleSearchToggle = () => {
@@ -141,7 +142,7 @@ export default function HeaderClientActions({ user, siteName, logoUrl, navLinks 
       </div>
 
       <div className="flex items-center gap-1 sm:gap-2">
-         <Button variant="ghost" size="icon" aria-label="Toggle Search" onClick={handleSearchToggle} className="text-primary transition-colors hover:bg-primary/10 rounded-full">
+         <Button variant="ghost" size="icon" aria-label="Toggle Search" onClick={handleSearchToggle} className="hidden md:inline-flex text-primary transition-colors hover:bg-primary/10 rounded-full">
           {isSearchOpen ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
         </Button>
         
