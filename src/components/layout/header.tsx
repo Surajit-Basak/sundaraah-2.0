@@ -1,17 +1,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Search, Heart, Home, ShoppingBag, Contact, User, Phone } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Input } from "../ui/input";
-import { CartSheet } from "../cart/cart-sheet";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSettings } from "@/lib/data";
 import Image from "next/image";
 import HeaderClientActions from "./header-client-actions";
 import { Skeleton } from "../ui/skeleton";
+import { Home, ShoppingBag, Heart, User } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -50,13 +45,10 @@ export default async function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-20 max-w-screen-2xl items-center justify-between px-4 gap-4">
         <div className="flex-shrink-0">
-          <Link href="/" className="hidden sm:block">
+          <Link href="/">
             <React.Suspense fallback={<LogoSkeleton />}>
               <Logo />
             </React.Suspense>
-          </Link>
-          <Link href="/" className="sm:hidden font-headline text-2xl font-bold text-primary">
-             {siteName.charAt(0)}
           </Link>
         </div>
         
