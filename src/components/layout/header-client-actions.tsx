@@ -49,7 +49,8 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
     if (isMobileMenuOpen) {
       setMobileMenuOpen(false);
     }
-  }, [pathname, isSearchOpen, isMobileMenuOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   const handleSearchToggle = () => {
     setIsSearchOpen(!isSearchOpen);
@@ -60,6 +61,7 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
     const searchTerm = searchInputRef.current?.value;
     if (searchTerm) {
       router.push(`/shop?search=${encodeURIComponent(searchTerm)}`);
+      setIsSearchOpen(false);
     }
   }
 
@@ -116,12 +118,18 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
   return (
     <>
       <div className={cn("flex-1 flex justify-center items-center transition-all duration-300")}>
-          <nav className={cn("hidden md:flex items-center gap-8", isSearchOpen ? 'hidden' : 'flex')}>
+          <nav className={cn("hidden md:flex items-center gap-8", {
+              'hidden': isSearchOpen,
+              'flex': !isSearchOpen
+          })}>
               {navLinks.map((link) => (
                   <NavLink key={link.href} href={link.href} label={link.label} />
               ))}
           </nav>
-          <div className={cn("relative w-full max-w-2xl", !isSearchOpen && "hidden")}>
+          <div className={cn("relative w-full max-w-2xl", {
+              'hidden': !isSearchOpen,
+              'block': isSearchOpen
+          })}>
             <form onSubmit={handleSearchSubmit}>
               <Input
                 ref={searchInputRef}
@@ -186,6 +194,9 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
                   </Link>
                 ))}
               </nav>
+              <div className="mt-auto p-4 border-t">
+                  <UserButton />
+              </div>
             </div>
           </SheetContent>
         </Sheet>
