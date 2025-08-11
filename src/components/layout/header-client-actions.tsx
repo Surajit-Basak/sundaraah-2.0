@@ -49,7 +49,7 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
     if (isMobileMenuOpen) {
       setMobileMenuOpen(false);
     }
-  }, [pathname]);
+  }, [pathname, isSearchOpen, isMobileMenuOpen]);
 
   const handleSearchToggle = () => {
     setIsSearchOpen(!isSearchOpen);
@@ -116,7 +116,7 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
   return (
     <>
       <div className={cn("flex-1 flex justify-center items-center transition-all duration-300")}>
-          <nav className={cn("hidden md:flex items-center gap-8", isSearchOpen && "hidden")}>
+          <nav className={cn("hidden md:flex items-center gap-8", isSearchOpen ? 'hidden' : 'flex')}>
               {navLinks.map((link) => (
                   <NavLink key={link.href} href={link.href} label={link.label} />
               ))}
