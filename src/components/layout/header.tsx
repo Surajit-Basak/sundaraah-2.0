@@ -52,7 +52,7 @@ export default async function Header() {
           </Link>
         </div>
         
-        <HeaderClientActions user={user} siteName={siteName} navLinks={navLinks} />
+        <HeaderClientActions user={user} siteName={siteName} navLinks={navLinks} logoUrl={settings?.header_logo_url} />
 
       </div>
     </header>

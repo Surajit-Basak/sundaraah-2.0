@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Search, LogOut, User, Heart } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Menu, X, Search, LogOut, User, Heart, Gem } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "../ui/input";
 import { CartSheet } from "../cart/cart-sheet";
@@ -21,14 +21,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { logout } from "@/app/auth/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import Image from "next/image";
 
 interface HeaderClientActionsProps {
     user: SupabaseUser | null;
     siteName: string;
+    logoUrl: string | null | undefined;
     navLinks: { href: string, label: string }[];
 }
 
-export default function HeaderClientActions({ user, siteName, navLinks }: HeaderClientActionsProps) {
+export default function HeaderClientActions({ user, siteName, logoUrl, navLinks }: HeaderClientActionsProps) {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const pathname = usePathname();
@@ -49,7 +51,6 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
     if (isMobileMenuOpen) {
       setMobileMenuOpen(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   const handleSearchToggle = () => {
@@ -58,10 +59,9 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const searchTerm = searchInputRef.current?.value;
+    const searchTerm = (e.currentTarget.elements.namedItem('search') as HTMLInputElement).value;
     if (searchTerm) {
       router.push(`/shop?search=${encodeURIComponent(searchTerm)}`);
-      setIsSearchOpen(false);
     }
   }
 
@@ -119,10 +119,11 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
     <>
       <div className="flex-1 flex justify-center items-center">
         {isSearchOpen ? (
-          <div className="relative w-full max-w-2xl">
+           <div className="relative w-full max-w-2xl">
             <form onSubmit={handleSearchSubmit}>
               <Input
                 ref={searchInputRef}
+                name="search"
                 type="search"
                 placeholder="Search products..."
                 className="w-full pl-12 h-12 text-base rounded-full bg-secondary border-transparent focus:border-primary focus:ring-primary"
@@ -165,18 +166,32 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
               <span className="sr-only">Open menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-background">
-            <div className="flex flex-col h-full">
-              <div className="flex justify-between items-center p-4 border-b">
-                 <Link href="/" className="font-headline text-2xl font-bold text-primary" onClick={() => setMobileMenuOpen(false)}>
-                  {siteName}
-                </Link>
-                <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
-                  <X className="h-6 w-6 text-primary" />
-                  <span className="sr-only">Close menu</span>
-                </Button>
-              </div>
-              <nav className="flex flex-col gap-6 p-4">
+          <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-background p-0 flex flex-col">
+            <SheetHeader className="p-4 border-b">
+                <SheetTitle asChild>
+                     <Link href="/" className="inline-block" onClick={() => setMobileMenuOpen(false)}>
+                        {logoUrl ? (
+                             <Image src={logoUrl} alt={`${siteName} logo`} width={180} height={45} className="object-contain max-h-10 w-auto" />
+                        ) : (
+                             <span className="font-headline text-2xl font-bold text-primary">{siteName}</span>
+                        )}
+                    </Link>
+                </SheetTitle>
+            </SheetHeader>
+            <div className="p-4">
+                 <form onSubmit={handleSearchSubmit}>
+                    <div className="relative">
+                        <Input
+                            name="search"
+                            type="search"
+                            placeholder="Search..."
+                            className="w-full pl-10 h-10 text-base"
+                        />
+                         <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                    </div>
+                </form>
+            </div>
+              <nav className="flex flex-col gap-4 p-4">
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}
@@ -194,7 +209,6 @@ export default function HeaderClientActions({ user, siteName, navLinks }: Header
               <div className="mt-auto p-4 border-t">
                   <UserButton />
               </div>
-            </div>
           </SheetContent>
         </Sheet>
       </div>
