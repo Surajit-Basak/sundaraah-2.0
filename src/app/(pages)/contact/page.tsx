@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +26,8 @@ export default async function ContactPage() {
   const heroContent = getContent(pageContent, 'hero');
   const infoContent = getContent(pageContent, 'info');
   const formContent = getContent(pageContent, 'form');
+  const mapContent = getContent(pageContent, 'map');
+
 
   return (
     <div className="bg-background">
@@ -112,6 +115,22 @@ export default async function ContactPage() {
           </div>
         </div>
       </section>
+
+      {/* Map Section */}
+      {mapContent?.iframe_html && (
+        <section className="py-16 md:py-24 bg-secondary">
+            <div className="container mx-auto px-4">
+                <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-primary">
+                    {mapContent.title || "Our Location"}
+                </h2>
+                <div 
+                    className="aspect-video w-full rounded-lg overflow-hidden shadow-xl border"
+                    dangerouslySetInnerHTML={{ __html: mapContent.iframe_html }}
+                />
+            </div>
+        </section>
+      )}
+
     </div>
   );
 }
