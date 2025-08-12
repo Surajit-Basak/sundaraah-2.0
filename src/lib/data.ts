@@ -5,7 +5,7 @@ import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, Pr
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
-import OrderConfirmationEmail from "@/components/emails/order-confirmation-email";
+import OrderConfirmationEmail from "@/components/emails/generic-notification-email";
 import GenericNotificationEmail from "@/components/emails/generic-notification-email";
 import Razorpay from "razorpay";
 
@@ -445,6 +445,93 @@ type NewOrder = {
     items: CartItem[];
     user_id?: string | null;
 }
+
+async function createShiprocketOrder(order: Order, items: CartItem[]) {
+    try {
+        const shiprocketEmail = process.env.SHIPROCKET_EMAIL;
+        const shiprocketPassword = process.env.SHIPROCKET_PASSWORD;
+
+        if (!shiprocketEmail || !shiprocketPassword) {
+            console.warn("Shiprocket credentials not found. Skipping shipment creation.");
+            return;
+        }
+
+        // 1. Authenticate with Shiprocket
+        const authResponse = await fetch("https://apiv2.shiprocket.in/v1/external/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: shiprocketEmail, password: shiprocketPassword }),
+        });
+
+        if (!authResponse.ok) {
+            throw new Error(`Shiprocket auth failed: ${authResponse.statusText}`);
+        }
+
+        const { token } = await authResponse.json();
+
+        // 2. Format order details for Shiprocket
+        const orderItems = items.map(item => ({
+            name: item.name,
+            sku: item.id.substring(0, 20), // SKU must be max 20 chars
+            units: item.quantity,
+            selling_price: item.price,
+        }));
+        
+        const supabase = createSupabaseServerClient();
+        const {data: userProfile} = await supabase.from('users').select('shipping_address').eq('id', order.user_id!).single();
+        if(!userProfile || !userProfile.shipping_address) {
+            throw new Error('Shipping address not found for user');
+        }
+
+        const payload = {
+            order_id: order.id,
+            order_date: new Date(order.created_at).toISOString().split('T')[0],
+            billing_customer_name: order.customer_name,
+            billing_last_name: "", // Shiprocket requires this field
+            billing_address: userProfile.shipping_address.street,
+            billing_city: userProfile.shipping_address.city,
+            billing_pincode: userProfile.shipping_address.postal_code,
+            billing_state: userProfile.shipping_address.state,
+            billing_country: userProfile.shipping_address.country,
+            billing_email: order.customer_email,
+            billing_phone: "9999999999", // Placeholder phone, required field
+            shipping_is_billing: true,
+            order_items: orderItems,
+            payment_method: "Prepaid",
+            sub_total: order.total,
+            length: 10, // Placeholder dimensions
+            breadth: 10,
+            height: 10,
+            weight: 0.5, // Placeholder weight in kg
+        };
+
+        // 3. Create shipment
+        const createOrderResponse = await fetch("https://apiv2.shiprocket.in/v1/external/orders/create/add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!createOrderResponse.ok) {
+            const errorBody = await createOrderResponse.json();
+            console.error("Shiprocket order creation failed:", errorBody);
+            throw new Error(`Shiprocket order creation failed: ${JSON.stringify(errorBody.errors)}`);
+        }
+
+        const shiprocketData = await createOrderResponse.json();
+        console.log("Shiprocket order created successfully:", shiprocketData);
+
+    } catch (error) {
+        console.error("Error creating Shiprocket shipment:", error);
+        // Do not re-throw the error, as we don't want to fail the entire customer order process
+        // if shipping integration fails. Just log it for manual follow-up.
+    }
+}
+
+
 export async function createOrder(orderData: NewOrder): Promise<string> {
     const supabase = createSupabaseServerClient();
     
@@ -477,7 +564,7 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
             status: 'Processing',
             user_id: orderData.user_id
         })
-        .select('id, created_at')
+        .select('id, created_at, user_id, customer_name, customer_email, total')
         .single();
 
     if (orderError || !order) {
@@ -515,9 +602,10 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
                 from: `"${settings?.site_name || 'Sundaraah'}" <noreply@sundaraah.com>`,
                 to: [orderData.customer_email],
                 subject: 'Your Sundaraah Order Confirmation',
-                react: OrderConfirmationEmail({
-                    order: { ...order, ...orderData, order_items: orderData.items },
+                react: GenericNotificationEmail({
                     siteName: settings?.site_name || 'Sundaraah Showcase',
+                    subject: 'Your Sundaraah Order Confirmation',
+                    bodyContent: `<p>Thank you for your order! Your order ID is ${orderId}.</p>`
                 }),
             });
         } catch (emailError) {
@@ -526,6 +614,9 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
     } else {
         console.warn("RESEND_API_KEY is not set. Skipping order confirmation email.");
     }
+    
+    // Create Shiprocket order in the background
+    createShiprocketOrder(order, orderData.items);
 
     revalidatePath('/admin/orders');
     revalidatePath('/admin/products'); // Revalidate products to show new inventory
