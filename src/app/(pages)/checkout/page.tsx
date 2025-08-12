@@ -16,6 +16,9 @@ import type { User } from "@supabase/supabase-js";
 import Script from "next/script";
 import type { Settings, UserProfile } from "@/types";
 import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 declare global {
     interface Window {
@@ -57,15 +60,17 @@ export default function CheckoutPage() {
   const finalShippingCost = isEligibleForFreeShipping ? 0 : shippingFee;
   const orderTotal = cartTotal + finalShippingCost;
 
+  const isProfileComplete = userProfile && userProfile.full_name && userProfile.email && userProfile.phone && userProfile.shipping_address;
+
 
   const handlePlaceOrder = async () => {
     setIsLoading(true);
 
-    if (!userProfile || !userProfile.full_name || !userProfile.email || cartItems.length === 0) {
+    if (!isProfileComplete || cartItems.length === 0) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please complete your profile and ensure your cart is not empty before checking out.",
+        description: "Please complete your profile (including phone and address) and ensure your cart is not empty before checking out.",
       });
       setIsLoading(false);
       return;
@@ -93,6 +98,7 @@ export default function CheckoutPage() {
                     const orderId = await createOrder({
                         customer_name: userProfile.full_name!,
                         customer_email: userProfile.email!,
+                        customer_phone: userProfile.phone!,
                         total: orderTotal,
                         items: cartItems,
                         user_id: user?.id,
@@ -116,9 +122,16 @@ export default function CheckoutPage() {
             prefill: {
                 name: userProfile.full_name,
                 email: userProfile.email,
+                contact: userProfile.phone,
             },
             theme: {
                 color: "#5d1d39"
+            },
+            modal: {
+                ondismiss: function() {
+                    console.log('Razorpay modal closed');
+                    setIsLoading(false); // Reset button state if modal is closed
+                }
             }
         };
 
@@ -170,6 +183,16 @@ export default function CheckoutPage() {
       <div className="grid lg:grid-cols-2 gap-12 items-start">
         {/* Left Side: Summary */}
         <div className="space-y-8">
+            {!isProfileComplete && (
+                 <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Incomplete Profile</AlertTitle>
+                    <AlertDescription>
+                        Your profile is missing required information (e.g., phone number or shipping address). Please
+                        <Link href="/account" className="font-bold underline ml-1">update your profile</Link> to proceed.
+                    </AlertDescription>
+                </Alert>
+            )}
             <Card>
                 <CardHeader>
                     <CardTitle>Customer & Shipping</CardTitle>
@@ -179,6 +202,7 @@ export default function CheckoutPage() {
                         <>
                          <p><strong>Name:</strong> {userProfile.full_name}</p>
                          <p><strong>Email:</strong> {userProfile.email}</p>
+                         <p><strong>Phone:</strong> {userProfile.phone || 'N/A'}</p>
                          <p className="text-sm text-muted-foreground pt-4">Your order will be shipped to your default shipping address. You can change this in your account profile.</p>
                         </>
                     ) : (
@@ -244,7 +268,7 @@ export default function CheckoutPage() {
                 <p>Total</p>
                 <p>{formatPrice(orderTotal)}</p>
               </div>
-              <Button onClick={handlePlaceOrder} size="lg" className="w-full" disabled={isLoading || !userProfile}>
+              <Button onClick={handlePlaceOrder} size="lg" className="w-full" disabled={isLoading || !isProfileComplete}>
                     {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Lock className="mr-2 h-5 w-5" />}
                     {isLoading ? "Processing..." : `Pay ${formatPrice(orderTotal)}`}
                 </Button>

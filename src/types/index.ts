@@ -112,6 +112,7 @@ export type UserProfile = {
   id: string;
   email: string | null;
   full_name: string | null;
+  phone: string | null;
   user_role: 'admin' | 'user';
   dob?: string | null;
   billing_address?: Address | null;

@@ -440,13 +440,14 @@ export async function getOrderById(id: string): Promise<OrderWithItems | null> {
 type NewOrder = {
     customer_name: string;
     customer_email: string;
+    customer_phone: string;
     total: number;
     shipping_fee: number;
     items: CartItem[];
     user_id?: string | null;
 }
 
-async function createShiprocketOrder(order: Order, items: CartItem[]) {
+async function createShiprocketOrder(order: Order, items: CartItem[], phone: string) {
     try {
         const shiprocketEmail = process.env.SHIPROCKET_EMAIL;
         const shiprocketPassword = process.env.SHIPROCKET_PASSWORD;
@@ -494,7 +495,7 @@ async function createShiprocketOrder(order: Order, items: CartItem[]) {
             billing_state: userProfile.shipping_address.state,
             billing_country: userProfile.shipping_address.country,
             billing_email: order.customer_email,
-            billing_phone: "9999999999", // Placeholder phone, required field
+            billing_phone: phone,
             shipping_is_billing: true,
             order_items: orderItems,
             payment_method: "Prepaid",
@@ -616,7 +617,7 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
     }
     
     // Create Shiprocket order in the background
-    createShiprocketOrder(order, orderData.items);
+    createShiprocketOrder(order, orderData.items, orderData.customer_phone);
 
     revalidatePath('/admin/orders');
     revalidatePath('/admin/products'); // Revalidate products to show new inventory

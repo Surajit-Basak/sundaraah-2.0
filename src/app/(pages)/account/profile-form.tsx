@@ -32,6 +32,7 @@ const addressSchema = z.object({
 
 const profileSchema = z.object({
   full_name: z.string().min(2, "Full name must be at least 2 characters.").optional(),
+  phone: z.string().min(10, "Please enter a valid phone number.").optional(),
   dob: z.string().optional(), // Storing as string, validation for date format can be added
   billing_address: addressSchema.optional(),
   shipping_address: addressSchema.optional(),
@@ -51,6 +52,7 @@ export function ProfileForm({ userProfile }: ProfileFormProps) {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       full_name: userProfile?.full_name || "",
+      phone: userProfile?.phone || "",
       dob: userProfile?.dob ? new Date(userProfile.dob).toISOString().split('T')[0] : "",
       billing_address: userProfile?.billing_address || {},
       shipping_address: userProfile?.shipping_address || {},
@@ -85,19 +87,37 @@ export function ProfileForm({ userProfile }: ProfileFormProps) {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="full_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} value={field.value || ''} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <FormField
+                  control={form.control}
+                  name="full_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input type="tel" {...field} value={field.value || ''} placeholder="e.g. 9876543210"/>
+                      </FormControl>
+                       <FormDescription>
+                        Required for shipping updates.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
              <FormField
                 control={form.control}
                 name="dob"
