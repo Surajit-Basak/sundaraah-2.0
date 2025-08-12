@@ -8,7 +8,7 @@ export default function PagesDashboard() {
   const pages = [
     { name: "Home", path: "home", description: "Edit content sections for the main landing page." },
     { name: "About", path: "about", description: "Manage the hero, mission, and team sections." },
-    { name: "Contact", path: "contact", description: "Update contact info and form titles." },
+    { name: "Contact", path: "contact", description: "Update contact info, form titles, and map." },
     { name: "Shop", path: "shop", description: "Change the title and subtitle of the shop page." },
     { name: "Blog", path: "blog", description: "Modify the main title for the blog listing page." },
     { name: "Privacy Policy", path: "privacy", description: "Edit your privacy policy document." },
