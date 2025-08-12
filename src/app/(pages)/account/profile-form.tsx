@@ -87,7 +87,17 @@ export function ProfileForm({ userProfile }: ProfileFormProps) {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input readOnly value={userProfile?.email || ''} className="bg-muted"/>
+                  </FormControl>
+                   <FormDescription>
+                    Your email is used for login and cannot be changed here.
+                  </FormDescription>
+                </FormItem>
                  <FormField
                   control={form.control}
                   name="full_name"
@@ -101,6 +111,8 @@ export function ProfileForm({ userProfile }: ProfileFormProps) {
                     </FormItem>
                   )}
                 />
+            </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <FormField
                   control={form.control}
                   name="phone"
@@ -117,20 +129,20 @@ export function ProfileForm({ userProfile }: ProfileFormProps) {
                     </FormItem>
                   )}
                 />
+                 <FormField
+                    control={form.control}
+                    name="dob"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Date of Birth</FormLabel>
+                        <FormControl>
+                            <Input type="date" {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
             </div>
-             <FormField
-                control={form.control}
-                name="dob"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Date of Birth</FormLabel>
-                    <FormControl>
-                        <Input type="date" {...field} value={field.value || ''} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
 
             <Separator />
 

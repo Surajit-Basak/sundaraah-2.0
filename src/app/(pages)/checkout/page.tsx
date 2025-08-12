@@ -14,7 +14,7 @@ import { Loader2, Lock } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import Script from "next/script";
-import type { Settings, UserProfile } from "@/types";
+import type { Settings, UserProfile, Address } from "@/types";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -25,6 +25,12 @@ declare global {
         Razorpay: any;
     }
 }
+
+const formatAddress = (address: Address | null | undefined): string => {
+    if (!address || !address.street || !address.city) return 'N/A';
+    const parts = [address.street, address.city, address.state, address.country, address.postal_code];
+    return parts.filter(Boolean).join(', ');
+};
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -60,7 +66,16 @@ export default function CheckoutPage() {
   const finalShippingCost = isEligibleForFreeShipping ? 0 : shippingFee;
   const orderTotal = cartTotal + finalShippingCost;
 
-  const isProfileComplete = userProfile && userProfile.full_name && userProfile.email && userProfile.phone && userProfile.shipping_address;
+  const isProfileComplete = 
+    userProfile && 
+    userProfile.full_name && 
+    userProfile.email && 
+    userProfile.phone && 
+    userProfile.shipping_address &&
+    userProfile.shipping_address.street &&
+    userProfile.shipping_address.city &&
+    userProfile.shipping_address.postal_code &&
+    userProfile.shipping_address.country;
 
 
   const handlePlaceOrder = async () => {
@@ -70,7 +85,7 @@ export default function CheckoutPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please complete your profile (including phone and address) and ensure your cart is not empty before checking out.",
+        description: "Please complete your profile (including phone and a full shipping address) and ensure your cart is not empty before checking out.",
       });
       setIsLoading(false);
       return;
@@ -188,7 +203,7 @@ export default function CheckoutPage() {
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Incomplete Profile</AlertTitle>
                     <AlertDescription>
-                        Your profile is missing required information (e.g., phone number or shipping address). Please
+                        Your profile is missing required information (e.g., phone number or a full shipping address). Please
                         <Link href="/account" className="font-bold underline ml-1">update your profile</Link> to proceed.
                     </AlertDescription>
                 </Alert>
@@ -203,7 +218,10 @@ export default function CheckoutPage() {
                          <p><strong>Name:</strong> {userProfile.full_name}</p>
                          <p><strong>Email:</strong> {userProfile.email}</p>
                          <p><strong>Phone:</strong> {userProfile.phone || 'N/A'}</p>
-                         <p className="text-sm text-muted-foreground pt-4">Your order will be shipped to your default shipping address. You can change this in your account profile.</p>
+                         <Separator className="my-4"/>
+                         <p className="font-semibold">Shipping Address:</p>
+                         <p>{formatAddress(userProfile.shipping_address)}</p>
+                         <p className="text-sm text-muted-foreground pt-4">You can change your shipping address in your account profile.</p>
                         </>
                     ) : (
                         <p>Loading your details...</p>
