@@ -919,15 +919,42 @@ export async function getPageContent(page: string): Promise<PageContent[]> {
 
 export async function updatePageContent(page: string, section: string, content: any) {
     const supabase = createSupabaseServerClient();
-    const { error } = await supabase
+    
+    // Check if the entry exists
+    const { data: existing, error: selectError } = await supabase
         .from('page_content')
-        .update({ content })
-        .match({ page, section });
-
-    if (error) {
-        console.error(`Error updating content for ${page}.${section}:`, error);
-        throw new Error('Failed to update page content.');
+        .select('id')
+        .match({ page, section })
+        .single();
+    
+    if (selectError && selectError.code !== 'PGRST116') { // PGRST116 = 'single row not found'
+        console.error(`Error checking for existing page content:`, selectError);
+        throw new Error('Failed to check for page content.');
     }
+
+    if (existing) {
+        // Update existing entry
+        const { error } = await supabase
+            .from('page_content')
+            .update({ content })
+            .match({ page, section });
+        
+        if (error) {
+            console.error(`Error updating content for ${page}.${section}:`, error);
+            throw new Error('Failed to update page content.');
+        }
+    } else {
+        // Insert new entry
+        const { error } = await supabase
+            .from('page_content')
+            .insert({ page, section, content });
+
+        if (error) {
+            console.error(`Error inserting content for ${page}.${section}:`, error);
+            throw new Error('Failed to insert page content.');
+        }
+    }
+    
     revalidatePath('/', 'layout'); // Revalidate the whole site
 }
 
