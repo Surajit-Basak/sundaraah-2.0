@@ -68,11 +68,13 @@ export function CartSheet() {
                         </div>
                     </ScrollArea>
                     <SheetFooter className="p-6 border-t flex-col gap-4">
-                       <div className="flex items-center justify-between font-semibold">
-                            <span>Subtotal</span>
-                            <span>{formatPrice(cartTotal)}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground text-center">Shipping & taxes calculated at checkout.</p>
+                       <div className="space-y-2">
+                            <div className="flex items-center justify-between font-semibold">
+                                <span>Subtotal</span>
+                                <span>{formatPrice(cartTotal)}</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">Shipping & taxes calculated at checkout.</p>
+                       </div>
                         <Button asChild size="lg" className="w-full" onClick={() => setSheetOpen(false)}>
                             <Link href="/checkout">Checkout</Link>
                         </Button>
