@@ -124,6 +124,7 @@ export type Settings = {
   site_name: string;
   header_logo_url: string | null;
   footer_logo_url: string | null;
+  favicon_url: string | null;
   copyright_text: string | null;
   theme_colors: {
     primary: string;
