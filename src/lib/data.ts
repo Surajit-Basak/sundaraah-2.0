@@ -867,6 +867,7 @@ export async function getSettings(): Promise<Settings> {
             site_name: 'Sundaraah Showcase',
             header_logo_url: null,
             footer_logo_url: null,
+            copyright_text: null,
             theme_colors: {
                 primary: "hsl(347 65% 25%)",
                 background: "hsl(30 50% 98%)",
