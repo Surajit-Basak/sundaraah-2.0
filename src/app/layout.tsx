@@ -19,7 +19,12 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s | ${siteName}`,
     },
     description: seoData?.meta_description || 'Exquisite Handcrafted Jewelry',
-    manifest: '/manifest.json'
+    manifest: '/manifest.json',
+    icons: {
+      icon: settings?.favicon_url || '/favicon.ico',
+      shortcut: settings?.favicon_url || '/favicon.ico',
+      apple: settings?.favicon_url || '/apple-touch-icon.png',
+    }
   };
 }
 
