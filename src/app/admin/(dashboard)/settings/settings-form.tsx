@@ -25,6 +25,7 @@ import { MediaPicker } from "@/components/ui/media-picker";
 import { hexToHsl, isHexColor } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 
 const colorSchema = z.string().refine(value => {
     const isHsl = /^hsl\(\d{1,3} \d{1,3}% \d{1,3}%\)$/.test(value);
@@ -35,6 +36,7 @@ const settingsSchema = z.object({
   site_name: z.string().min(2, "Site name must be at least 2 characters."),
   header_logo_url: z.string().optional(),
   footer_logo_url: z.string().optional(),
+  copyright_text: z.string().optional(),
   theme_colors: z.object({
     primary: colorSchema,
     background: colorSchema,
@@ -87,6 +89,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
       site_name: "Sundaraah Showcase",
       header_logo_url: "",
       footer_logo_url: "",
+      copyright_text: "",
       theme_colors: {
         primary: "hsl(347 65% 25%)",
         background: "hsl(30 50% 98%)",
@@ -192,6 +195,26 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                       </FormControl>
                        <FormDescription>
                         A separate logo for the site footer. If empty, the site name will be used. Recommended minimum width: 600px.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="copyright_text"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Copyright Text</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="© 2024 Your Company. All Rights Reserved."
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                       <FormDescription>
+                        The copyright text displayed in the site footer.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
