@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Define public and protected routes
-  const protectedRoutes = ['/account'];
+  const protectedRoutes = ['/account', '/wishlist'];
   const adminLoginRoute = '/admin/login';
   const adminDashboardRoute = '/admin/dashboard';
   const adminBaseRoute = '/admin';
@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
   if (pathname === adminLoginRoute) {
     // If an admin is already logged in, redirect them to the dashboard
     if (session) {
-       const { data: userProfile } = await supabase.from('users').select('user_role').single();
+       const { data: userProfile } = await supabase.from('users').select('user_role').eq('id', session.user.id).single();
        if (userProfile?.user_role === 'admin') {
          return NextResponse.redirect(new URL(adminDashboardRoute, request.url));
        }
@@ -69,7 +69,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(adminLoginRoute, request.url));
     }
 
-    const { data: userProfile } = await supabase.from('users').select('user_role').single();
+    const { data: userProfile } = await supabase.from('users').select('user_role').eq('id', session.user.id).single();
 
     if (userProfile?.user_role !== 'admin') {
       // If not an admin, redirect to home page
