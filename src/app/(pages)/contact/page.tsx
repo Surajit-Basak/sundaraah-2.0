@@ -124,7 +124,7 @@ export default async function ContactPage() {
                     {mapContent.title || "Our Location"}
                 </h2>
                 <div 
-                    className="aspect-video w-full rounded-lg overflow-hidden shadow-xl border"
+                    className="aspect-[2.4/1] w-full rounded-lg overflow-hidden shadow-xl border"
                     dangerouslySetInnerHTML={{ __html: mapContent.iframe_html }}
                 />
             </div>
