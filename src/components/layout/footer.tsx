@@ -7,6 +7,7 @@ import Image from "next/image";
 export default async function Footer() {
   const settings = await getSettings();
   const siteName = settings?.site_name || "Sundaraah Showcase";
+  const copyrightText = settings?.copyright_text || `© ${new Date().getFullYear()} ${siteName}. All Rights Reserved.`;
 
   return (
     <footer className="bg-primary text-primary-foreground">
@@ -79,7 +80,7 @@ export default async function Footer() {
 
         </div>
         <div className="border-t border-primary-foreground/20 mt-12 pt-8 text-center text-sm text-primary-foreground/80">
-          <p>&copy; {new Date().getFullYear()} {siteName}. All Rights Reserved.</p>
+          <p>{copyrightText}</p>
         </div>
       </div>
     </footer>
