@@ -79,55 +79,59 @@ export default async function AdminDashboardLayout({
 
   return (
     <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <div className="flex items-center gap-2 p-2 h-14">
-            {settings?.header_logo_url ? (
-              <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={240} height={60} className="object-contain max-h-full w-auto group-data-[state=collapsed]:hidden" />
-            ) : (
-               <h3 className="font-headline text-2xl font-bold text-primary group-data-[state=collapsed]:hidden">{siteName}</h3>
-            )}
-            <Gem className="h-6 w-6 text-accent group-data-[state=expanded]:hidden mx-auto"/>
-            <div className="flex-1" />
-            <SidebarTrigger className="group-data-[state=collapsed]:hidden" />
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
+      <div className="flex">
+        <Sidebar>
+          <SidebarHeader>
+            <div className="flex items-center gap-2 p-2 h-14">
+              {settings?.header_logo_url ? (
+                <Image src={settings.header_logo_url} alt={`${siteName} logo`} width={240} height={60} className="object-contain max-h-full w-auto group-data-[state=collapsed]:hidden" />
+              ) : (
+                <h3 className="font-headline text-2xl font-bold text-primary group-data-[state=collapsed]:hidden">{siteName}</h3>
+              )}
+              <Gem className="h-6 w-6 text-accent group-data-[state=expanded]:hidden mx-auto"/>
+              <div className="flex-1" />
+              <SidebarTrigger className="group-data-[state=collapsed]:hidden" />
+            </div>
+          </SidebarHeader>
+          <SidebarContent>
+              <SidebarMenu>
+                  {Object.entries(navItems).map(([group, items]) => (
+                      <React.Fragment key={group}>
+                          <SidebarSeparator />
+                          {items.map((item) => (
+                              <SidebarMenuItem key={item.label}>
+                                  <SidebarMenuButton asChild tooltip={item.label} isActive={pathname.startsWith(item.href) && item.href !== '#'}>
+                                      <Link href={item.href}>
+                                          {item.icon}
+                                          <span>{item.label}</span>
+                                      </Link>
+                                  </SidebarMenuButton>
+                              </SidebarMenuItem>
+                          ))}
+                      </React.Fragment>
+                  ))}
+              </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter>
             <SidebarMenu>
-                 {Object.entries(navItems).map(([group, items]) => (
-                    <React.Fragment key={group}>
-                         <SidebarSeparator />
-                         {items.map((item) => (
-                            <SidebarMenuItem key={item.label}>
-                                <SidebarMenuButton asChild tooltip={item.label} isActive={pathname.startsWith(item.href) && item.href !== '#'}>
-                                    <Link href={item.href}>
-                                        {item.icon}
-                                        <span>{item.label}</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        ))}
-                    </React.Fragment>
-                ))}
+                  <SidebarMenuItem>
+                      <form action={handleLogout} className="w-full">
+                          <SidebarMenuButton tooltip="Logout" type="submit" className="w-full">
+                              <LogOut />
+                              <span>Logout</span>
+                          </SidebarMenuButton>
+                      </form>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarTrigger className="w-full" />
+                  </SidebarMenuItem>
             </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter>
-           <SidebarMenu>
-                <SidebarMenuItem>
-                    <form action={handleLogout} className="w-full">
-                        <SidebarMenuButton tooltip="Logout" type="submit" className="w-full">
-                            <LogOut />
-                            <span>Logout</span>
-                        </SidebarMenuButton>
-                    </form>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarTrigger className="w-full" />
-                </SidebarMenuItem>
-           </SidebarMenu>
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset>{children}</SidebarInset>
+          </SidebarFooter>
+        </Sidebar>
+        <main className="flex-1">
+            {children}
+        </main>
+      </div>
     </SidebarProvider>
   );
 }
