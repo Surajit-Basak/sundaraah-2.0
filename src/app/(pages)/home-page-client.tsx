@@ -16,6 +16,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import Autoplay from "embla-carousel-autoplay"
 import { Input } from "@/components/ui/input";
 import type { Product, BlogPost, TeamMember, PageContent, Testimonial } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -231,7 +232,15 @@ export default function HomePageClient({
             {getContent(pageContent, 'testimonials').title || "Words from Our Customers"}
           </h2>
           {testimonials.length > 0 && (
-            <Carousel opts={{ align: "start", loop: true }} className="w-full">
+             <Carousel 
+                opts={{ align: "start", loop: true }} 
+                plugins={[
+                    Autoplay({
+                      delay: 6000,
+                    }),
+                ]}
+                className="w-full"
+            >
               <CarouselContent>
                 {testimonials.map((testimonial) => (
                   <CarouselItem key={testimonial.id} className="p-4 sm:basis-1/2 lg:basis-1/3">
