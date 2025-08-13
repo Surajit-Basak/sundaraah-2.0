@@ -36,6 +36,7 @@ const settingsSchema = z.object({
   site_name: z.string().min(2, "Site name must be at least 2 characters."),
   header_logo_url: z.string().optional(),
   footer_logo_url: z.string().optional(),
+  favicon_url: z.string().optional(),
   copyright_text: z.string().optional(),
   theme_colors: z.object({
     primary: colorSchema,
@@ -89,6 +90,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
       site_name: "Sundaraah Showcase",
       header_logo_url: "",
       footer_logo_url: "",
+      favicon_url: "",
       copyright_text: "",
       theme_colors: {
         primary: "hsl(347 65% 25%)",
@@ -195,6 +197,22 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                       </FormControl>
                        <FormDescription>
                         A separate logo for the site footer. If empty, the site name will be used. Recommended minimum width: 600px.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="favicon_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Favicon</FormLabel>
+                      <FormControl>
+                        <MediaPicker {...field} />
+                      </FormControl>
+                       <FormDescription>
+                        The icon displayed in the browser tab. Recommended size: 32x32px or 64x64px.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
