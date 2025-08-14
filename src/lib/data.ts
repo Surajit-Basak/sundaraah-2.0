@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo, Testimonial, EmailTemplate, WishlistItem } from "@/types";
+import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo, Testimonial, EmailTemplate, WishlistItem, Address } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
@@ -479,9 +479,12 @@ async function createShiprocketOrder(order: Order, items: CartItem[], phone: str
         }));
         
         const supabase = createSupabaseServerClient();
-        const {data: userProfile} = await supabase.from('users').select('shipping_address').eq('id', order.user_id!).single();
-        if(!userProfile || !userProfile.shipping_address) {
-            throw new Error('Shipping address not found for user');
+        const { data: userProfile } = await supabase.from('users').select('shipping_address').eq('id', order.user_id!).single();
+        
+        const shippingAddress = userProfile?.shipping_address as Address | null;
+        if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.postal_code || !shippingAddress.country || !shippingAddress.state) {
+            console.error('Incomplete shipping address found for user. Skipping Shiprocket order.', userProfile);
+            return; // Skip if address is incomplete
         }
 
         const payload = {
@@ -489,11 +492,11 @@ async function createShiprocketOrder(order: Order, items: CartItem[], phone: str
             order_date: new Date(order.created_at).toISOString().split('T')[0],
             billing_customer_name: order.customer_name,
             billing_last_name: "", // Shiprocket requires this field
-            billing_address: userProfile.shipping_address.street,
-            billing_city: userProfile.shipping_address.city,
-            billing_pincode: userProfile.shipping_address.postal_code,
-            billing_state: userProfile.shipping_address.state,
-            billing_country: userProfile.shipping_address.country,
+            billing_address: shippingAddress.street,
+            billing_city: shippingAddress.city,
+            billing_pincode: shippingAddress.postal_code,
+            billing_state: shippingAddress.state,
+            billing_country: shippingAddress.country,
             billing_email: order.customer_email,
             billing_phone: phone,
             shipping_is_billing: true,
@@ -1408,3 +1411,6 @@ export async function getWishlistAnalytics(): Promise<Product[]> {
         reviews: []
     }));
 }
+
+
+    
