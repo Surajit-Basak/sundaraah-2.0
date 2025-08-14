@@ -113,7 +113,7 @@ export default function AccountPage() {
                                 {orders.map((order) => (
                                     <TableRow key={order.id}>
                                     <TableCell className="font-medium">{order.id.substring(0,8).toUpperCase()}</TableCell>
-                                    <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
+                                    <TableCell>{new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</TableCell>
                                     <TableCell className="text-right">{formatPrice(order.total)}</TableCell>
                                     <TableCell className="text-center">
                                         <Badge variant={getStatusVariant(order.status) as any}>{order.status}</Badge>
