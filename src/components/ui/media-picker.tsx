@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose, DialogDescription } from '@/components/ui/dialog';
 import { getMedia } from '@/lib/data';
 import type { Media } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -109,6 +109,9 @@ export function MediaPicker({ value, onChange, multiple = false }: MediaPickerPr
       <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{showUploader ? "Upload New Media" : "Select Media"}</DialogTitle>
+          <DialogDescription>
+            {showUploader ? "Upload an image or video from your device." : "Click an item to select it."}
+          </DialogDescription>
         </DialogHeader>
         
         {showUploader ? (
