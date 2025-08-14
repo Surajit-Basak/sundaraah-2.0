@@ -21,7 +21,6 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s | ${siteName}`,
     },
     description: seoData?.meta_description || 'Exquisite Handcrafted Jewelry',
-    manifest: '/manifest.json',
     icons: {
       icon: faviconUrl,
       shortcut: faviconUrl,
