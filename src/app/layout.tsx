@@ -12,6 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
   const siteName = settings?.site_name || 'Sundaraah Showcase';
   const seoData = await getPageSeo('home');
+  // Add a cache-busting query parameter
+  const faviconUrl = settings?.favicon_url ? `${settings.favicon_url}?v=${new Date().getTime()}` : '/favicon.ico';
   
   return {
     title: {
@@ -21,9 +23,9 @@ export async function generateMetadata(): Promise<Metadata> {
     description: seoData?.meta_description || 'Exquisite Handcrafted Jewelry',
     manifest: '/manifest.json',
     icons: {
-      icon: settings?.favicon_url || '/favicon.ico',
-      shortcut: settings?.favicon_url || '/favicon.ico',
-      apple: settings?.favicon_url || '/apple-touch-icon.png',
+      icon: faviconUrl,
+      shortcut: faviconUrl,
+      apple: faviconUrl,
     }
   };
 }
