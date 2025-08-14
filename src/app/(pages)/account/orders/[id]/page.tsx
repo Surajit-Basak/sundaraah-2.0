@@ -35,6 +35,8 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
         default: return "outline";
     }
   }
+  
+  const orderDate = new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-16">
@@ -101,7 +103,7 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
                     </div>
                      <div className="flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-muted-foreground" />
-                        <p>Date: {new Date(order.created_at).toLocaleDateString()}</p>
+                        <p>Date: {orderDate}</p>
                     </div>
                     <div className="flex items-center gap-2">
                         <Package2 className="w-5 h-5 text-muted-foreground" />
