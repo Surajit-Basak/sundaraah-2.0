@@ -79,7 +79,7 @@ export default async function AdminDashboardLayout({
 
   return (
     <SidebarProvider>
-      <div className="flex">
+      <div className="flex h-screen">
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2 h-14">
@@ -128,7 +128,7 @@ export default async function AdminDashboardLayout({
             </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
-        <main className="flex-1">
+        <main className="flex-1 overflow-y-auto">
             {children}
         </main>
       </div>
