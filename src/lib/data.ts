@@ -1,12 +1,10 @@
 
-
 'use server';
 
 import type { Product, BlogPost, TeamMember, Order, OrderWithItems, Category, ProductReview, Banner, UserProfile, Settings, PageContent, Collection, CartItem, FullOrderForEmail, Media, PageSeo, Testimonial, EmailTemplate, WishlistItem, Address } from "@/types";
 import { createSupabaseServerClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
-import OrderConfirmationEmail from "@/components/emails/generic-notification-email";
 import GenericNotificationEmail from "@/components/emails/generic-notification-email";
 import Razorpay from "razorpay";
 
@@ -454,16 +452,15 @@ async function createShiprocketOrder(order: Order, items: CartItem[], phone: str
         return;
     }
 
+    const shiprocketEmail = process.env.SHIPROCKET_EMAIL;
+    const shiprocketPassword = process.env.SHIPROCKET_PASSWORD;
+
+    if (!shiprocketEmail || !shiprocketPassword) {
+        console.warn("Shiprocket credentials are not configured in environment variables. Skipping shipment creation.");
+        return;
+    }
+    
     try {
-        const shiprocketEmail = process.env.SHIPROCKET_EMAIL;
-        const shiprocketPassword = process.env.SHIPROCKET_PASSWORD;
-
-        if (!shiprocketEmail || !shiprocketPassword) {
-            console.warn("Shiprocket credentials not found. Skipping shipment creation.");
-            return;
-        }
-
-        // 1. Get User's Shipping Address from DB
         const supabase = createSupabaseServerClient();
         const { data: userProfile, error: profileError } = await supabase
             .from('users')
@@ -482,7 +479,7 @@ async function createShiprocketOrder(order: Order, items: CartItem[], phone: str
             return; 
         }
 
-        // 2. Authenticate with Shiprocket
+        // Authenticate with Shiprocket
         const authResponse = await fetch("https://apiv2.shiprocket.in/v1/external/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -492,10 +489,9 @@ async function createShiprocketOrder(order: Order, items: CartItem[], phone: str
         if (!authResponse.ok) {
             throw new Error(`Shiprocket auth failed: ${authResponse.statusText}`);
         }
-
         const { token } = await authResponse.json();
 
-        // 3. Format order details for Shiprocket
+        // Format order details
         const orderItems = items.map(item => ({
             name: item.name,
             sku: item.id.substring(0, 20),
@@ -507,7 +503,7 @@ async function createShiprocketOrder(order: Order, items: CartItem[], phone: str
             order_id: order.id,
             order_date: new Date(order.created_at).toISOString().split('T')[0],
             billing_customer_name: order.customer_name,
-            billing_last_name: "", // Shiprocket requires this field
+            billing_last_name: "",
             billing_address: shippingAddress.street,
             billing_city: shippingAddress.city,
             billing_pincode: shippingAddress.postal_code,
@@ -525,25 +521,19 @@ async function createShiprocketOrder(order: Order, items: CartItem[], phone: str
             weight: 0.5,
         };
 
-        // 4. Create shipment
+        // Create shipment
         const createOrderResponse = await fetch("https://apiv2.shiprocket.in/v1/external/orders/create/add", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
-            },
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
             body: JSON.stringify(payload),
         });
 
         if (!createOrderResponse.ok) {
             const errorBody = await createOrderResponse.json();
-            console.error("Shiprocket order creation failed:", errorBody);
             throw new Error(`Shiprocket order creation failed: ${JSON.stringify(errorBody.errors)}`);
         }
 
-        const shiprocketData = await createOrderResponse.json();
-        console.log("Shiprocket order created successfully:", shiprocketData);
-
+        console.log("Shiprocket order created successfully:", await createOrderResponse.json());
     } catch (error) {
         console.error("Error creating Shiprocket shipment:", error);
     }
@@ -562,8 +552,6 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
 
         if (error) {
             console.error('Error decrementing inventory:', error);
-            // The RPC function raises an exception which is caught here.
-            // We can make the error message more user-friendly.
             if (error.message.includes('Not enough stock')) {
                 throw new Error(`Sorry, ${item.name} is out of stock. Please remove it from your cart and try again.`);
             }
@@ -587,13 +575,10 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
 
     if (orderError || !order) {
         console.error('Error creating order:', orderError);
-        // Here you would ideally have a way to rollback the inventory decrements.
-        // For simplicity, we'll proceed but in a real-world app, a transaction across all operations is needed.
         throw new Error('Failed to create order.');
     }
 
     const orderId = order.id;
-
     const orderItems = orderData.items.map(item => ({
         order_id: orderId,
         product_id: item.id,
@@ -605,44 +590,48 @@ export async function createOrder(orderData: NewOrder): Promise<string> {
 
     if (itemsError) {
         console.error('Error creating order items:', itemsError);
-        // Rollback order creation if items fail
         await supabase.from('orders').delete().eq('id', orderId);
-        // Note: inventory is not rolled back here. A full transactional function in SQL is the robust solution.
         throw new Error('Failed to create order items.');
     }
     
-    const resendApiKey = process.env.RESEND_API_KEY;
-    if (resendApiKey) {
-        try {
-            const resend = new Resend(resendApiKey);
-            const settings = await getSettings();
-            await resend.emails.send({
-                from: `"${settings?.site_name || 'Sundaraah'}" <noreply@sundaraah.com>`,
-                to: [orderData.customer_email],
-                subject: 'Your Sundaraah Order Confirmation',
-                react: GenericNotificationEmail({
-                    siteName: settings?.site_name || 'Sundaraah Showcase',
-                    subject: 'Your Sundaraah Order Confirmation',
-                    bodyContent: `<p>Thank you for your order! Your order ID is ${orderId}.</p>`
-                }),
-            });
-        } catch (emailError) {
-            console.error('Email sending failed:', emailError);
-        }
-    } else {
-        console.warn("RESEND_API_KEY is not set. Skipping order confirmation email.");
-    }
-    
-    // Create Shiprocket order in the background
+    // Trigger integrations and notifications
     createShiprocketOrder(order, orderData.items, orderData.customer_phone);
+    sendOrderConfirmationEmail(orderId);
 
     revalidatePath('/admin/orders');
-    revalidatePath('/admin/products'); // Revalidate products to show new inventory
+    revalidatePath('/admin/products');
     if (orderData.user_id) {
         revalidatePath('/account');
     }
 
     return orderId;
+}
+
+async function sendOrderConfirmationEmail(orderId: string) {
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+        console.warn("RESEND_API_KEY is not set. Skipping order confirmation email.");
+        return;
+    }
+    
+    const eventTrigger = 'order_confirmation';
+    const supabase = createSupabaseServerClient();
+    const { data: template } = await supabase
+        .from('email_templates')
+        .select('*')
+        .eq('event_trigger', eventTrigger)
+        .eq('is_active', true)
+        .single();
+    
+    const { data: order } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .single();
+
+    if (template && order) {
+        await sendTemplatedEmail(template, order);
+    }
 }
 
 export async function getOrdersByUserId(userId: string): Promise<Order[]> {
@@ -676,7 +665,6 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
         throw new Error('Failed to update order status.');
     }
 
-    // If the order is fulfilled, trigger the notification email
     if (status === 'Fulfilled') {
         const eventTrigger = 'order_status_fulfilled';
         const { data: template } = await supabase
@@ -690,7 +678,6 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
             await sendTemplatedEmail(template, updatedOrder);
         }
     }
-
 
     revalidatePath('/admin/orders');
     revalidatePath(`/admin/orders/${orderId}`);
@@ -735,7 +722,6 @@ export async function getReviews(): Promise<ProductReview[]> {
 export async function deleteReview(id: string) {
     const supabase = createSupabaseServerClient();
 
-    // To revalidate the product page, we need its slug.
     const { data: reviewData } = await supabase
         .from('product_reviews')
         .select('products(slug)')
@@ -1315,7 +1301,7 @@ async function sendTemplatedEmail(template: EmailTemplate, order: Order) {
 // Razorpay Integration
 export async function createRazorpayOrder(options: { amount: number; currency: string; }) {
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-        throw new Error('Razorpay API keys are not configured.');
+        throw new Error('Razorpay API keys are not configured. Please set them in your environment variables.');
     }
 
     const razorpay = new Razorpay({
